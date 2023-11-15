@@ -57,6 +57,42 @@ connectDB();
 //   }),
 // );
 
+// === DB test ===
+// --- user ---
+// import { User } from './models/User.js';
+// const user = new User({
+//   name: 'test',
+//   email: 'test@mail.com',
+//   password: 'password',
+// });
+// user.save();
+
+// --- feeling ---
+// import { Feeling } from './models/Feeling.js';
+// const feeling = new Feeling({
+//   title: 'test',
+//   category: 'tests_category',
+// });
+// feeling.save();
+
+// --- Journal ---
+// import { Journal } from './models/Journal.js';
+// const journal = new Journal({
+//   title: '更新測試',
+//   type: 'diary',
+//   content: '心好累',
+//   userId: '6554ad56356f33259f15b103',
+//   recordingPaths: ['aaa.mp3'],
+//   linkedNoteIds: [],
+//   // createdAt: { type: Date, default: Date.now },
+//   // updatedAt: { type: Date, default: Date.now },
+//   // diaryDate: { type: Date },
+//   moodScore: 5,
+//   moodFeelings: ['快樂', '驚喜'],
+//   moodFactors: ['學習', '朋友'],
+// });
+// journal.save();
+
 app.listen(port, () => {
   logger.info(`This app is listening to localhost: ${port}`);
 });
