@@ -76,12 +76,12 @@ const server = new ApolloServer({
 await server.start();
 server.applyMiddleware({ app });
 
-app.use((err, req, res, next) => {
-  return res.status(500).json({
-    err_name: 'Internal Server Error',
-    err_message: err.stack,
-  });
-});
+// app.use((err, req, res, next) => {
+//   return res.status(500).json({
+//     err_name: 'Internal Server Error',
+//     err_message: err.stack,
+//   });
+// });
 
 app.listen(port, () => {
   logger.info(`This app is listening to localhost: ${port}`);

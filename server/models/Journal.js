@@ -11,7 +11,6 @@ const JournalSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
-  recordingPaths: [String],
   linkedNoteIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Journal' }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

@@ -22,10 +22,18 @@ const userResolver = {
         email,
         password,
       });
-      const res = await user.save();
-      logger.info('User created:');
-      logger.info(res);
-      return { ...res._doc };
+      try {
+        const res = await user.save();
+        logger.info('User created:');
+        logger.info(res);
+        return { ...res._doc };
+      } catch (error) {
+        logger.error(error);
+        if (error.message.includes('duplicate key error')) {
+          throwCustomError('Email already exist', ErrorTypes.BAD_USER_INPUT);
+        }
+        throw error;
+      }
     },
   },
 };
