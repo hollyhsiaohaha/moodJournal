@@ -28,46 +28,53 @@ const journalResolver = {
       if (!res) throwCustomError('Title not exist', ErrorTypes.BAD_USER_INPUT);
       return res;
     },
-    async getUserLatestDiaries(_, { userId, amount }) {
-      const res = await Journal.find({ userId, type: 'diary' })
-        .sort({ updatedAt: -1 })
-        .limit(amount);
-      return res;
-    },
-    async getUserLatestNotes(_, { userId, amount }) {
-      const res = await Journal.find({ userId, type: 'note' })
-        .sort({ updatedAt: -1 })
-        .limit(amount);
+    async getUserLatestJournals(_, { userId, amount, type }) {
+      const res = await Journal.find({ userId, type }).sort({ updatedAt: -1 }).limit(amount);
       return res;
     },
   },
   Mutation: {
-    async creatJournal(
-      _,
-      {
-        userInput: {
-          title,
-          type,
-          content,
-          userId,
-          linkedNoteIds,
-          diaryDate,
-          moodScore,
-          moodFeelings,
-          moodFactors,
-        },
-      },
-    ) {
+    // async createJournal(
+    //   _,
+    //   {
+    //     JournalInput: {
+    //       title,
+    //       type,
+    //       content,
+    //       userId,
+    //       linkedNoteIds,
+    //       diaryDate,
+    //       moodScore,
+    //       moodFeelings,
+    //       moodFactors,
+    //     },
+    //   },
+    // ) {
+    //   const journal = new Journal({
+    //     title,
+    //     type,
+    //     content,
+    //     userId,
+    //     linkedNoteIds,
+    //     diaryDate,
+    //     moodScore,
+    //     moodFeelings,
+    //     moodFactors,
+    //   });
+    //   try {
+    //     const res = await journal.save();
+    //     logger.info('Journal created:');
+    //     logger.info(res);
+    //     return { ...res._doc };
+    //   } catch (error) {
+    //     logger.error(error);
+    //     throw error;
+    //   }
+    // },
+    async createJournal(_, { JournalInput }) {
+      console.log(JournalInput);
       const journal = new Journal({
-        title,
-        type,
-        content,
-        userId,
-        linkedNoteIds,
-        diaryDate,
-        moodScore,
-        moodFeelings,
-        moodFactors,
+        ...JournalInput,
       });
       try {
         const res = await journal.save();
@@ -81,5 +88,7 @@ const journalResolver = {
     },
   },
 };
+// TODO: JournalInput 是空的
+// TODO: loader 會壞
 
 export default journalResolver;
