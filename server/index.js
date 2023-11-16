@@ -7,9 +7,11 @@ import bodyParser from 'body-parser';
 import cookiesParser from 'cookie-parser';
 import morganBody from 'morgan-body';
 import { fileURLToPath } from 'url';
-import { graphqlHTTP } from 'express-graphql';
+import { ApolloServer } from 'apollo-server-express';
 import { logger } from './utils/logger.js';
 import { connectDB } from './utils/db.js';
+import { typeDefs } from './schema/typeDefs.js';
+import { resolvers } from './schema/resolvers.js';
 
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
@@ -24,7 +26,7 @@ const log = fs.createWriteStream(path.join(workingDir, 'logs', 'request.log'), {
 // CORS setting for React
 app.use(
   cors({
-    origin: 'http://localhost:8080/',
+    origin: ['http://localhost:8080/', 'https://studio.apollographql.com'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -47,15 +49,6 @@ app.set('view engine', 'pug');
 app.enable('trust proxy');
 
 connectDB();
-
-// === graphQL server ===
-// app.use(
-//   '/graphql',
-//   graphqlHTTP({
-//     schema,
-//     graphiql: process.env.NODE_ENV === 'development',
-//   }),
-// );
 
 // === DB test ===
 // --- user ---
@@ -92,6 +85,15 @@ connectDB();
 //   moodFactors: ['學習', '朋友'],
 // });
 // journal.save();
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  introspection: true,
+  playground: true,
+});
+await server.start();
+server.applyMiddleware({ app });
 
 app.listen(port, () => {
   logger.info(`This app is listening to localhost: ${port}`);
