@@ -1,16 +1,18 @@
 import { logger } from '../utils/logger.js';
-import { Journal } from '../models/Journal.js';
 import { User } from '../models/User.js';
+import { throwCustomError, ErrorTypes } from '../utils/errorHandler.js';
 
-export const resolvers = {
+const userResolver = {
   Query: {
     async getUserbyId(_, { ID }) {
-      return await User.findById(ID);
+      const res = await User.findById(ID);
+      if (!res) throwCustomError('Id not exist', ErrorTypes.BAD_USER_INPUT);
+      return res;
     },
     async getUserbyEmail(_, { email }) {
-      // const res = await User.findOne({ email }).exec();
-      // console.log(res);
-      return await User.findOne({ email }).exec();
+      const res = await User.findOne({ email }).exec();
+      if (!res) throwCustomError('Email not exist', ErrorTypes.BAD_USER_INPUT);
+      return res;
     },
   },
   Mutation: {
@@ -27,3 +29,5 @@ export const resolvers = {
     },
   },
 };
+
+export default userResolver;

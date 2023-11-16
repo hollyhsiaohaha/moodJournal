@@ -10,8 +10,8 @@ import { fileURLToPath } from 'url';
 import { ApolloServer } from 'apollo-server-express';
 import { logger } from './utils/logger.js';
 import { connectDB } from './utils/db.js';
-import { typeDefs } from './schema/typeDefs.js';
-import { resolvers } from './schema/resolvers.js';
+import typeDefs from './schemas/typeDefs.js';
+import resolvers from './resolvers/resolvers.js';
 
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
@@ -49,25 +49,6 @@ app.set('view engine', 'pug');
 app.enable('trust proxy');
 
 connectDB();
-
-// === DB test ===
-// --- user ---
-// import { User } from './models/User.js';
-// const user = new User({
-//   name: 'test',
-//   email: 'test@mail.com',
-//   password: 'password',
-// });
-// user.save();
-
-// --- feeling ---
-// import { Feeling } from './models/Feeling.js';
-// const feeling = new Feeling({
-//   title: 'test',
-//   category: 'tests_category',
-// });
-// feeling.save();
-
 // --- Journal ---
 // import { Journal } from './models/Journal.js';
 // const journal = new Journal({
@@ -94,6 +75,13 @@ const server = new ApolloServer({
 });
 await server.start();
 server.applyMiddleware({ app });
+
+app.use((err, req, res, next) => {
+  return res.status(500).json({
+    err_name: 'Internal Server Error',
+    err_message: err.stack,
+  });
+});
 
 app.listen(port, () => {
   logger.info(`This app is listening to localhost: ${port}`);
