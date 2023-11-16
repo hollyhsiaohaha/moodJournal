@@ -12,6 +12,7 @@ import { logger } from './utils/logger.js';
 import { connectDB } from './utils/db.js';
 import typeDefs from './schemas/typeDefs.js';
 import resolvers from './resolvers/resolvers.js';
+import { journalUserDataloader, journalLinkDataloader } from './dataloader/journal.js';
 
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
@@ -72,6 +73,12 @@ const server = new ApolloServer({
   resolvers,
   introspection: true,
   playground: true,
+  context: () => ({
+    loaders: {
+      journalUserLoader: journalUserDataloader(),
+      journalLinkLoader: journalLinkDataloader(),
+    },
+  }),
 });
 await server.start();
 server.applyMiddleware({ app });

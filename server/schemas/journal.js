@@ -37,8 +37,8 @@ const userTypeDef = gql`
   type Query {
     getJournalbyId(ID: ID!): Journal!
     getJournalbyTitle(userId: String!, title: String!): Journal!
-    getLatestNotes(userId: String!, amount: Int!): [Journal]!
-    getLatestDiaries(userId: String!, amount: Int!): [Journal]!
+    getUserLatestDiaries(userId: String!, amount: Int!): [Journal]!
+    getUserLatestNotes(userId: String!, amount: Int!): [Journal]!
   }
 
   # Mutations
