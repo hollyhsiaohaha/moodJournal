@@ -91,25 +91,16 @@ const journalResolver = {
       ]);
       return res;
     },
-    // async getBackLinkedJournals(_, { ID }) {
-    //   const res = await Journal.aggregate([
-    //     {
-    //       $search: {
-    //         index: 'title_autocomplete',
-    //         autocomplete: {
-    //           path: 'title',
-    //           query: keyword,
-    //         },
-    //       },
-    //     },
-    //     {
-    //       $match: {
-    //         userId: new mongoose.Types.ObjectId(userId),
-    //       },
-    //     },
-    //   ]);
-    //   return res;
-    // },
+    async getBackLinkedJournals(_, { ID }) {
+      const res = await Journal.aggregate([
+        {
+          $match: {
+            linkedNoteIds: { $in: [new mongoose.Types.ObjectId(ID)] },
+          },
+        },
+      ]);
+      return res;
+    },
   },
   Mutation: {
     async createJournal(
