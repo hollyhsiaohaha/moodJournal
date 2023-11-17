@@ -1,6 +1,14 @@
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 import { logger } from '../utils/logger.js';
 import { User } from '../models/User.js';
 import { throwCustomError, ErrorTypes } from '../utils/errorHandler.js';
+
+dotenv.config();
+
+const saltRounds = 10;
+const { JWT_SECRET } = process.env;
 
 const userResolver = {
   Query: {
@@ -16,26 +24,58 @@ const userResolver = {
     },
   },
   Mutation: {
-    async creatUser(_, { userInput: { name, email, password } }) {
-      const user = new User({
-        name,
-        email,
-        password,
-      });
+    async signUp(_, { signUpInput: { name, email, password } }) {
       try {
+        const existUser = await User.findOne({ email }).exec();
+        if (existUser) throwCustomError('email', ErrorTypes.DUPLICATE_KEY);
+        const encryptedPassword = await bcrypt.hash(password, saltRounds);
+        const user = new User({
+          name,
+          email,
+          password: encryptedPassword,
+        });
         const res = await user.save();
         logger.info('User created:');
         logger.info(res);
-        return { ...res._doc };
+        const userInfo = {
+          _id: res._id,
+          name,
+          email,
+        };
+        const jwtToken = jwt.sign(userInfo, JWT_SECRET, { expiresIn: '1h' });
+        return {
+          ...userInfo,
+          jwtToken,
+        };
       } catch (error) {
         logger.error(error);
-        if (error.message.includes('duplicate key error')) {
-          throwCustomError('email', ErrorTypes.DUPLICATE_KEY);
-        }
+        throw error;
+      }
+    },
+    async signIn(_, { signInInput: { email, password } }) {
+      try {
+        const existUser = await User.findOne({ email }).exec();
+        if (!existUser) throwCustomError('incorrect email or password', ErrorTypes.UNAUTHENTICATED);
+        const encryptedPassword = await bcrypt.hash(password, saltRounds);
+        const isCorrectPassword = bcrypt.compare(existUser.password, encryptedPassword);
+        if (!isCorrectPassword)
+          throwCustomError('incorrect email or password', ErrorTypes.UNAUTHENTICATED);
+        const userInfo = {
+          _id: existUser._id,
+          name: existUser.name,
+          email,
+        };
+        const jwtToken = jwt.sign(userInfo, JWT_SECRET, { expiresIn: '1h' });
+        return {
+          ...userInfo,
+          jwtToken,
+        };
+      } catch (error) {
+        logger.error(error);
         throw error;
       }
     },
   },
 };
-
+// TODO: 所以怎掛上去 context
 export default userResolver;
