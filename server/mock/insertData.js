@@ -38,4 +38,5 @@ console.log('=== insert diaries ===');
 diaries.forEach(async (diary) => {
   const result = await inserJournal(diary);
   console.log(result);
+  // console.log(result.errors[0]);
 });

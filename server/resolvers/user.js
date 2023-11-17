@@ -30,7 +30,7 @@ const userResolver = {
       } catch (error) {
         logger.error(error);
         if (error.message.includes('duplicate key error')) {
-          throwCustomError('Email already exist', ErrorTypes.BAD_USER_INPUT);
+          throwCustomError('email', ErrorTypes.DUPLICATE_KEY);
         }
         throw error;
       }

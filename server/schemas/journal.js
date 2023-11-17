@@ -37,6 +37,9 @@ const userTypeDef = gql`
     getJournalbyId(ID: ID!): Journal!
     getJournalbyTitle(userId: String!, title: String!): Journal!
     getUserLatestJournals(userId: String!, amount: Int!, type: JournalType!): [Journal]!
+    searchJournals(userId: String!, keyword: String!): [Journal]!
+    autoCompleteJournals(userId: String!, keyword: String!): [Journal]!
+    getBackLinkedJournals(ID: ID!): [Journal]!
   }
 
   # Mutations

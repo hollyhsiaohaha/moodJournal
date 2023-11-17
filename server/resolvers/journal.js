@@ -1,6 +1,7 @@
 import { logger } from '../utils/logger.js';
 import { Journal } from '../models/Journal.js';
 import { throwCustomError, ErrorTypes } from '../utils/errorHandler.js';
+import mongoose from 'mongoose';
 
 const getLinkedNoteIds = async (content, userId) => {
   const linkedNoteIds = [];
@@ -50,6 +51,65 @@ const journalResolver = {
       const res = await Journal.find({ userId, type }).sort({ updatedAt: -1 }).limit(amount);
       return res;
     },
+    async searchJournals(_, { userId, keyword }) {
+      const res = await Journal.aggregate([
+        {
+          $search: {
+            index: 'default',
+            text: {
+              query: keyword,
+              path: {
+                wildcard: '*',
+              },
+            },
+          },
+        },
+        {
+          $match: {
+            userId: new mongoose.Types.ObjectId(userId),
+          },
+        },
+      ]);
+      return res;
+    },
+    async autoCompleteJournals(_, { userId, keyword }) {
+      const res = await Journal.aggregate([
+        {
+          $search: {
+            index: 'title_autocomplete',
+            autocomplete: {
+              path: 'title',
+              query: keyword,
+            },
+          },
+        },
+        {
+          $match: {
+            userId: new mongoose.Types.ObjectId(userId),
+          },
+        },
+      ]);
+      return res;
+    },
+    // async getBackLinkedJournals(_, { ID }) {
+    //   const res = await Journal.aggregate([
+    //     {
+    //       $search: {
+    //         index: 'title_autocomplete',
+    //         autocomplete: {
+    //           path: 'title',
+    //           query: keyword,
+    //         },
+    //       },
+    //     },
+    //     {
+    //       $match: {
+    //         userId: new mongoose.Types.ObjectId(userId),
+    //       },
+    //     },
+    //   ]);
+    //   return res;
+    // },
   },
   Mutation: {
     async createJournal(
@@ -86,7 +146,7 @@ const journalResolver = {
         return { ...res._doc };
       } catch (error) {
         if (error.message.includes('duplicate key error')) {
-          throwCustomError(`Journal title already exist: ${title}`, ErrorTypes.BAD_USER_INPUT);
+          throwCustomError(`${title}`, ErrorTypes.DUPLICATE_KEY);
         }
         logger.error(error);
         throw error;

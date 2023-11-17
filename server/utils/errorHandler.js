@@ -10,6 +10,10 @@ export const ErrorTypes = {
     errorCode: ApolloServerErrorCode.BAD_REQUEST,
     errorStatus: 400,
   },
+  DUPLICATE_KEY: {
+    errorCode: 'DUPLICATE_KEY',
+    errorStatus: 400,
+  },
   UNAUTHENTICATED: {
     errorCode: 'UNAUTHENTICATED',
     errorStatus: 403,
