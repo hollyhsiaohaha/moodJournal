@@ -2,6 +2,24 @@ import { logger } from '../utils/logger.js';
 import { Journal } from '../models/Journal.js';
 import { throwCustomError, ErrorTypes } from '../utils/errorHandler.js';
 
+const getLinkedNoteIds = async (content, userId) => {
+  const linkedNoteIds = [];
+  const keywordRegex = /\[\[(.*?)\]\]/g;
+  const matches = content.match(keywordRegex);
+  if (!matches) return linkedNoteIds;
+  const extracted = matches.map((match) => match.slice(2, -2));
+  const linkedNoteSearch = extracted.map((keyword) => {
+    return Journal.findOne({ userId, title: keyword }).select({ _id: 1 }).exec();
+  });
+  const linkedNotes = await Promise.all(linkedNoteSearch);
+  for (let i = 0; i < linkedNotes.length; i++) {
+    if (!linkedNotes[i])
+      throwCustomError(`Keyword not exist: ${extracted[i]}`, ErrorTypes.BAD_USER_INPUT);
+    linkedNoteIds.push(linkedNotes[i]._id);
+  }
+  return linkedNoteIds;
+};
+
 const journalResolver = {
   Journal: {
     user: async (parent, args, context) => {
@@ -34,47 +52,32 @@ const journalResolver = {
     },
   },
   Mutation: {
-    // async createJournal(
-    //   _,
-    //   {
-    //     JournalInput: {
-    //       title,
-    //       type,
-    //       content,
-    //       userId,
-    //       linkedNoteIds,
-    //       diaryDate,
-    //       moodScore,
-    //       moodFeelings,
-    //       moodFactors,
-    //     },
-    //   },
-    // ) {
-    //   const journal = new Journal({
-    //     title,
-    //     type,
-    //     content,
-    //     userId,
-    //     linkedNoteIds,
-    //     diaryDate,
-    //     moodScore,
-    //     moodFeelings,
-    //     moodFactors,
-    //   });
-    //   try {
-    //     const res = await journal.save();
-    //     logger.info('Journal created:');
-    //     logger.info(res);
-    //     return { ...res._doc };
-    //   } catch (error) {
-    //     logger.error(error);
-    //     throw error;
-    //   }
-    // },
-    async createJournal(_, { JournalInput }) {
-      console.log(JournalInput);
+    async createJournal(
+      _,
+      {
+        journalInput: {
+          title,
+          type,
+          content,
+          userId,
+          diaryDate,
+          moodScore,
+          moodFeelings,
+          moodFactors,
+        },
+      },
+    ) {
+      const linkedNoteIds = await getLinkedNoteIds(content, userId);
       const journal = new Journal({
-        ...JournalInput,
+        title,
+        type,
+        content,
+        userId,
+        diaryDate,
+        moodScore,
+        moodFeelings,
+        moodFactors,
+        linkedNoteIds,
       });
       try {
         const res = await journal.save();
@@ -82,13 +85,14 @@ const journalResolver = {
         logger.info(res);
         return { ...res._doc };
       } catch (error) {
+        if (error.message.includes('duplicate key error')) {
+          throwCustomError(`Journal title already exist: ${title}`, ErrorTypes.BAD_USER_INPUT);
+        }
         logger.error(error);
         throw error;
       }
     },
   },
 };
-// TODO: JournalInput 是空的
-// TODO: loader 會壞
 
 export default journalResolver;

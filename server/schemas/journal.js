@@ -27,7 +27,6 @@ const userTypeDef = gql`
     type: JournalType!
     content: String!
     userId: String!
-    linkedNoteIds: [String]
     diaryDate: String
     moodScore: Int
     moodFeelings: [String]

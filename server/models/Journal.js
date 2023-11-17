@@ -20,4 +20,6 @@ const JournalSchema = new mongoose.Schema({
   moodFactors: [String],
 });
 
+JournalSchema.index({ title: 1, userId: 1 }, { unique: true });
+
 export const Journal = mongoose.model('Journal', JournalSchema);

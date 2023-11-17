@@ -15,8 +15,8 @@ import resolvers from './resolvers/resolvers.js';
 import { journalUserDataloader, journalLinkDataloader } from './dataloader/journal.js';
 
 dotenv.config();
-const __filename = fileURLToPath(import.meta.url);
-const workingDir = path.dirname(__filename);
+const filename = fileURLToPath(import.meta.url);
+const workingDir = path.dirname(filename);
 
 const app = express();
 const port = process.env.PORT || 3000;

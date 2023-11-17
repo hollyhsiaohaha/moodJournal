@@ -1,0 +1,38 @@
+[
+  {
+    "journalInput": {
+      "title": "2023-11-14",
+      "content": "今天開始[[個人專案]]的發想，這是進[[AppWorks School]]以來壓力最大的幾天",
+      "type": "diary",
+      "userId": "6554ad56356f33259f15b103",
+      "diaryDate": "2023-11-14",
+      "moodScore": 5,
+      "moodFactors": ["受挫"],
+      "moodFeelings": ["教育"]
+    }
+  },
+  {
+    "journalInput": {
+      "title": "2023-11-15",
+      "content": "跟子華討論了[[個人專案]]，還好有他的[[冷笑話]]",
+      "type": "diary",
+      "userId": "6554ad56356f33259f15b103",
+      "diaryDate": "2023-11-15",
+      "moodScore": 6,
+      "moodFactors": ["感恩", "放鬆"],
+      "moodFeelings": ["教育"]
+    }
+  },
+  {
+    "journalInput": {
+      "title": "2023-11-16",
+      "content": "跟同學們吃午餐很開心，也講了不少[[冷笑話]]，感覺放鬆很多。很開心能在 [[AppWorks School]]遇見這麼多很棒的人",
+      "type": "diary",
+      "userId": "6554ad56356f33259f15b103",
+      "diaryDate": "2023-11-16",
+      "moodScore": 8,
+      "moodFactors": ["有趣"],
+      "moodFeelings": ["同儕"]
+    }
+  }
+]
