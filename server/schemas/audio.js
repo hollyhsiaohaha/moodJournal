@@ -8,7 +8,7 @@ const audioTypeDef = gql`
   # Queries
   type Query {
     getAudioSignedUrl(fileName: String!): String!
-    getAudio(fileName: String!): String!
+    voiceToText(fileName: String!): String!
   }
 
   # Mutations

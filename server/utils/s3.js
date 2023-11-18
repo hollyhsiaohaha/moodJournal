@@ -46,11 +46,17 @@ export async function getAudioS3(key) {
   const command = new GetObjectCommand(params);
   try {
     const res = await s3.send(command);
+    // return res;
     if (res.Body && res.Body instanceof stream.Readable) {
+      const contentType = res.ContentType;
+      const knownLength = res.ContentLength;
       return new Promise((resolve, reject) => {
         const chunks = [];
         res.Body.on('data', (chunk) => chunks.push(chunk));
-        res.Body.on('end', () => resolve(Buffer.concat(chunks)));
+        res.Body.on('end', () => {
+          const buffer = Buffer.concat(chunks);
+          resolve({ buffer, contentType, knownLength });
+        });
         res.Body.on('error', reject);
       });
     } else {
