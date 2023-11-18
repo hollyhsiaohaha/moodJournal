@@ -64,7 +64,8 @@ const userResolver = {
           name: existUser.name,
           email,
         };
-        const jwtToken = jwt.sign(userInfo, JWT_SECRET, { expiresIn: '1h' });
+        // TODO: 記得改回來
+        const jwtToken = jwt.sign(userInfo, JWT_SECRET, { expiresIn: '12h' });
         return {
           ...userInfo,
           jwtToken,

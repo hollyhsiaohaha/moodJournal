@@ -39,3 +39,22 @@ export const Factors = [
     values: ['家務', '工作', '教育', '天氣', '時事', '金錢'],
   },
 ];
+
+const feelingOptions = [];
+Feelings.forEach((feelingCategory) => {
+  feelingOptions.push(...feelingCategory.values);
+});
+const factorOptions = [];
+Factors.forEach((factorCategory) => {
+  factorOptions.push(...factorCategory.values);
+});
+
+export const prompt = `接下來我會給你一則文章，請以 json 的格式回傳給我答覆。
+                       資料型態如下：{score: interger, feeling: array, factor: array}
+                       以下是各個項目的解說：
+                       score 為本篇文章的情緒分數，10 為最高分，1為最低分。
+                       feeling 為從以下情緒項目選出最相似的，並輸出成 array，十分確定才可加入情緒項目。
+                       情緒項目：${feelingOptions.join(',')}。
+                       factor 為從以下要素項目選出最相似的，並輸出成 array，十分確定才可加入要素項目。
+                       要素項目：${factorOptions.join(',')}。
+                      `;

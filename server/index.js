@@ -57,12 +57,6 @@ const server = new ApolloServer({
   resolvers,
   introspection: true,
   playground: true,
-  // context: () => ({
-  //   loaders: {
-  //     journalUserLoader: journalUserDataloader(),
-  //     journalLinkLoader: journalLinkDataloader(),
-  //   },
-  // }),
   context,
 });
 await server.start();
