@@ -37,21 +37,26 @@ const journalResolver = {
     },
   },
   Query: {
-    async getJournalbyId(_, { ID }) {
+    async getJournalbyId(_, { ID }, context) {
+      const userId = context.user._id;
       const res = await Journal.findById(ID);
-      if (!res) throwCustomError('Id not exist', ErrorTypes.BAD_USER_INPUT);
+      if (!res || res.userId.toString() !== userId)
+        throwCustomError('Journal not exist', ErrorTypes.BAD_USER_INPUT);
       return res;
     },
-    async getJournalbyTitle(_, { userId, title }) {
+    async getJournalbyTitle(_, { title }, context) {
+      const userId = context.user._id;
       const res = await Journal.findOne({ userId, title }).exec();
       if (!res) throwCustomError('Title not exist', ErrorTypes.BAD_USER_INPUT);
       return res;
     },
-    async getUserLatestJournals(_, { userId, amount, type }) {
+    async getUserLatestJournals(_, { amount, type }, context) {
+      const userId = context.user._id;
       const res = await Journal.find({ userId, type }).sort({ updatedAt: -1 }).limit(amount);
       return res;
     },
-    async searchJournals(_, { userId, keyword }) {
+    async searchJournals(_, { keyword }, context) {
+      const userId = context.user._id;
       const res = await Journal.aggregate([
         {
           $search: {
@@ -72,7 +77,8 @@ const journalResolver = {
       ]);
       return res;
     },
-    async autoCompleteJournals(_, { userId, keyword }) {
+    async autoCompleteJournals(_, { keyword }, context) {
+      const userId = context.user._id;
       const res = await Journal.aggregate([
         {
           $search: {
@@ -91,7 +97,11 @@ const journalResolver = {
       ]);
       return res;
     },
-    async getBackLinkedJournals(_, { ID }) {
+    async getBackLinkedJournals(_, { ID }, context) {
+      const userId = context.user._id;
+      const journal = await Journal.findById(ID);
+      if (!journal || journal.userId.toString() !== userId)
+        throwCustomError('Journal not exist', ErrorTypes.BAD_USER_INPUT);
       const res = await Journal.aggregate([
         {
           $match: {
@@ -105,19 +115,10 @@ const journalResolver = {
   Mutation: {
     async createJournal(
       _,
-      {
-        journalInput: {
-          title,
-          type,
-          content,
-          userId,
-          diaryDate,
-          moodScore,
-          moodFeelings,
-          moodFactors,
-        },
-      },
+      { journalInput: { title, type, content, diaryDate, moodScore, moodFeelings, moodFactors } },
+      context,
     ) {
+      const userId = context.user._id;
       const linkedNoteIds = await getLinkedNoteIds(content, userId);
       const journal = new Journal({
         title,
@@ -145,5 +146,6 @@ const journalResolver = {
     },
   },
 };
+// TODO: schema 如何指定必要 header
 
 export default journalResolver;

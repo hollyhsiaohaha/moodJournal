@@ -12,7 +12,8 @@ import { logger } from './utils/logger.js';
 import { connectDB } from './utils/db.js';
 import typeDefs from './schemas/typeDefs.js';
 import resolvers from './resolvers/resolvers.js';
-import { journalUserDataloader, journalLinkDataloader } from './dataloader/journal.js';
+// import { journalUserDataloader, journalLinkDataloader } from './dataloader/journal.js';
+import context from './context/context.js';
 
 dotenv.config();
 const filename = fileURLToPath(import.meta.url);
@@ -50,35 +51,19 @@ app.set('view engine', 'pug');
 app.enable('trust proxy');
 
 connectDB();
-// --- Journal ---
-// import { Journal } from './models/Journal.js';
-// const journal = new Journal({
-//   title: '更新測試',
-//   type: 'diary',
-//   content: '心好累',
-//   userId: '6554ad56356f33259f15b103',
-//   recordingPaths: ['aaa.mp3'],
-//   linkedNoteIds: [],
-//   // createdAt: { type: Date, default: Date.now },
-//   // updatedAt: { type: Date, default: Date.now },
-//   // diaryDate: { type: Date },
-//   moodScore: 5,
-//   moodFeelings: ['快樂', '驚喜'],
-//   moodFactors: ['學習', '朋友'],
-// });
-// journal.save();
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   introspection: true,
   playground: true,
-  context: () => ({
-    loaders: {
-      journalUserLoader: journalUserDataloader(),
-      journalLinkLoader: journalLinkDataloader(),
-    },
-  }),
+  // context: () => ({
+  //   loaders: {
+  //     journalUserLoader: journalUserDataloader(),
+  //     journalLinkLoader: journalLinkDataloader(),
+  //   },
+  // }),
+  context,
 });
 await server.start();
 server.applyMiddleware({ app });

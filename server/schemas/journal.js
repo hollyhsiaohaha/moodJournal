@@ -26,7 +26,6 @@ const userTypeDef = gql`
     title: String!
     type: JournalType!
     content: String!
-    userId: String!
     diaryDate: String
     moodScore: Int
     moodFeelings: [String]
@@ -34,16 +33,23 @@ const userTypeDef = gql`
   }
   # Queries
   type Query {
+    "Requires authentication"
     getJournalbyId(ID: ID!): Journal!
-    getJournalbyTitle(userId: String!, title: String!): Journal!
-    getUserLatestJournals(userId: String!, amount: Int!, type: JournalType!): [Journal]!
-    searchJournals(userId: String!, keyword: String!): [Journal]!
-    autoCompleteJournals(userId: String!, keyword: String!): [Journal]!
+    "Requires authentication"
+    getJournalbyTitle(title: String!): Journal!
+    "Requires authentication"
+    getUserLatestJournals(amount: Int!, type: JournalType!): [Journal]!
+    "Requires authentication"
+    searchJournals(keyword: String!): [Journal]!
+    "Requires authentication"
+    autoCompleteJournals(keyword: String!): [Journal]!
+    "Requires authentication"
     getBackLinkedJournals(ID: ID!): [Journal]!
   }
 
   # Mutations
   type Mutation {
+    "Requires authentication"
     createJournal(journalInput: JournalInput!): Journal!
   }
 `;

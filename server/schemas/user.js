@@ -6,11 +6,19 @@ const userTypeDef = gql`
     _id: String
     name: String
     email: String
-    password: String
-    createdAt: String
   }
-  input UserInput {
+  type UserJWT {
+    _id: String
     name: String
+    email: String
+    jwtToken: String
+  }
+  input SignUpInput {
+    name: String
+    email: String
+    password: String
+  }
+  input SignInInput {
     email: String
     password: String
   }
@@ -22,7 +30,8 @@ const userTypeDef = gql`
 
   # Mutations
   type Mutation {
-    creatUser(userInput: UserInput!): User!
+    signUp(signUpInput: SignUpInput!): UserJWT
+    signIn(signInInput: SignInInput!): UserJWT
   }
 `;
 
