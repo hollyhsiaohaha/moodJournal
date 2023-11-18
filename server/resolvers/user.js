@@ -35,8 +35,7 @@ const userResolver = {
           password: encryptedPassword,
         });
         const res = await user.save();
-        logger.info('User created:');
-        logger.info(res);
+        logger.info(`User created: ${res._id}`);
         const userInfo = {
           _id: res._id,
           name,
@@ -77,5 +76,4 @@ const userResolver = {
     },
   },
 };
-// TODO: 所以怎掛上去 context
 export default userResolver;
