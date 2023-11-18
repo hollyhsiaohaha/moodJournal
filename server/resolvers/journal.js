@@ -146,6 +146,5 @@ const journalResolver = {
     },
   },
 };
-// TODO: schema 如何指定必要 header
 
 export default journalResolver;
