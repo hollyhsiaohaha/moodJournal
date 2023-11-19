@@ -19,7 +19,8 @@ const context = async ({ req }) => {
     journalUserLoader: journalUserDataloader(),
     journalLinkLoader: journalLinkDataloader(),
   };
-  if (req.body.operationName === 'SignUp' || req.body.operationName === 'SignIn') {
+  logger.info(`option name: ${req.body.operationName}`);
+  if (['SignUp', 'SignIn', 'IntrospectionQuery'].includes(req.body.operationName)) {
     return;
   }
   const token = req.headers.authorization || '';

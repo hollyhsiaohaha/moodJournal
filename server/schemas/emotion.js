@@ -10,10 +10,16 @@ const emotionTypeDef = gql`
     name: String
     values: [String]
   }
+  type SentimentAnalysis {
+    score: Int
+    feeling: [String]
+    factor: [String]
+  }
   # Queries
   type Query {
     getFeelings: [Feeling!]!
     getFactors: [Factor!]!
+    sentimentAnalysis(journalContent: String!): SentimentAnalysis!
   }
 `;
 
