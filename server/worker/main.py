@@ -51,8 +51,8 @@ def get_feelings_and_factors():
     most_similar_feeling = find_most_similar(feeling_vectors, text_vector)
     most_similar_factor = find_most_similar(factor_vectors, text_vector)
     result = {
-        "feelings": most_similar_feeling,
-        "factors": most_similar_factor,
+        "feeling": [most_similar_feeling],
+        "factor": [most_similar_factor],
     }
     return jsonify(result)
 

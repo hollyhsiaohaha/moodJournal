@@ -19,8 +19,16 @@ const context = async ({ req }) => {
     journalUserLoader: journalUserDataloader(),
     journalLinkLoader: journalLinkDataloader(),
   };
-  logger.info(`option name: ${req.body.operationName}`);
-  if (['SignUp', 'SignIn', 'IntrospectionQuery'].includes(req.body.operationName)) {
+  const operationName = req.body.operationName;
+  const notRequireAuthOperations = [
+    'SignUp',
+    'SignIn',
+    'IntrospectionQuery',
+    'getFeelings',
+    'getFactors',
+  ];
+  logger.info(`GraphQL operation name: ${operationName}`);
+  if (notRequireAuthOperations.includes(operationName) || !operationName) {
     return;
   }
   const token = req.headers.authorization || '';

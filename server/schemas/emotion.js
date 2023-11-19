@@ -19,7 +19,10 @@ const emotionTypeDef = gql`
   type Query {
     getFeelings: [Feeling!]!
     getFactors: [Factor!]!
-    sentimentAnalysis(journalContent: String!): SentimentAnalysis!
+    "Requires authentication"
+    SentimentAnalysisOpenAi(journalContent: String!): SentimentAnalysis!
+    "Requires authentication"
+    SentimentAnalysis(journalContent: String!): SentimentAnalysis!
   }
 `;
 
