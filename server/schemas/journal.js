@@ -23,9 +23,9 @@ const userTypeDef = gql`
     moodFactors: [String]
   }
   input JournalInput {
-    title: String!
-    type: JournalType!
-    content: String!
+    title: String
+    type: JournalType
+    content: String
     diaryDate: String
     moodScore: Int
     moodFeelings: [String]
@@ -51,6 +51,10 @@ const userTypeDef = gql`
   type Mutation {
     "Requires authentication"
     createJournal(journalInput: JournalInput!): Journal!
+    "Requires authentication"
+    deleteJournal(ID: ID!): Boolean
+    "Requires authentication"
+    updateJournal(ID: ID!, journalInput: JournalInput!): Journal!
   }
 `;
 
