@@ -17,7 +17,7 @@ const emotionResolver = {
     async getFactors() {
       return Factors;
     },
-    async SentimentAnalysisOpenAi(_, { journalContent }) {
+    async sentimentAnalysisOpenAi(_, { journalContent }) {
       try {
         const chatCompletion = await openai.chat.completions.create({
           response_format: { type: 'json_object' },
@@ -38,7 +38,7 @@ const emotionResolver = {
         throwCustomError(error.message, ErrorTypes.INTERNAL_SERVER_ERROR);
       }
     },
-    async SentimentAnalysis(_, { journalContent }) {
+    async sentimentAnalysis(_, { journalContent }) {
       try {
         // AWS Comprehend for score
         const input = {
