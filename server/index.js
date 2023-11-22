@@ -12,7 +12,6 @@ import { logger } from './utils/logger.js';
 import { connectDB } from './utils/db.js';
 import typeDefs from './schemas/typeDefs.js';
 import resolvers from './resolvers/resolvers.js';
-// import { journalUserDataloader, journalLinkDataloader } from './dataloader/journal.js';
 import context from './context/context.js';
 
 dotenv.config();
