@@ -12,7 +12,6 @@ import { logger } from './utils/logger.js';
 import { connectDB } from './utils/db.js';
 import typeDefs from './schemas/typeDefs.js';
 import resolvers from './resolvers/resolvers.js';
-// import { journalUserDataloader, journalLinkDataloader } from './dataloader/journal.js';
 import context from './context/context.js';
 
 dotenv.config();
@@ -28,7 +27,7 @@ const log = fs.createWriteStream(path.join(workingDir, 'logs', 'request.log'), {
 // CORS setting for React
 app.use(
   cors({
-    origin: ['http://localhost:8080/', 'https://studio.apollographql.com'],
+    origin: ['http://localhost:5173', 'https://studio.apollographql.com'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
