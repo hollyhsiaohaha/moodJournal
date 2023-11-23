@@ -21,7 +21,7 @@ function CustomizedMarkdownEditor() {
           const { data, error } = await getJournalIdByTitle({ variables: { title: keyword } });
           const journalId = data?.getJournalbyTitle?._id;
           if (!journalId) {
-            // TODO: 看要不要放在一個 state 中，印出給 user 一個違規清單
+            // TODO: 看要不要放在一個 state 中，印出給 user 一個違規清單 ???
             const message = `連結筆記不存在： ${keyword}`;
             throw new Error(message);
           }
@@ -61,11 +61,61 @@ function CustomizedMarkdownEditor() {
       if (lastOpeningBracket > lastClosingBracket) {
         const keyword = textBeforeCursor.slice(lastOpeningBracket + 2, cursor.ch);
         keyword ? triggerAutocomplete(keyword) : null;
-      }
+      } else setAutoCompleteResults([]);
     });
+
     return () => easyMDEInstance.current.toTextArea();
   }, []);
 
+  //  === AutocompleteList ===
+  const renderAutocompleteList = () => {
+    console.log(autoCompleteResults)
+    const cursorCoords = getCursorCoords();
+
+    const listStyle = {
+      position: 'absolute',
+      top: `${cursorCoords.top}px`,
+      left: `${cursorCoords.left}px`,
+      zIndex: 1000,
+      'border-style': autoCompleteResults.length ? 'solid' : 'none',
+      //TODO: 以下條件可以放 css
+      'list-style-type': 'none',
+    };
+    return (
+      <ul className="autocomplete-list" style={listStyle}>
+        {autoCompleteResults.map((item, index) => (
+          <li key={index} onClick={() => handleAutocompleteSelect(item)}>
+            {item}
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
+  const handleAutocompleteSelect = (selectedTitle) => {
+    if (easyMDEInstance.current) {
+      const cm = easyMDEInstance.current.codemirror;
+      const cursor = cm.getCursor();
+      const textBeforeCursor = cm.getRange({ line: 0, ch: 0 }, cursor);
+      const lastOpeningBracket = textBeforeCursor.lastIndexOf('[[');
+      cm.replaceRange(
+        `${selectedTitle}]]`,
+        { line: cursor.line, ch: lastOpeningBracket + 2 },
+        cursor
+      );
+      setAutoCompleteResults([]);
+    }
+  };
+
+  const getCursorCoords = () => {
+    if (easyMDEInstance.current) {
+      const editor = easyMDEInstance.current.codemirror;
+      const cursor = editor.getCursor();
+      return editor.cursorCoords(cursor);
+    }
+    return { top: 0, left: 0 };
+  };
+  //  ===========================
   const getEditorValue = () => {
     if (easyMDEInstance.current) {
       alert(easyMDEInstance.current.value());
@@ -86,16 +136,17 @@ function CustomizedMarkdownEditor() {
         throw new Error(error)
       }
       if (data) {
-        console.log(data.autoCompleteJournals);
+        const autocompletList = data.autoCompleteJournals.map(journal => journal.title);
+        setAutoCompleteResults(autocompletList);
       }
     } catch (error) {
       console.error('Autocomplete API fail', error);
     }
   };
-
   return (
     <>
       <textarea ref={editorRef} />
+      {renderAutocompleteList()}
       <button onClick={getEditorValue}>Get Editor Content</button>
     </>
   );
