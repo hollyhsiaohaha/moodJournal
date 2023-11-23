@@ -71,8 +71,8 @@ app.use((err, req, res, next) => {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ error: err.code, message: 'File is too large' });
     }
-    if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-      return res.status(400).json({ error: err.code, message: 'File type must be audio/mpeg' });
+    if (err.code === 'UNEXPECTED_FILE_TYPE') {
+      return res.status(400).json({ error: err.code, message: 'File type must be audio' });
     }
   }
   return res.status(500).json({

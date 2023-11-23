@@ -4,7 +4,7 @@ import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
 import { GET_AUTOCOMPLETE, GET_JOURNAL_ID_BY_TITLE } from '../queries/journals';
 
-function CustomizedMarkdownEditor() {
+function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
   const editorRef = useRef(null);
   const easyMDEInstance = useRef(null);
   const [autoCompleteResults, setAutoCompleteResults] = useState([]);
@@ -12,7 +12,18 @@ function CustomizedMarkdownEditor() {
   const [getAutocomplete] = useLazyQuery(GET_AUTOCOMPLETE);
   const [getJournalIdByTitle] = useLazyQuery(GET_JOURNAL_ID_BY_TITLE);
 
+  // useEffect for easyMDE
   useEffect(() => {
+    easyMDEInstance.current = new EasyMDE({
+      element: editorRef.current,
+      previewRender: (plainText, preview) => {
+        setTimeout( async () => {
+          preview.innerHTML = await customRender(plainText);
+      }, 100);
+        return "Loading...";
+      },
+    });
+
     const customRender = async (plainText) => {
       const matches = [...plainText.matchAll(/\[\[(.*?)\]\]/g)];
       const replacements = await Promise.all(matches.map(async (match) => {
@@ -43,16 +54,6 @@ function CustomizedMarkdownEditor() {
       return easyMDEInstance.current ? easyMDEInstance.current.markdown(customRenderedText) : null;
     };
 
-    easyMDEInstance.current = new EasyMDE({
-      element: editorRef.current,
-      previewRender: (plainText, preview) => {
-        setTimeout( async () => {
-          preview.innerHTML = await customRender(plainText);
-      }, 100);
-        return "Loading...";
-      },
-    });
-
     easyMDEInstance.current.codemirror.on('change', (instance) => {
       const cursor = instance.getCursor();
       const textBeforeCursor = instance.getRange({ line: cursor.line, ch: 0 }, cursor);
@@ -64,12 +65,24 @@ function CustomizedMarkdownEditor() {
       } else setAutoCompleteResults([]);
     });
 
-    return () => easyMDEInstance.current.toTextArea();
+    return () => easyMDEInstance.current ? easyMDEInstance.current.toTextArea() : null;
   }, []);
+
+  // useEffect for audio filename update
+  useEffect(() => {
+    if (audioNameS3) {
+      const currentContent = easyMDEInstance.current.value();
+      const audioTag = `\n<audio id=" ${audioNameS3}" controls="" preload="auto">
+          <source id="${audioNameS3}-src" src="https://mood-journal.s3.ap-northeast-1.amazonaws.com/${audioNameS3}">
+        </audio>
+      `;
+      easyMDEInstance.current.value(currentContent + audioTag);
+    }
+    setAudioNameS3('');
+  }, [audioNameS3, setAudioNameS3])
 
   //  === AutocompleteList ===
   const renderAutocompleteList = () => {
-    console.log(autoCompleteResults)
     const cursorCoords = getCursorCoords();
 
     const listStyle = {
