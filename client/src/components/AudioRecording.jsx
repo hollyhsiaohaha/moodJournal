@@ -21,7 +21,7 @@ const AudioRecorder = ({ audioNameS3, setAudioNameS3 }) => {
           };
 
           recorder.onstop = () => {
-            const blob = new Blob(audioChunksRef.current, { type: 'audio/ogg; codecs=opus' });
+            const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
             setAudioURL(window.URL.createObjectURL(blob));
             audioChunksRef.current = [];
             stream.getTracks().forEach(track => track.stop());
@@ -52,7 +52,7 @@ const AudioRecorder = ({ audioNameS3, setAudioNameS3 }) => {
       const blob = await response.blob();
   
       const formData = new FormData();
-      formData.append('audio', blob, 'audio.ogg');
+      formData.append('audio', blob, 'audio.webm');
   
       const headers = formData.getHeaders ? formData.getHeaders() : {};
       headers['Authorization'] = localStorage.getItem('JWT_TOKEN');
