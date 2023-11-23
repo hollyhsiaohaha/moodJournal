@@ -8,6 +8,7 @@ import cookiesParser from 'cookie-parser';
 import morganBody from 'morgan-body';
 import { fileURLToPath } from 'url';
 import { ApolloServer } from 'apollo-server-express';
+import multer from 'multer';
 import { logger } from './utils/logger.js';
 import { connectDB } from './utils/db.js';
 import typeDefs from './schemas/typeDefs.js';
@@ -49,6 +50,9 @@ app.set('views', path.join(workingDir, 'views'));
 app.set('view engine', 'pug');
 app.enable('trust proxy');
 
+import apiRoutes from './routes/api.js';
+app.use('/api', apiRoutes);
+
 connectDB();
 
 const server = new ApolloServer({
@@ -61,12 +65,21 @@ const server = new ApolloServer({
 await server.start();
 server.applyMiddleware({ app });
 
-// app.use((err, req, res, next) => {
-//   return res.status(500).json({
-//     err_name: 'Internal Server Error',
-//     err_message: err.stack,
-//   });
-// });
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: err.code, message: 'File is too large' });
+    }
+    if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      return res.status(400).json({ error: err.code, message: 'File type must be audio/mpeg' });
+    }
+  }
+  return res.status(500).json({
+    error: 'INTERNAL_SERVER_ERROR',
+    message: err.stack,
+  });
+});
 
 app.listen(port, () => {
   logger.info(`This app is listening to localhost: ${port}`);
