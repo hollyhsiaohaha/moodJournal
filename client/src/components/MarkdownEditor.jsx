@@ -18,7 +18,7 @@ function CustomizedMarkdownEditor() {
       const replacements = await Promise.all(matches.map(async (match) => {
         const keyword = match[1];
         try {
-          const { data, error } = await getJournalIdByTitle({ variables: { title: keyword } });
+          const { data } = await getJournalIdByTitle({ variables: { title: keyword } });
           const journalId = data?.getJournalbyTitle?._id;
           if (!journalId) {
             // TODO: 看要不要放在一個 state 中，印出給 user 一個違規清單 ???
@@ -40,7 +40,7 @@ function CustomizedMarkdownEditor() {
       replacements.forEach(({ match, replacement }) => {
         customRenderedText = customRenderedText.replace(match[0], replacement);
       });
-      return easyMDEInstance.current.markdown(customRenderedText);
+      return easyMDEInstance.current ? easyMDEInstance.current.markdown(customRenderedText) : null;
     };
 
     easyMDEInstance.current = new EasyMDE({
@@ -77,9 +77,9 @@ function CustomizedMarkdownEditor() {
       top: `${cursorCoords.top}px`,
       left: `${cursorCoords.left}px`,
       zIndex: 1000,
-      'border-style': autoCompleteResults.length ? 'solid' : 'none',
+      borderStyle: autoCompleteResults.length ? 'solid' : 'none',
       //TODO: 以下條件可以放 css
-      'list-style-type': 'none',
+      listStyleType: 'none',
     };
     return (
       <ul className="autocomplete-list" style={listStyle}>

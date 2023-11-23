@@ -1,9 +1,13 @@
 import MarkdownEditor from './MarkdownEditor'
+import AudioRecording from './AudioRecording';
 
 function CreateJournal() {
-	return (
-		<MarkdownEditor/>
-	)
+  return (
+    <>
+      <AudioRecording/>
+      <MarkdownEditor/>
+    </>
+  )
 }
 
 export default CreateJournal;
