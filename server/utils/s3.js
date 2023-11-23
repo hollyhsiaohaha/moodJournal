@@ -25,7 +25,8 @@ export async function uploadS3(key, buffer, type) {
     ContentType: type,
   };
   const command = new PutObjectCommand(params);
-  s3.send(command);
+  const result = await s3.send(command);
+  return result;
 }
 
 export async function getUrlS3(key) {
