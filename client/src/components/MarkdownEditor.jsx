@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLazyQuery } from '@apollo/client';
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
+import PropTypes from 'prop-types';
 import { GET_AUTOCOMPLETE, GET_JOURNAL_ID_BY_TITLE } from '../queries/journals';
 
 function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
@@ -84,7 +85,6 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
   //  === AutocompleteList ===
   const renderAutocompleteList = () => {
     const cursorCoords = getCursorCoords();
-
     const listStyle = {
       position: 'absolute',
       top: `${cursorCoords.top}px`,
@@ -164,5 +164,10 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
     </>
   );
 }
+
+CustomizedMarkdownEditor.propTypes = {
+  audioNameS3: PropTypes.string,
+  setAudioNameS3: PropTypes.func.isRequired,
+};
 
 export default CustomizedMarkdownEditor;

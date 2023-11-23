@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 
 const AudioRecorder = ({ audioNameS3, setAudioNameS3 }) => {
   const [stateIndex, setStateIndex] = useState(0);
@@ -6,13 +7,14 @@ const AudioRecorder = ({ audioNameS3, setAudioNameS3 }) => {
   const audioChunksRef = useRef([]);
   const [audioURL, setAudioURL] = useState('');
 
-  useEffect(() => {
+  const record = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       console.log('mediaDevices supported..');
       navigator.mediaDevices
         .getUserMedia({ audio: true })
         .then((stream) => {
           const recorder = new MediaRecorder(stream);
+          audioChunksRef.current = [];
 
           recorder.ondataavailable = (e) => {
             audioChunksRef.current.push(e.data);
@@ -22,9 +24,12 @@ const AudioRecorder = ({ audioNameS3, setAudioNameS3 }) => {
             const blob = new Blob(audioChunksRef.current, { type: 'audio/ogg; codecs=opus' });
             setAudioURL(window.URL.createObjectURL(blob));
             audioChunksRef.current = [];
+            stream.getTracks().forEach(track => track.stop());
           };
 
           setMediaRecorder(recorder);
+          setStateIndex(1);
+          recorder.start();
         })
         .catch((error) => {
           console.log('Following error has occurred: ', error);
@@ -34,12 +39,6 @@ const AudioRecorder = ({ audioNameS3, setAudioNameS3 }) => {
       console.log('Your browser does not support mediaDevices');
       setStateIndex('');
     }
-  }, []);
-
-  const record = () => {
-    audioChunksRef.current = [];
-    setStateIndex(1);
-    mediaRecorder.start();
   };
 
   const stopRecording = () => {
@@ -89,6 +88,11 @@ const AudioRecorder = ({ audioNameS3, setAudioNameS3 }) => {
       </div>
     </div>
   );
+};
+
+AudioRecorder.propTypes = {
+  audioNameS3: PropTypes.string,
+  setAudioNameS3: PropTypes.func.isRequired,
 };
 
 export default AudioRecorder;
