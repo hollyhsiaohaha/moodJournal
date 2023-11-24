@@ -128,11 +128,6 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
       const cursor = cm.getCursor();
       const textBeforeCursor = cm.getRange({ line: cursor.line, ch: 0 }, cursor);
       const lastOpeningBracket = textBeforeCursor.lastIndexOf('[[');
-      console.log(textBeforeCursor)
-      console.log(`lastOpeningBracket: ${lastOpeningBracket}`)
-      console.log(`cursor.line: ${cursor.line}`)
-      console.log(`cursor.ch: ${cursor.ch}`)
-      console.log(`cursor: ${JSON.stringify(cursor)}`)
       cm.replaceRange(
         `${selectedTitle}]]`,
         { line: cursor.line, ch: lastOpeningBracket + 2},

@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-const AudioRecorder = ({ audioNameS3, setAudioNameS3 }) => {
+const AudioRecorder = ({ setAudioNameS3 }) => {
   const [stateIndex, setStateIndex] = useState(0);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const audioChunksRef = useRef([]);
