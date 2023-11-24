@@ -5,6 +5,7 @@ import 'easymde/dist/easymde.min.css';
 import PropTypes from 'prop-types';
 import { GET_AUTOCOMPLETE, GET_JOURNAL_ID_BY_TITLE, GET_VOICE_TO_TEXT } from '../queries/journals';
 
+
 function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
   const editorRef = useRef(null);
   const easyMDEInstance = useRef(null);

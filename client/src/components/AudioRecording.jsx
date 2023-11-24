@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-const AudioRecorder = ({ setAudioNameS3 }) => {
+function AudioRecorder ({ setAudioNameS3 }) {
   const [stateIndex, setStateIndex] = useState(0);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const audioChunksRef = useRef([]);
@@ -88,7 +88,7 @@ const AudioRecorder = ({ setAudioNameS3 }) => {
       </div>
     </div>
   );
-};
+}
 
 AudioRecorder.propTypes = {
   audioNameS3: PropTypes.string,
