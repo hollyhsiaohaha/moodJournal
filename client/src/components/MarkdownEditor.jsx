@@ -3,15 +3,17 @@ import { useLazyQuery } from '@apollo/client';
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
 import PropTypes from 'prop-types';
-import { GET_AUTOCOMPLETE, GET_JOURNAL_ID_BY_TITLE } from '../queries/journals';
+import { GET_AUTOCOMPLETE, GET_JOURNAL_ID_BY_TITLE, GET_VOICE_TO_TEXT } from '../queries/journals';
 
 function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
   const editorRef = useRef(null);
   const easyMDEInstance = useRef(null);
   const [autoCompleteResults, setAutoCompleteResults] = useState([]);
+  const [voiceToTextResults, setVoiceToTextResults] = useState('');
 
   const [getAutocomplete] = useLazyQuery(GET_AUTOCOMPLETE);
   const [getJournalIdByTitle] = useLazyQuery(GET_JOURNAL_ID_BY_TITLE);
+  const [getVoiceToText] = useLazyQuery(GET_VOICE_TO_TEXT);
 
   // useEffect for easyMDE
   useEffect(() => {
@@ -71,16 +73,31 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
 
   // useEffect for audio filename update
   useEffect(() => {
+    const voiceToText = async (fileName) => {
+      const {data, error} = await getVoiceToText({variables: { fileName }});
+      if (error) return setVoiceToTextResults('錯誤：目前無法進行 voice to text');
+      if (data.voiceToText) return setVoiceToTextResults(data.voiceToText);
+    }
+
     if (audioNameS3) {
+      const fileName = audioNameS3;
       const currentContent = easyMDEInstance.current.value();
-      const audioTag = `\n<audio id=" ${audioNameS3}" controls="" preload="auto">
-          <source id="${audioNameS3}-src" src="https://mood-journal.s3.ap-northeast-1.amazonaws.com/${audioNameS3}">
+      const audioTag = `\n<audio id=" ${fileName}" controls="" preload="auto">
+          <source id="${fileName}-src" src="https://mood-journal.s3.ap-northeast-1.amazonaws.com/${fileName}">
         </audio>
       `;
       easyMDEInstance.current.value(currentContent + audioTag);
+      setAudioNameS3('');
+      voiceToText(fileName);
     }
-    setAudioNameS3('');
-  }, [audioNameS3, setAudioNameS3])
+  }, [audioNameS3, setAudioNameS3, getVoiceToText])
+
+  useEffect(() => {
+    const voiceToText = voiceToTextResults;
+    const currentContent = easyMDEInstance.current.value();
+    easyMDEInstance.current.value(`${currentContent}\n${voiceToText}`);
+    setVoiceToTextResults('');
+  }, [voiceToTextResults, setVoiceToTextResults])
 
   //  === AutocompleteList ===
   const renderAutocompleteList = () => {
@@ -109,11 +126,16 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
     if (easyMDEInstance.current) {
       const cm = easyMDEInstance.current.codemirror;
       const cursor = cm.getCursor();
-      const textBeforeCursor = cm.getRange({ line: 0, ch: 0 }, cursor);
+      const textBeforeCursor = cm.getRange({ line: cursor.line, ch: 0 }, cursor);
       const lastOpeningBracket = textBeforeCursor.lastIndexOf('[[');
+      console.log(textBeforeCursor)
+      console.log(`lastOpeningBracket: ${lastOpeningBracket}`)
+      console.log(`cursor.line: ${cursor.line}`)
+      console.log(`cursor.ch: ${cursor.ch}`)
+      console.log(`cursor: ${JSON.stringify(cursor)}`)
       cm.replaceRange(
         `${selectedTitle}]]`,
-        { line: cursor.line, ch: lastOpeningBracket + 2 },
+        { line: cursor.line, ch: lastOpeningBracket + 2},
         cursor
       );
       setAutoCompleteResults([]);
