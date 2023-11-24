@@ -15,3 +15,9 @@ query GetJournalbyTitle($title: String!) {
   }
 }
 `;
+
+export const GET_VOICE_TO_TEXT = gql`
+query Query($fileName: String!) {
+  voiceToText(fileName: $fileName)
+}
+`;

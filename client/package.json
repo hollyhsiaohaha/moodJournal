@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "@apollo/client": "^3.8.7",
+    "@ffmpeg/core": "^0.12.4",
+    "@ffmpeg/ffmpeg": "^0.12.7",
     "easymde": "^2.18.0",
+    "ffmpeg": "^0.0.4",
     "graphql": "^16.8.1",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",

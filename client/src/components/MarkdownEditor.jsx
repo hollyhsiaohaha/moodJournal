@@ -2,17 +2,31 @@ import { useEffect, useRef, useState } from 'react';
 import { useLazyQuery } from '@apollo/client';
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
-import { GET_AUTOCOMPLETE, GET_JOURNAL_ID_BY_TITLE } from '../queries/journals';
+import PropTypes from 'prop-types';
+import { GET_AUTOCOMPLETE, GET_JOURNAL_ID_BY_TITLE, GET_VOICE_TO_TEXT } from '../queries/journals';
 
-function CustomizedMarkdownEditor() {
+function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
   const editorRef = useRef(null);
   const easyMDEInstance = useRef(null);
   const [autoCompleteResults, setAutoCompleteResults] = useState([]);
+  const [voiceToTextResults, setVoiceToTextResults] = useState('');
 
   const [getAutocomplete] = useLazyQuery(GET_AUTOCOMPLETE);
   const [getJournalIdByTitle] = useLazyQuery(GET_JOURNAL_ID_BY_TITLE);
+  const [getVoiceToText] = useLazyQuery(GET_VOICE_TO_TEXT);
 
+  // useEffect for easyMDE
   useEffect(() => {
+    easyMDEInstance.current = new EasyMDE({
+      element: editorRef.current,
+      previewRender: (plainText, preview) => {
+        setTimeout( async () => {
+          preview.innerHTML = await customRender(plainText);
+      }, 100);
+        return "Loading...";
+      },
+    });
+
     const customRender = async (plainText) => {
       const matches = [...plainText.matchAll(/\[\[(.*?)\]\]/g)];
       const replacements = await Promise.all(matches.map(async (match) => {
@@ -43,16 +57,6 @@ function CustomizedMarkdownEditor() {
       return easyMDEInstance.current ? easyMDEInstance.current.markdown(customRenderedText) : null;
     };
 
-    easyMDEInstance.current = new EasyMDE({
-      element: editorRef.current,
-      previewRender: (plainText, preview) => {
-        setTimeout( async () => {
-          preview.innerHTML = await customRender(plainText);
-      }, 100);
-        return "Loading...";
-      },
-    });
-
     easyMDEInstance.current.codemirror.on('change', (instance) => {
       const cursor = instance.getCursor();
       const textBeforeCursor = instance.getRange({ line: cursor.line, ch: 0 }, cursor);
@@ -64,14 +68,40 @@ function CustomizedMarkdownEditor() {
       } else setAutoCompleteResults([]);
     });
 
-    return () => easyMDEInstance.current.toTextArea();
+    return () => easyMDEInstance.current ? easyMDEInstance.current.toTextArea() : null;
   }, []);
+
+  // useEffect for audio filename update
+  useEffect(() => {
+    const voiceToText = async (fileName) => {
+      const {data, error} = await getVoiceToText({variables: { fileName }});
+      if (error) return setVoiceToTextResults('錯誤：目前無法進行 voice to text');
+      if (data.voiceToText) return setVoiceToTextResults(data.voiceToText);
+    }
+
+    if (audioNameS3) {
+      const fileName = audioNameS3;
+      const currentContent = easyMDEInstance.current.value();
+      const audioTag = `\n<audio id=" ${fileName}" controls="" preload="auto">
+          <source id="${fileName}-src" src="https://mood-journal.s3.ap-northeast-1.amazonaws.com/${fileName}">
+        </audio>
+      `;
+      easyMDEInstance.current.value(currentContent + audioTag);
+      setAudioNameS3('');
+      voiceToText(fileName);
+    }
+  }, [audioNameS3, setAudioNameS3, getVoiceToText])
+
+  useEffect(() => {
+    const voiceToText = voiceToTextResults;
+    const currentContent = easyMDEInstance.current.value();
+    easyMDEInstance.current.value(`${currentContent}\n${voiceToText}`);
+    setVoiceToTextResults('');
+  }, [voiceToTextResults, setVoiceToTextResults])
 
   //  === AutocompleteList ===
   const renderAutocompleteList = () => {
-    console.log(autoCompleteResults)
     const cursorCoords = getCursorCoords();
-
     const listStyle = {
       position: 'absolute',
       top: `${cursorCoords.top}px`,
@@ -96,11 +126,11 @@ function CustomizedMarkdownEditor() {
     if (easyMDEInstance.current) {
       const cm = easyMDEInstance.current.codemirror;
       const cursor = cm.getCursor();
-      const textBeforeCursor = cm.getRange({ line: 0, ch: 0 }, cursor);
+      const textBeforeCursor = cm.getRange({ line: cursor.line, ch: 0 }, cursor);
       const lastOpeningBracket = textBeforeCursor.lastIndexOf('[[');
       cm.replaceRange(
         `${selectedTitle}]]`,
-        { line: cursor.line, ch: lastOpeningBracket + 2 },
+        { line: cursor.line, ch: lastOpeningBracket + 2},
         cursor
       );
       setAutoCompleteResults([]);
@@ -151,5 +181,10 @@ function CustomizedMarkdownEditor() {
     </>
   );
 }
+
+CustomizedMarkdownEditor.propTypes = {
+  audioNameS3: PropTypes.string,
+  setAudioNameS3: PropTypes.func.isRequired,
+};
 
 export default CustomizedMarkdownEditor;

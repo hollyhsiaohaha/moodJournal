@@ -3,7 +3,7 @@ import multer from 'multer';
 const storage = multer.memoryStorage({});
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'audio/mpeg') cb(null, true);
+  if (file.mimetype.split('/')[0] === 'audio') cb(null, true);
   else {
     req.fileValidationError = `Goes wrong on the mimetype: ${file?.originalname}`;
     cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE'), false);

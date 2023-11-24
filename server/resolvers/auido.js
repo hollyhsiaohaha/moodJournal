@@ -23,6 +23,7 @@ const audioResolver = {
       formData.append('model', 'whisper-1');
       formData.append('language', 'zh');
       formData.append('response_format', 'json');
+      formData.append('initial_prompt', '繁體中文');
 
       const headers = formData.getHeaders ? formData.getHeaders() : {};
       headers['Authorization'] = `Bearer ${OPENAI_API_KEY}`;
