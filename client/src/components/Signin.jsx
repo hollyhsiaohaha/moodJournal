@@ -24,12 +24,9 @@ function Signin() {
         },
       });
       const token = data.signIn?.jwtToken;
-      const anHour = 1/24;
-      Cookies.set('JWT_TOKEN', token, {expires: anHour});
+      Cookies.set('JWT_TOKEN', token, { expires: 1 }); // day
     } catch (error) {
-      error.message === 'incorrect email or password'
-      ? alert(error.message)
-      : console.error(error);
+      error.message === 'incorrect email or password' ? alert('錯誤的 Email 或密碼') : console.error(error);
     }
     setLoading(false);
   };

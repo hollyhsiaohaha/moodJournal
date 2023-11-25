@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
+import Cookies from 'js-cookie';
 
 function AudioRecorder ({ setAudioNameS3 }) {
   const [stateIndex, setStateIndex] = useState(0);
@@ -55,7 +56,8 @@ function AudioRecorder ({ setAudioNameS3 }) {
       formData.append('audio', blob, 'audio.webm');
   
       const headers = formData.getHeaders ? formData.getHeaders() : {};
-      headers['Authorization'] = localStorage.getItem('JWT_TOKEN');
+      const token = Cookies.get('JWT_TOKEN');
+      headers['Authorization'] = token;
       const res = await fetch('http://localhost:3000/api/audio', {
           method: 'POST',
           body: formData,
