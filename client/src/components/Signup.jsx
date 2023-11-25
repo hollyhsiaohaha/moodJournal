@@ -5,6 +5,8 @@ import { Button } from 'primereact/button';
 import { useMutation } from '@apollo/client';
 import { SIGN_UP } from '../mutations/users.js';
 import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
+
 
 function Signup() {
   const [userEmail, setUserEmail] = useState('');
@@ -12,6 +14,7 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [signUp] = useMutation(SIGN_UP);
+  const navigate = useNavigate();
 
   const validateEmail = (email) => {
     var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -36,6 +39,7 @@ function Signup() {
       });
       const token = data.signUp?.jwtToken;
       Cookies.set('JWT_TOKEN', token, { expires: 1 }); // day
+      navigate('/profile');
     } catch (error) {
       error.message === 'email exist' ? alert('Email 已被註冊') : console.error(error);
     }
@@ -72,6 +76,14 @@ function Signup() {
         </span>
       </div>
       <Button label="Sign Up" loading={loading} onClick={submit} />
+      <br/>
+      <Button
+          label="Sign In >>>"
+          link
+          onClick={() => {
+            navigate('/signin');
+          }}
+        />
     </>
   );
 }

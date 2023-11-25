@@ -5,12 +5,15 @@ import { Button } from 'primereact/button';
 import { useMutation } from '@apollo/client';
 import { SIGN_IN } from '../mutations/users.js';
 import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
+
 
 function Signin() {
   const [userEmail, setUserEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [signIn] = useMutation(SIGN_IN);
+  const navigate = useNavigate();
 
   const submit = async () => {
     setLoading(true);
@@ -25,6 +28,7 @@ function Signin() {
       });
       const token = data.signIn?.jwtToken;
       Cookies.set('JWT_TOKEN', token, { expires: 1 }); // day
+      navigate('/profile');
     } catch (error) {
       error.message === 'incorrect email or password' ? alert('錯誤的 Email 或密碼') : console.error(error);
     }
@@ -55,6 +59,14 @@ function Signin() {
         </span>
       </div>
       <Button label="Sign In" loading={loading} onClick={submit} />
+      <br/>
+      <Button
+          label="Sign Up >>>"
+          link
+          onClick={() => {
+            navigate('/signup');
+          }}
+        />
     </>
   );
 }

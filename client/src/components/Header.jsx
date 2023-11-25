@@ -1,7 +1,6 @@
 import { TabMenu } from 'primereact/tabmenu';
 import { useNavigate } from 'react-router-dom';
 
-// TODO: 配上正確的路徑
 function Header() {
   const navigate = useNavigate();
   const items = [
@@ -9,35 +8,35 @@ function Header() {
       label: 'Home',
       icon: 'pi pi-fw pi-home',
       command: () => {
-        navigate('/');
+        navigate('/home');
       },
     },
     {
       label: 'Journals',
       icon: 'pi pi-fw pi-inbox',
       command: () => {
-        navigate('/');
+        navigate('/journal');
       },
     },
     {
       label: 'Graph',
       icon: 'pi pi-fw pi-share-alt',
       command: () => {
-        navigate('/');
+        navigate('/graph');
       },
     },
     {
       label: 'Dashboard',
       icon: 'pi pi-fw pi-chart-bar',
       command: () => {
-        navigate('/');
+        navigate('/dashboard');
       },
     },
     {
       label: 'User',
       icon: 'pi pi-fw pi-user',
       command: () => {
-        navigate('/');
+        navigate('/profile');
       },
     },
   ];
