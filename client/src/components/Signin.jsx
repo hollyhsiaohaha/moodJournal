@@ -29,6 +29,7 @@ function Signin() {
       const token = data.signIn?.jwtToken;
       Cookies.set('JWT_TOKEN', token, { expires: 1 }); // day
       navigate('/profile');
+      alert('成功登入');
     } catch (error) {
       error.message === 'incorrect email or password' ? alert('錯誤的 Email 或密碼') : console.error(error);
     }

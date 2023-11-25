@@ -27,6 +27,11 @@ const userResolver = {
       if (!res) throwCustomError('Email not exist', ErrorTypes.BAD_USER_INPUT);
       return res;
     },
+    async getUserProfile(_, args, context) {
+      const { user } = context;
+      if (!user) throwCustomError('user not exist', ErrorTypes.INTERNAL_SERVER_ERROR);
+      return user;
+    },
   },
   Mutation: {
     async signUp(_, { signUpInput: { name, email, password } }) {

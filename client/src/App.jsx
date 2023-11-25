@@ -14,7 +14,7 @@ import Journal from './components/Journal';
 import Graph from './components/Graph';
 import Dashboard from './components/Dashboard';
 import Profile from './components/Profile';
-import Welcome from './components/Welcome';
+import Welcome from './components/Welcome'
 
 function App() {
   return (

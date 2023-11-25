@@ -40,6 +40,7 @@ function Signup() {
       const token = data.signUp?.jwtToken;
       Cookies.set('JWT_TOKEN', token, { expires: 1 }); // day
       navigate('/profile');
+      alert('成功登入');
     } catch (error) {
       error.message === 'email exist' ? alert('Email 已被註冊') : console.error(error);
     }

@@ -26,6 +26,7 @@ const userTypeDef = gql`
   type Query {
     getUserbyId(ID: ID!): User!
     getUserbyEmail(email: String!): User!
+    getUserProfile: User!
   }
 
   # Mutations
