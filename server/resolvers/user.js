@@ -10,6 +10,11 @@ dotenv.config();
 const saltRounds = 10;
 const { JWT_SECRET } = process.env;
 
+const validateEmail = (email) => {
+  var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  return re.test(email);
+};
+
 const userResolver = {
   Query: {
     async getUserbyId(_, { ID }) {
@@ -22,12 +27,19 @@ const userResolver = {
       if (!res) throwCustomError('Email not exist', ErrorTypes.BAD_USER_INPUT);
       return res;
     },
+    async getUserProfile(_, args, context) {
+      const { user } = context;
+      if (!user) throwCustomError('user not exist', ErrorTypes.INTERNAL_SERVER_ERROR);
+      return user;
+    },
   },
   Mutation: {
     async signUp(_, { signUpInput: { name, email, password } }) {
       try {
         const existUser = await User.findOne({ email }).exec();
-        if (existUser) throwCustomError('email', ErrorTypes.DUPLICATE_KEY);
+        if (!validateEmail(email))
+          throwCustomError('incorrect email format', ErrorTypes.BAD_USER_INPUT);
+        if (existUser) throwCustomError('email exist', ErrorTypes.DUPLICATE_KEY);
         const encryptedPassword = await bcrypt.hash(password, saltRounds);
         const user = new User({
           name,
@@ -64,8 +76,7 @@ const userResolver = {
           name: existUser.name,
           email,
         };
-        // TODO: 記得改回來
-        const jwtToken = jwt.sign(userInfo, JWT_SECRET, { expiresIn: '12h' });
+        const jwtToken = jwt.sign(userInfo, JWT_SECRET, { expiresIn: '24h' });
         return {
           ...userInfo,
           jwtToken,
