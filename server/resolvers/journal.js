@@ -165,7 +165,7 @@ const journalResolver = {
         return { ...res._doc };
       } catch (error) {
         if (error.message.includes('duplicate key error')) {
-          throwCustomError(`${title}`, ErrorTypes.DUPLICATE_KEY);
+          throwCustomError(`DUPLICATE_KEY: ${title}`, ErrorTypes.DUPLICATE_KEY);
         }
         logger.error(error);
         throw error;

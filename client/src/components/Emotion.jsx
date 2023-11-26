@@ -7,11 +7,9 @@ import { GET_FEELINGS, GET_FACTORS, SENTIMENT_ANALYSIS } from '../queries/emotio
 import { Button } from 'primereact/button';
 
 function Emotion({
-  mood,
-  setMood,
-  moodFeelings,
+  moodScore,
+  setMoodScore,
   setMoodFeelings,
-  moodFactors,
   setMoodFactors,
   content,
 }) {
@@ -26,7 +24,7 @@ function Emotion({
 
   useEffect(() => {
     const fetchFeelingNodes = async () => {
-      const { data, error } = await getFeelings();
+      const { data } = await getFeelings();
       const feelings = data.getFeelings;
       const nodes = [];
       for (let i = 0; i < feelings.length; i++) {
@@ -45,7 +43,7 @@ function Emotion({
       setFeelingNodes(nodes);
     };
     const fetchFactorNodes = async () => {
-      const { data, error } = await getFactors();
+      const { data } = await getFactors();
       const factors = data.getFactors;
       const nodes = [];
       for (let i = 0; i < factors.length; i++) {
@@ -65,6 +63,7 @@ function Emotion({
     };
     fetchFeelingNodes();
     fetchFactorNodes();
+    setMoodScore(1);
   }, []);
 
   const nodesToArray = (nodes, nodeList) => {
@@ -115,7 +114,7 @@ function Emotion({
     const regexAudioTag = /\<audio.*?\<\/audio\>/gs;
     const contentRemoveBrackets = content.replace(regexBrackets, '$1');
     const journalContent = contentRemoveBrackets.replace(regexAudioTag, '');
-    const { data, error } = await getSentimentAnalysis({
+    const { data } = await getSentimentAnalysis({
       variables: {
         journalContent,
       },
@@ -129,7 +128,7 @@ function Emotion({
       }
       const feelingNodeAnalysis =  ArrayToNodes(feeling, feelingNodes);
       const factorNodeAnalysis =  ArrayToNodes(factor, factorNodes);
-      setMood(score);
+      setMoodScore(score);
       setSelectedFeelingNodes(feelingNodeAnalysis);
       setSelectedFactorNodes(factorNodeAnalysis);
     } else alert('目前無法使用情緒偵測');
@@ -140,7 +139,7 @@ function Emotion({
       <h3>Emotion</h3>
       <Button label="情緒偵測" severity="secondary" loading={loading} onClick={emotionAnalysis} />
       <h4>分數</h4>
-      <Knob value={mood} onChange={(e) => setMood(e.value)} min={1} max={10} />
+      <Knob value={moodScore} onChange={(e) => setMoodScore(e.value)} min={1} max={10} />
       <h4>感受</h4>
       <TreeSelect
         value={selectedFeelingNodes}
@@ -166,5 +165,16 @@ function Emotion({
     </>
   );
 }
+
+Emotion.propTypes = {
+  audioNameS3: PropTypes.string,
+  setAudioNameS3: PropTypes.func,
+  setContent: PropTypes.func,
+  mood: PropTypes.number,
+  setMoodScore: PropTypes.func,
+  setMoodFeelings: PropTypes.func,
+  setMoodFactors: PropTypes.func,
+  content: PropTypes.string,
+};
 
 export default Emotion;
