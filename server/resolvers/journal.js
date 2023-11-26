@@ -83,6 +83,11 @@ const journalResolver = {
       if (!res) throwCustomError('Title not exist', ErrorTypes.BAD_USER_INPUT);
       return res;
     },
+    async getJournalsbyUserId(_, args, context) {
+      const userId = context.user._id;
+      const res = await Journal.find({ userId });
+      return res;
+    },
     async getUserLatestJournals(_, { amount, type }, context) {
       const userId = context.user._id;
       const res = await Journal.find({ userId, type }).sort({ updatedAt: -1 }).limit(amount);

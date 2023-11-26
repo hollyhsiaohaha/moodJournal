@@ -36,6 +36,8 @@ const userTypeDef = gql`
     "Requires authentication"
     getJournalbyId(ID: ID!): Journal!
     "Requires authentication"
+    getJournalsbyUserId: [Journal]!
+    "Requires authentication"
     getJournalbyTitle(title: String!): Journal!
     "Requires authentication"
     getUserLatestJournals(amount: Int!, type: JournalType!): [Journal]!
