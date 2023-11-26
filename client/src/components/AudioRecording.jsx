@@ -78,6 +78,7 @@ function AudioRecorder ({ setAudioNameS3 }) {
 
   return (
     <div>
+      <h3>Audio</h3>
       <div className="display">
         {stateIndex === 1 && <p>Recording...</p>}
         {stateIndex === 2 && <audio controls src={audioURL} preload="auto"></audio>}

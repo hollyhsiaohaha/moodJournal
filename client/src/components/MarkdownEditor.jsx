@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { GET_AUTOCOMPLETE, GET_JOURNAL_ID_BY_TITLE, GET_VOICE_TO_TEXT } from '../queries/journals';
 
 
-function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
+function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent }) {
   const editorRef = useRef(null);
   const easyMDEInstance = useRef(null);
   const [autoCompleteResults, setAutoCompleteResults] = useState([]);
@@ -59,6 +59,9 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
     };
 
     easyMDEInstance.current.codemirror.on('change', (instance) => {
+      //  update content to parent component
+      setContent(easyMDEInstance.current.value());
+      // autocomplete trigger conditions
       const cursor = instance.getCursor();
       const textBeforeCursor = instance.getRange({ line: cursor.line, ch: 0 }, cursor);
       const lastOpeningBracket = textBeforeCursor.lastIndexOf('[[');
@@ -68,8 +71,9 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
         keyword ? triggerAutocomplete(keyword) : null;
       } else setAutoCompleteResults([]);
     });
-
     return () => easyMDEInstance.current ? easyMDEInstance.current.toTextArea() : null;
+    //TODO: bug 改成下面這樣可以成功移除，但看起來無論如何都會被移除掉
+    // return easyMDEInstance.current ? easyMDEInstance.current.toTextArea() : null;
   }, []);
 
   // useEffect for audio filename update
@@ -98,7 +102,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
     const currentContent = easyMDEInstance.current.value();
     easyMDEInstance.current.value(`${currentContent}\n${voiceToText}`);
     setVoiceToTextResults('');
-  }, [voiceToTextResults, setVoiceToTextResults])
+  }, [voiceToTextResults])
 
   //  === AutocompleteList ===
   const renderAutocompleteList = () => {
@@ -147,11 +151,11 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
     return { top: 0, left: 0 };
   };
   //  ===========================
-  const getEditorValue = () => {
-    if (easyMDEInstance.current) {
-      alert(easyMDEInstance.current.value());
-    }
-  };
+  // const getEditorValue = () => {
+  //   if (easyMDEInstance.current) {
+  //     alert(easyMDEInstance.current.value());
+  //   }
+  // };
 
   const triggerAutocomplete = async (keyword) => {
     try {
@@ -176,9 +180,10 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
   };
   return (
     <>
+      <h3>Content</h3>
       <textarea ref={editorRef} />
       {renderAutocompleteList()}
-      <button onClick={getEditorValue}>Get Editor Content</button>
+      {/* <button onClick={getEditorValue}>Get Editor Content</button> */}
     </>
   );
 }
@@ -186,6 +191,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3 }) {
 CustomizedMarkdownEditor.propTypes = {
   audioNameS3: PropTypes.string,
   setAudioNameS3: PropTypes.func.isRequired,
+  setContent: PropTypes.func.isRequired,
 };
 
 export default CustomizedMarkdownEditor;
