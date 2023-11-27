@@ -41,7 +41,7 @@ function JournalList() {
   //   return <Tag value={option} severity={getSeverity(option)} />;
   // };
 
-// TODO: 啥時要更新？
+// TODO: 啥時要更新？ 怎知道有沒有新 journal
   useEffect(() => {
     const getJournals = async () => {
       const { data } = await getJournalsByUser();

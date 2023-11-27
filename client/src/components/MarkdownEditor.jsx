@@ -58,7 +58,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
           const message = `連結筆記不存在： ${keyword}`;
           throw new Error(message);
         }
-        const domain = window.location.host;
+        const domain = window.location.origin;
         return {
           match,
           replacement: `[${keyword}](${domain}/journal/${journalId})`
@@ -101,7 +101,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
       const {data} = await getJournalById({variables: {id: journalId}});
       easyMDEInstance.current.value(data.getJournalbyId.content)
     }
-    getJournalInfo();
+    if (journalId) getJournalInfo();
   }, [journalId]);
 
   // === useEffect for audio filename update ===
