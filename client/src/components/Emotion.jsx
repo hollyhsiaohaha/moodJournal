@@ -14,6 +14,7 @@ function Emotion({
   moodFactors,
   setMoodFactors,
   content,
+  journalId,
 }) {
   const nodesToArray = (nodes, nodeList) => {
     const resArray = [];
@@ -98,7 +99,7 @@ function Emotion({
     };
     initFeelingNodes();
     initFactorNodes();
-  }, []);
+  }, [journalId]);
 
   useEffect(() => {
     setMoodFeelings(nodesToArray(selectedFeelingNodes, feelingNodes));
@@ -181,6 +182,7 @@ Emotion.propTypes = {
   moodFactors: PropTypes.array,
   setMoodFactors: PropTypes.func,
   content: PropTypes.string,
+  journalId: PropTypes.string,
 };
 
 export default Emotion;

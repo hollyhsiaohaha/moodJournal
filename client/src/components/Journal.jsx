@@ -44,7 +44,7 @@ function Journal() {
       setDate(new Date(data.getJournalbyId.title));
     }
     getJournalInfo();
-  }, []);
+  }, [journalId]);
 
   const update = () => {
     const updateExistingJournal = async () => {
@@ -117,6 +117,7 @@ function Journal() {
         setAudioNameS3={setAudioNameS3}
         setContent={setContent}
         content={content}
+        journalId={journalId}
         />
       ) : null
       }
@@ -129,12 +130,13 @@ function Journal() {
           moodFactors={moodFactors}
           setMoodFactors={setMoodFactors}
           content={content}
+          journalId={journalId}
         />
       ) : null}
       <Backlink journalId={journalId}/>
       <div className="card flex justify-content-center">
         <span className="p-buttonset" >
-            <Button label="Save" icon="pi pi-check" onClick={update} />
+            <Button label="Save" icon="pi pi-check" onClick={update} key={journalId}/>
         </span>
       </div>
     </>

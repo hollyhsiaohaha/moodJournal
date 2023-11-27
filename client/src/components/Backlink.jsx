@@ -26,9 +26,8 @@ function Backlink({ journalId }) {
       if (data) setBacklinks(data.getBackLinkedJournals);
     };
     getBackLinkInfo();
-  }, []);
+  }, [journalId]);
 
-  //  TODO: 連結是壞的 QQQQ
   const itemTemplate = (journal) => {
     return (
       <div className="col-12">

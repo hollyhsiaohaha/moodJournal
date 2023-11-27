@@ -41,6 +41,7 @@ function JournalList() {
   //   return <Tag value={option} severity={getSeverity(option)} />;
   // };
 
+// TODO: 啥時要更新？
   useEffect(() => {
     const getJournals = async () => {
       const { data } = await getJournalsByUser();
