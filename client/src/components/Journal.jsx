@@ -26,55 +26,62 @@ function Journal() {
   const [getJournalById] = useLazyQuery(GET_JOURNAL_BY_ID);
   const [updateJournal] = useMutation(UPDATE_JOURNAL);
 
+  const dateParser = (yourDate) => {
+    const offset = yourDate.getTimezoneOffset()
+    yourDate = new Date(yourDate.getTime() - (offset*60*1000))
+    return yourDate.toISOString().split('T')[0];
+  }
   useEffect(() => {
     const getJournalInfo = async () => {
-      const {data} = await getJournalById({variables: {id: journalId}})
+      const {data} = await getJournalById({variables: {id: journalId}});
       if (!data) return alert('筆記不存在');
-      // update hook
       setType(data.getJournalbyId.type);
       setContent(data.getJournalbyId.content);
       setMoodScore(data.getJournalbyId.moodScore);
       setMoodFeelings(data.getJournalbyId.moodFeelings);
       setMoodFactors(data.getJournalbyId.moodFactors);
       setTitle(data.getJournalbyId.title);
+      setDate(new Date(data.getJournalbyId.title));
     }
     getJournalInfo();
   }, []);
+
   const update = () => {
-    // const createNewJournal = async () => {
-    //   let journalInput;
-    //   if (type === 'note') {
-    //     if (!title || !content) return alert('筆記名稱及內容不能為空白');
-    //     journalInput = {
-    //       type,
-    //       title,
-    //       content,
-    //     };
-    //   } else {
-    //     if (!content) return alert('筆記內容不能為空白');
-    //     journalInput= {
-    //       type,
-    //       title: dateParser(date),
-    //       diaryDate: dateParser(date),
-    //       content,
-    //       moodScore,
-    //       moodFeelings,
-    //       moodFactors,
-    //     };
-    //   }
-    //   // console.log(journalInput)
-    //   try {
-    //     const { data } = await createJournal({ variables: { journalInput } });
-    //     const { title } = data.createJournal;
-    //     alert(`筆記新增成功：${title}`);
-    //   } catch (error) {
-    //     if (error.message.includes('DUPLICATE_KEY')) return alert('筆記名稱重複');
-    //     console.error(error);
-    //   }
-    // };
-    // createNewJournal();
+    const updateExistingJournal = async () => {
+      let journalInput;
+      if (type === 'note') {
+        if (!title || !content) return alert('筆記名稱及內容不能為空白');
+        journalInput = {
+          title,
+          content,
+        };
+      } else {
+        if (!content) return alert('筆記內容不能為空白');
+        journalInput= {
+          title: dateParser(date),
+          diaryDate: dateParser(date),
+          content,
+          moodScore,
+          moodFeelings,
+          moodFactors,
+        };
+      }
+      // console.log(journalInput)
+      try {
+        const res = await updateJournal({ variables: { id: journalId, journalInput } });
+        console.log(res)
+        const { data } = await updateJournal({ variables: { id: journalId, journalInput } });
+        const { title } = data.updateJournal;
+        alert(`筆記修改成功：${title}`);
+      } catch (error) {
+        if (error.message.includes('DUPLICATE_TITLE')) return alert(`修改失敗，筆記名稱重複: ${title}`);
+        console.error(error);
+      }
+    };
+    updateExistingJournal();
   };
 
+  // TODO: 判斷有變動才顯示 save + 按鈕
   return (
     <>
       <div className="card flex justify-content-center">
@@ -126,7 +133,9 @@ function Journal() {
       ) : null}
       <Backlink journalId={journalId}/>
       <div className="card flex justify-content-center">
-        <Button label="Update" onClick={update} />
+        <span className="p-buttonset" >
+            <Button label="Save" icon="pi pi-check" onClick={update} />
+        </span>
       </div>
     </>
   );

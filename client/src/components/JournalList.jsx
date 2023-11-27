@@ -26,9 +26,9 @@ function JournalList() {
   }
   // const getSeverity = (type) => {
   //   switch (type) {
-  //       case 'journal':
-  //           return 'success';
   //       case 'note':
+  //           return 'success';
+  //       case 'diary':
   //           return 'info';
   //   }
   // };

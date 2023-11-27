@@ -251,6 +251,8 @@ const journalResolver = {
         await session.abortTransaction();
         await session.endSession();
         logger.error(error.stack);
+        if (error.message.includes('title_1_userId_1 dup key'))
+          return throwCustomError('DUPLICATE_TITLE', ErrorTypes.BAD_USER_INPUT);
         throwCustomError('Error occur when journal updating', ErrorTypes.INTERNAL_SERVER_ERROR);
       }
     },
