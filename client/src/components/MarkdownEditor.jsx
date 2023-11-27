@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { GET_AUTOCOMPLETE, GET_JOURNAL_ID_BY_TITLE, GET_VOICE_TO_TEXT } from '../queries/journals';
 
 
-function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent }) {
+function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, content }) {
   const editorRef = useRef(null);
   const easyMDEInstance = useRef(null);
   const [autoCompleteResults, setAutoCompleteResults] = useState([]);
@@ -20,6 +20,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent }) {
   useEffect(() => {
     easyMDEInstance.current = new EasyMDE({
       element: editorRef.current,
+      initialValue: content,
       previewRender: (plainText, preview) => {
         setTimeout( async () => {
           preview.innerHTML = await customRender(plainText);
@@ -151,25 +152,12 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent }) {
     return { top: 0, left: 0 };
   };
   //  ===========================
-  // const getEditorValue = () => {
-  //   if (easyMDEInstance.current) {
-  //     alert(easyMDEInstance.current.value());
-  //   }
-  // };
 
   const triggerAutocomplete = async (keyword) => {
     try {
-      const { data, error } = await getAutocomplete({ 
+      const { data } = await getAutocomplete({ 
         variables: { keyword },
       })
-      if (error) {
-        // TODO: 403 需要在這邊判斷ㄇ 
-        const status = error.networkError?.result?.errors[0].extensions?.http?.status;
-        if (status === 403) {
-          return alert('請先登入');
-        }
-        throw new Error(error)
-      }
       if (data) {
         const autocompletList = data.autoCompleteJournals.map(journal => journal.title);
         setAutoCompleteResults(autocompletList);
@@ -183,7 +171,6 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent }) {
       <h3>Content</h3>
       <textarea ref={editorRef} />
       {renderAutocompleteList()}
-      {/* <button onClick={getEditorValue}>Get Editor Content</button> */}
     </>
   );
 }
@@ -192,6 +179,7 @@ CustomizedMarkdownEditor.propTypes = {
   audioNameS3: PropTypes.string,
   setAudioNameS3: PropTypes.func.isRequired,
   setContent: PropTypes.func.isRequired,
+  content: PropTypes.string,
 };
 
 export default CustomizedMarkdownEditor;

@@ -9,63 +9,12 @@ import { Button } from 'primereact/button';
 function Emotion({
   moodScore,
   setMoodScore,
+  moodFeelings,
   setMoodFeelings,
+  moodFactors,
   setMoodFactors,
   content,
 }) {
-  const [feelingNodes, setFeelingNodes] = useState(null);
-  const [selectedFeelingNodes, setSelectedFeelingNodes] = useState(null);
-  const [factorNodes, setFactorNodes] = useState(null);
-  const [selectedFactorNodes, setSelectedFactorNodes] = useState(null);
-  const [getFeelings] = useLazyQuery(GET_FEELINGS);
-  const [getFactors] = useLazyQuery(GET_FACTORS);
-  const [getSentimentAnalysis] = useLazyQuery(SENTIMENT_ANALYSIS);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchFeelingNodes = async () => {
-      const { data } = await getFeelings();
-      const feelings = data.getFeelings;
-      const nodes = [];
-      for (let i = 0; i < feelings.length; i++) {
-        const category = feelings[i];
-        const children = category.values.map((value, idx) => {
-          return { key: `${i}-${idx}`, label: value, data: value };
-        });
-        const categoryObj = {
-          key: i,
-          label: category.name,
-          data: category.name,
-          children,
-        };
-        nodes.push(categoryObj);
-      }
-      setFeelingNodes(nodes);
-    };
-    const fetchFactorNodes = async () => {
-      const { data } = await getFactors();
-      const factors = data.getFactors;
-      const nodes = [];
-      for (let i = 0; i < factors.length; i++) {
-        const category = factors[i];
-        const children = category.values.map((value, idx) => {
-          return { key: `${i}-${idx}`, label: value, data: value };
-        });
-        const categoryObj = {
-          key: i,
-          label: category.name,
-          data: category.name,
-          children,
-        };
-        nodes.push(categoryObj);
-      }
-      setFactorNodes(nodes);
-    };
-    fetchFeelingNodes();
-    fetchFactorNodes();
-    setMoodScore(1);
-  }, []);
-
   const nodesToArray = (nodes, nodeList) => {
     const resArray = [];
     if (!nodes) return resArray;
@@ -86,15 +35,70 @@ function Emotion({
     if (!array) return null;
     for (const category of nodeList) {
       for (const node of category.children) {
-        nodesMapping[node.data] = node.key
+        nodesMapping[node.data] = node.key;
       }
     }
     for (const item of array) {
       const key = nodesMapping[item];
-      nodes[key] = {checked: true, partialChecked: false};
+      nodes[key] = { checked: true, partialChecked: false };
     }
     return nodes;
   };
+  const [feelingNodes, setFeelingNodes] = useState(null);
+  const [selectedFeelingNodes, setSelectedFeelingNodes] = useState(null);
+  const [factorNodes, setFactorNodes] = useState(null);
+  const [selectedFactorNodes, setSelectedFactorNodes] = useState(null);
+  const [getFeelings] = useLazyQuery(GET_FEELINGS);
+  const [getFactors] = useLazyQuery(GET_FACTORS);
+  const [getSentimentAnalysis] = useLazyQuery(SENTIMENT_ANALYSIS);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const initFeelingNodes = async () => {
+      const { data } = await getFeelings();
+      const feelings = data.getFeelings;
+      const nodes = [];
+      for (let i = 0; i < feelings.length; i++) {
+        const category = feelings[i];
+        const children = category.values.map((value, idx) => {
+          return { key: `${i}-${idx}`, label: value, data: value };
+        });
+        const categoryObj = {
+          key: i,
+          label: category.name,
+          data: category.name,
+          children,
+        };
+        nodes.push(categoryObj);
+      }
+      setFeelingNodes(nodes);
+      const initMoodFeelings = moodFeelings;
+      if (initMoodFeelings) setSelectedFeelingNodes(ArrayToNodes(initMoodFeelings, nodes));
+    };
+    const initFactorNodes = async () => {
+      const { data } = await getFactors();
+      const factors = data.getFactors;
+      const nodes = [];
+      for (let i = 0; i < factors.length; i++) {
+        const category = factors[i];
+        const children = category.values.map((value, idx) => {
+          return { key: `${i}-${idx}`, label: value, data: value };
+        });
+        const categoryObj = {
+          key: i,
+          label: category.name,
+          data: category.name,
+          children,
+        };
+        nodes.push(categoryObj);
+      }
+      setFactorNodes(nodes);
+      const initMoodFactors = moodFactors;
+      if (initMoodFactors) setSelectedFactorNodes(ArrayToNodes(initMoodFactors, nodes));
+    };
+    initFeelingNodes();
+    initFactorNodes();
+  }, []);
 
   useEffect(() => {
     setMoodFeelings(nodesToArray(selectedFeelingNodes, feelingNodes));
@@ -121,13 +125,13 @@ function Emotion({
     });
     const res = data.sentimentAnalysisOpenAi;
     if (res) {
-      const {score, factor, feeling} = res;
+      const { score, factor, feeling } = res;
       if (!score || !factor || !feeling) {
         setLoading(false);
         return alert('未偵測出任何情緒 請手動輸入');
       }
-      const feelingNodeAnalysis =  ArrayToNodes(feeling, feelingNodes);
-      const factorNodeAnalysis =  ArrayToNodes(factor, factorNodes);
+      const feelingNodeAnalysis = ArrayToNodes(feeling, feelingNodes);
+      const factorNodeAnalysis = ArrayToNodes(factor, factorNodes);
       setMoodScore(score);
       setSelectedFeelingNodes(feelingNodeAnalysis);
       setSelectedFactorNodes(factorNodeAnalysis);
@@ -170,9 +174,11 @@ Emotion.propTypes = {
   audioNameS3: PropTypes.string,
   setAudioNameS3: PropTypes.func,
   setContent: PropTypes.func,
-  mood: PropTypes.number,
+  moodScore: PropTypes.number,
   setMoodScore: PropTypes.func,
+  moodFeelings: PropTypes.array,
   setMoodFeelings: PropTypes.func,
+  moodFactors: PropTypes.array,
   setMoodFactors: PropTypes.func,
   content: PropTypes.string,
 };

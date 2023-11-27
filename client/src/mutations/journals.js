@@ -14,3 +14,20 @@ mutation Mutation($journalInput: JournalInput!) {
   }
 }
 `;
+
+export const UPDATE_JOURNAL = gql`
+mutation UpdateJournal($id: ID!, $journalInput: JournalInput!) {
+  updateJournal(ID: $id, journalInput: $journalInput) {
+    _id
+    title
+    type
+    content
+  }
+}
+`;
+
+export const DELETE_JOURNAL = gql`
+mutation DeleteJournal($id: ID!) {
+  deleteJournal(ID: $id)
+}
+`;

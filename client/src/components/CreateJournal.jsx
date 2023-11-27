@@ -53,6 +53,7 @@ function CreateJournal() {
       try {
         const { data } = await createJournal({ variables: { journalInput } });
         const { title } = data.createJournal;
+        // TODO: redirect 到新筆記的頁面
         alert(`筆記新增成功：${title}`);
       } catch (error) {
         if (error.message.includes('DUPLICATE_KEY')) return alert('筆記名稱重複');

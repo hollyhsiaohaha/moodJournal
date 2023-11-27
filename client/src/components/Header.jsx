@@ -15,7 +15,7 @@ function Header() {
       label: 'Journals',
       icon: 'pi pi-fw pi-inbox',
       command: () => {
-        navigate('/journal');
+        navigate('/journalList');
       },
     },
     {
