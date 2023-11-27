@@ -140,7 +140,7 @@ function Emotion({
   };
   return (
     <>
-      <h3>Emotion</h3>
+      <h3>情緒</h3>
       <Button label="情緒偵測" severity="secondary" loading={loading} onClick={emotionAnalysis} />
       <h4>分數</h4>
       <Knob value={moodScore} onChange={(e) => setMoodScore(e.value)} min={1} max={10} />

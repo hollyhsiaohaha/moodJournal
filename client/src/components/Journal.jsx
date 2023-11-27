@@ -7,7 +7,8 @@ import { Calendar } from 'primereact/calendar';
 import MarkdownEditor from './MarkdownEditor';
 import AudioRecording from './AudioRecording';
 import Emotion from './Emotion';
-import { GET_JOURNAL_BY_ID, GET_BACKLINK } from '../queries/journals';
+import Backlink from './Backlink';
+import { GET_JOURNAL_BY_ID } from '../queries/journals';
 import { UPDATE_JOURNAL } from '../mutations/journals';
 import { useMutation, useLazyQuery } from '@apollo/client';
 
@@ -23,14 +24,11 @@ function Journal() {
   const [moodFactors, setMoodFactors] = useState([]);
   const [date, setDate] = useState(new Date());
   const [getJournalById] = useLazyQuery(GET_JOURNAL_BY_ID);
-  const [getBackLink] = useLazyQuery(GET_BACKLINK);
   const [updateJournal] = useMutation(UPDATE_JOURNAL);
 
   useEffect(() => {
-    // TODO:
     const getJournalInfo = async () => {
       const {data} = await getJournalById({variables: {id: journalId}})
-      const BacklinkRes = await getBackLink({variables: {id: journalId}})
       if (!data) return alert('筆記不存在');
       // update hook
       setType(data.getJournalbyId.type);
@@ -126,6 +124,7 @@ function Journal() {
           content={content}
         />
       ) : null}
+      <Backlink journalId={journalId}/>
       <div className="card flex justify-content-center">
         <Button label="Update" onClick={update} />
       </div>

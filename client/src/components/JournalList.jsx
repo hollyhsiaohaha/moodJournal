@@ -9,7 +9,6 @@ import { Column } from 'primereact/column';
 import { Dropdown } from 'primereact/dropdown';
 // TODO: Link
 // TODO: Delete
-// TODO: Update
 // TODO: Filter
 
 function JournalList() {

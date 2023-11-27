@@ -84,7 +84,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
       if (error) return setVoiceToTextResults('錯誤：目前無法進行 voice to text');
       if (data.voiceToText) return setVoiceToTextResults(data.voiceToText);
     }
-
+  //  === Voice to Text ===
     if (audioNameS3) {
       const fileName = audioNameS3;
       const currentContent = easyMDEInstance.current.value();
@@ -168,7 +168,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
   };
   return (
     <>
-      <h3>Content</h3>
+      <h3>筆記內容</h3>
       <textarea ref={editorRef} />
       {renderAutocompleteList()}
     </>
