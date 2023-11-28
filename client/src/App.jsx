@@ -11,6 +11,7 @@ import Signin from './components/Signin';
 import Signup from './components/Signup';
 import Home from './components/Home';
 import Journal from './components/Journal';
+import JournalList from './components/journalList';
 import Graph from './components/Graph';
 import Dashboard from './components/Dashboard';
 import Profile from './components/Profile';
@@ -27,7 +28,8 @@ function App() {
         <Route path='signin' element={<Signin />}></Route>
         <Route path='signup' element={<Signup />}></Route>
         <Route path='home' element={<Home />}></Route>
-        <Route path='journal' element={<Journal />}></Route>
+        <Route path='journalList' element={<JournalList />}></Route>
+        <Route path='journal/:journalId' element={<Journal />}></Route>
         <Route path='graph' element={<Graph />}></Route>
         <Route path='dashboard' element={<Dashboard />}></Route>
         <Route path='profile' element={<Profile />}></Route>

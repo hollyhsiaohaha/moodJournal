@@ -36,6 +36,8 @@ const userTypeDef = gql`
     "Requires authentication"
     getJournalbyId(ID: ID!): Journal!
     "Requires authentication"
+    getJournalsbyUserId: [Journal]!
+    "Requires authentication"
     getJournalbyTitle(title: String!): Journal!
     "Requires authentication"
     getUserLatestJournals(amount: Int!, type: JournalType!): [Journal]!
@@ -53,6 +55,8 @@ const userTypeDef = gql`
     createJournal(journalInput: JournalInput!): Journal!
     "Requires authentication"
     deleteJournal(ID: ID!): Boolean
+    "Requires authentication"
+    deleteJournals(Ids: [ID]!): [Boolean]
     "Requires authentication"
     updateJournal(ID: ID!, journalInput: JournalInput!): Journal!
   }
