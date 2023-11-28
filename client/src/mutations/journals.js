@@ -31,3 +31,9 @@ mutation DeleteJournal($id: ID!) {
   deleteJournal(ID: $id)
 }
 `;
+
+export const DELETE_JOURNALS = gql`
+mutation deleteJournals($ids: [ID]!) {
+  deleteJournals(Ids: $ids)
+}
+`;

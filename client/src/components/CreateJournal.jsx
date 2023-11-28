@@ -8,6 +8,7 @@ import AudioRecording from './AudioRecording';
 import Emotion from './Emotion';
 import { CREATE_JOURNAL } from '../mutations/journals';
 import { useMutation } from '@apollo/client';
+import { useNavigate } from 'react-router-dom';
 
 function CreateJournal() {
   const [audioNameS3, setAudioNameS3] = useState('');
@@ -20,6 +21,7 @@ function CreateJournal() {
   const [moodFactors, setMoodFactors] = useState([]);
   const [date, setDate] = useState(new Date());
   const [createJournal] = useMutation(CREATE_JOURNAL);
+  const navigate = useNavigate();
 
   const dateParser = (yourDate) => {
     const offset = yourDate.getTimezoneOffset()
@@ -49,11 +51,12 @@ function CreateJournal() {
           moodFactors,
         };
       }
-      // console.log(journalInput)
       try {
         const { data } = await createJournal({ variables: { journalInput } });
         const { title } = data.createJournal;
-        // TODO: redirect 到新筆記的頁面
+        const journalId = data.createJournal._id;
+        console.log(journalId);
+        navigate(`/journal/${journalId}`);
         alert(`筆記新增成功：${title}`);
       } catch (error) {
         if (error.message.includes('DUPLICATE_KEY')) return alert('筆記名稱重複');

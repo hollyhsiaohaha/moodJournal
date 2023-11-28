@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Get_JOURNALS_BY_USER } from '../queries/journals';
+import { DELETE_JOURNALS } from '../mutations/journals';
 import { useMutation, useLazyQuery } from '@apollo/client';
 import { Link } from 'react-router-dom';
 import { FilterMatchMode, FilterOperator } from 'primereact/api';
@@ -10,12 +11,15 @@ import { Tag } from 'primereact/tag';
 import { Column } from 'primereact/column';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
-// TODO: Delete
 
 function JournalList() {
   const navigate = useNavigate();
   const [getJournalsByUser] = useLazyQuery(Get_JOURNALS_BY_USER);
   const [journals, setJournals] = useState([]);
+  const [deleteButtonVisiual, setDeleteButtonVisiual] = useState(false);
+  const [selectedJournals, setSelectedJournals] = useState([]);
+  const [deleteJournals] = useMutation(DELETE_JOURNALS);
+  const [types] = useState(['note', 'diary']);
   const [filters, setFilters] = useState({
     title: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
     type: { value: null, matchMode: FilterMatchMode.EQUALS },
@@ -28,8 +32,6 @@ function JournalList() {
       constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
     },
   });
-  const [selectedJournals, setSelectedJournals] = useState(null);
-  const [types] = useState(['note', 'diary']);
 
   const formatDate = (value) => {
     const dd_mm_yyyy = value.toLocaleDateString();
@@ -70,11 +72,14 @@ function JournalList() {
     );
   };
 
-  const dateBodyTemplate = (rowData) => {
+  const createdDateBodyTemplate = (rowData) => {
     return formatDate(rowData.parsedCreatedAt);
   };
- 
-  // TODO: 日期篩選只能用 Date is 的 > 再回來修
+  const updatedDateBodyTemplate = (rowData) => {
+    return formatDate(rowData.parsedUpdatedAt);
+  };
+
+  // TODO: 日期篩選只能用 Date is 的
   const createdDateFilterTemplate = (options) => {
     return (
       <Calendar
@@ -86,7 +91,7 @@ function JournalList() {
           // updatedFilters.parsedCreatedAt.constraints[options.index].matchMode = options.filterModel.matchMode;
           // updatedFilters.parsedCreatedAt = options.filterModel;
           setFilters(createdFilters);
-          options.filterCallback(e.value, options.index)
+          options.filterCallback(e.value, options.index);
         }}
         dateFormat="yy-mm-dd"
         placeholder="yy-mm-dd"
@@ -102,7 +107,7 @@ function JournalList() {
           let updatedFilters = { ...filters };
           updatedFilters.parsedUpdatedAt.constraints[options.index].value = e.value;
           setFilters(updatedFilters);
-          options.filterCallback(e.value, options.index)
+          options.filterCallback(e.value, options.index);
         }}
         dateFormat="yy-mm-dd"
         placeholder="yy-mm-dd"
@@ -111,8 +116,22 @@ function JournalList() {
     );
   };
 
+  const deleteSelected = async () => {
+    const selectedIds = selectedJournals.map((journal) => journal._id);
+    const { data } = await deleteJournals({ variables: { ids: selectedIds } });
+    console.log(data)
+    const deleteRes = data.deleteJournals;
+    const failList = [];
+    for (let i = 0; i < deleteRes.length; i++) {
+      if (!deleteRes[i]) {
+        failList.push(selectedJournals[i].title);
+      }
+    }
+    failList.length ? alert (`以下筆記刪除失敗： ${failList.join(',')}`) : alert('刪除成功');
+    setSelectedJournals([]);
+    // TODO: 重新 render
+  };
 
-  // TODO: 啥時要更新？ 怎知道有沒有新 journal 在 App.jsx 放 status???
   useEffect(() => {
     const getJournals = async () => {
       const { data } = await getJournalsByUser();
@@ -133,8 +152,19 @@ function JournalList() {
     getJournals();
   }, []);
 
+  useEffect(() => {
+    setDeleteButtonVisiual(selectedJournals.length ? true : false);
+  }, [selectedJournals]);
+
   return (
     <>
+      <Button
+        label="Delete"
+        severity="danger"
+        icon="pi pi-times"
+        onClick={deleteSelected}
+        visible={deleteButtonVisiual}
+      />
       <div className="card">
         <DataTable
           value={journals}
@@ -146,7 +176,9 @@ function JournalList() {
           tableStyle={{ minWidth: '50rem' }}
           selectionMode="checkbox"
           selection={selectedJournals}
-          onSelectionChange={(e) => setSelectedJournals(e.value)}
+          onSelectionChange={(e) => {
+            setSelectedJournals(e.value);
+          }}
           dataKey="_id"
           filters={filters}
           filterDisplay="row"
@@ -163,6 +195,7 @@ function JournalList() {
           ></Column>
           <Column
             field="type"
+            style={{ width: '5%' }}
             showFilterMenu={false}
             filter
             filterElement={typeRowFilterTemplate}
@@ -174,7 +207,7 @@ function JournalList() {
             field="parsedCreatedAt"
             filterField="parsedCreatedAt"
             dataType="date"
-            body={dateBodyTemplate}
+            body={createdDateBodyTemplate}
             filter
             filterElement={createdDateFilterTemplate}
             sortable
@@ -184,13 +217,12 @@ function JournalList() {
             field="parsedUpdatedAt"
             filterField="parsedUpdatedAt"
             dataType="date"
-            body={dateBodyTemplate}
+            body={updatedDateBodyTemplate}
             filter
             filterElement={updatedDateFilterTemplate}
             sortable
-            header="建立時間"
+            header="更新時間"
           ></Column>
-          {/* <Column field="updatedAt" sortable header="更新時間"></Column> */}
           <Column field="contentPreview" sortable header="內容"></Column>
         </DataTable>
       </div>
