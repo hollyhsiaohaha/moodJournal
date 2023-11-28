@@ -56,6 +56,8 @@ const userTypeDef = gql`
     "Requires authentication"
     deleteJournal(ID: ID!): Boolean
     "Requires authentication"
+    deleteJournals(Ids: [ID]!): [Boolean]
+    "Requires authentication"
     updateJournal(ID: ID!, journalInput: JournalInput!): Journal!
   }
 `;

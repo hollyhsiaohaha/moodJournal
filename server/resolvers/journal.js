@@ -53,6 +53,40 @@ const reviseContentForUpdated = (content, originTitle, updatedTitle) => {
   return updatedContent;
 };
 
+const deleteSingleJournal = async (journalId, userId) => {
+  const targetJournal = await Journal.findById(journalId);
+  if (!targetJournal || targetJournal.userId.toString() !== userId) return false;
+  // throwCustomError('Target journal not exist', ErrorTypes.BAD_USER_INPUT);
+  const backLinkedJornals = await getBackLinkeds(journalId);
+
+  const session = await Journal.startSession();
+  session.startTransaction();
+  try {
+    // delete target journal
+    await Journal.findByIdAndDelete({ _id: journalId }, { session });
+    // update back linked journals
+    for (const journal of backLinkedJornals) {
+      await Journal.findByIdAndUpdate(
+        { _id: journal._id },
+        {
+          linkedNoteIds: removeDeletedJournal(journal.linkedNoteIds, journalId),
+          content: reviseContentForDeleted(journal.content, targetJournal.title),
+        },
+        { session },
+      );
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return true;
+  } catch (error) {
+    await session.abortTransaction();
+    await session.endSession();
+    logger.error(error.stack);
+    return false;
+    // throwCustomError('Error occur when journal deleting', ErrorTypes.INTERNAL_SERVER_ERROR);
+  }
+};
+
 // === resolvers ===
 const journalResolver = {
   Journal: {
@@ -178,36 +212,17 @@ const journalResolver = {
     },
     async deleteJournal(_, { ID }, context) {
       const userId = context.user._id;
-      const targetJournal = await Journal.findById(ID);
-      if (!targetJournal || targetJournal.userId.toString() !== userId)
-        throwCustomError('Target journal not exist', ErrorTypes.BAD_USER_INPUT);
-      const backLinkedJornals = await getBackLinkeds(ID);
-
-      const session = await Journal.startSession();
-      session.startTransaction();
-      try {
-        // delete target journal
-        await Journal.findByIdAndDelete({ _id: ID }, { session });
-        // update back linked journals
-        for (const journal of backLinkedJornals) {
-          await Journal.findByIdAndUpdate(
-            { _id: journal._id },
-            {
-              linkedNoteIds: removeDeletedJournal(journal.linkedNoteIds, ID),
-              content: reviseContentForDeleted(journal.content, targetJournal.title),
-            },
-            { session },
-          );
-        }
-        await session.commitTransaction();
-        await session.endSession();
-        return true;
-      } catch (error) {
-        await session.abortTransaction();
-        await session.endSession();
-        logger.error(error.stack);
-        throwCustomError('Error occur when journal deleting', ErrorTypes.INTERNAL_SERVER_ERROR);
+      const res = await deleteSingleJournal(ID, userId);
+      return res;
+    },
+    async deleteJournals(_, { Ids }, context) {
+      const userId = context.user._id;
+      const resArray = [];
+      for (const journalId of Ids) {
+        const res = await deleteSingleJournal(journalId, userId);
+        resArray.push(res);
       }
+      return resArray;
     },
     async updateJournal(_, { ID, journalInput }, context) {
       const userId = context.user._id;
