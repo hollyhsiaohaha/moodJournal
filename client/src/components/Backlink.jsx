@@ -13,10 +13,10 @@ function Backlink({ journalId }) {
 
   const getSeverity = (journal) => {
     switch (journal.type) {
-        case 'diary':
-            return 'info';
-        case 'note':
-            return 'success';
+      case 'diary':
+          return 'info';
+      case 'note':
+          return 'success';
     }
   };
 

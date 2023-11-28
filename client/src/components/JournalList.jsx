@@ -1,47 +1,118 @@
 import { useState, useEffect } from 'react';
-import { Button } from 'primereact/button';
 import { useNavigate } from 'react-router-dom';
 import { Get_JOURNALS_BY_USER } from '../queries/journals';
 import { useMutation, useLazyQuery } from '@apollo/client';
+import { Link } from 'react-router-dom';
+import { FilterMatchMode, FilterOperator } from 'primereact/api';
+import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Tag } from 'primereact/tag';
 import { Column } from 'primereact/column';
 import { Dropdown } from 'primereact/dropdown';
-// TODO: Link
+import { Calendar } from 'primereact/calendar';
 // TODO: Delete
-// TODO: Filter
 
 function JournalList() {
   const navigate = useNavigate();
   const [getJournalsByUser] = useLazyQuery(Get_JOURNALS_BY_USER);
   const [journals, setJournals] = useState([]);
+  const [filters, setFilters] = useState({
+    title: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    type: { value: null, matchMode: FilterMatchMode.EQUALS },
+    parsedCreatedAt: {
+      operator: FilterOperator.AND,
+      constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
+    },
+    parsedUpdatedAt: {
+      operator: FilterOperator.AND,
+      constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
+    },
+  });
   const [selectedJournals, setSelectedJournals] = useState(null);
-  // const types = ['note, diary'];
-  const types = useState(['note, diary']);
-  const parseDate = (dateString) => {
-    const date = new Date(Number(dateString));
-    var dd_mm_yyyy = date.toLocaleDateString();
-    var yyyy_mm_dd = dd_mm_yyyy.replace(/(\d+)\/(\d+)\/(\d+)/g, "$3-$1-$2");
-    return(yyyy_mm_dd);
-  }
-  // const getSeverity = (type) => {
-  //   switch (type) {
-  //       case 'note':
-  //           return 'success';
-  //       case 'diary':
-  //           return 'info';
-  //   }
-  // };
-  // const typeRowFilterTemplate = (options) => {
-  //   return (
-  //       <Dropdown value={options.value} options={types} onChange={(e) => options.filterApplyCallback(e.value)} itemTemplate={typeItemTemplate} placeholder="Select One" className="p-column-filter" showClear style={{ minWidth: '12rem' }} />
-  //   );
-  // };
-  // const typeItemTemplate = (option) => {
-  //   return <Tag value={option} severity={getSeverity(option)} />;
-  // };
+  const [types] = useState(['note', 'diary']);
 
-// TODO: 啥時要更新？ 怎知道有沒有新 journal
+  const formatDate = (value) => {
+    const dd_mm_yyyy = value.toLocaleDateString();
+    const yyyy_mm_dd = dd_mm_yyyy.replace(/(\d+)\/(\d+)\/(\d+)/g, '$3-$1-$2');
+    return yyyy_mm_dd;
+  };
+
+  const getSeverity = (type) => {
+    switch (type) {
+      case 'diary':
+        return 'info';
+      case 'note':
+        return 'success';
+    }
+  };
+
+  const titleBodyTemplate = (journal) => {
+    return <Link to={`/journal/${journal._id}`}>{journal.title}</Link>;
+  };
+  const typeBodyTemplate = (journal) => {
+    return <Tag value={journal.type} severity={getSeverity(journal.type)}></Tag>;
+  };
+  const typeItemTemplate = (option) => {
+    return <Tag value={option} severity={getSeverity(option)}></Tag>;
+  };
+  const typeRowFilterTemplate = (option) => {
+    return (
+      <Dropdown
+        showClear
+        value={option.value}
+        options={types}
+        onChange={(e) => option.filterApplyCallback(e.value)}
+        itemTemplate={typeItemTemplate}
+        placeholder="Select One"
+        className="p-column-filter"
+        style={{ minWidth: '12rem' }}
+      />
+    );
+  };
+
+  const dateBodyTemplate = (rowData) => {
+    return formatDate(rowData.parsedCreatedAt);
+  };
+ 
+  // TODO: 日期篩選只能用 Date is 的 > 再回來修
+  const createdDateFilterTemplate = (options) => {
+    return (
+      <Calendar
+        value={options.value}
+        onChange={(e) => {
+          // console.log(options)
+          let createdFilters = { ...filters };
+          createdFilters.parsedCreatedAt.constraints[options.index].value = e.value;
+          // updatedFilters.parsedCreatedAt.constraints[options.index].matchMode = options.filterModel.matchMode;
+          // updatedFilters.parsedCreatedAt = options.filterModel;
+          setFilters(createdFilters);
+          options.filterCallback(e.value, options.index)
+        }}
+        dateFormat="yy-mm-dd"
+        placeholder="yy-mm-dd"
+        mask="9999-99-99"
+      />
+    );
+  };
+  const updatedDateFilterTemplate = (options) => {
+    return (
+      <Calendar
+        value={options.value}
+        onChange={(e) => {
+          let updatedFilters = { ...filters };
+          updatedFilters.parsedUpdatedAt.constraints[options.index].value = e.value;
+          setFilters(updatedFilters);
+          options.filterCallback(e.value, options.index)
+        }}
+        dateFormat="yy-mm-dd"
+        placeholder="yy-mm-dd"
+        mask="9999-99-99"
+      />
+    );
+  };
+
+
+  // TODO: 啥時要更新？ 怎知道有沒有新 journal 在 App.jsx 放 status???
   useEffect(() => {
     const getJournals = async () => {
       const { data } = await getJournalsByUser();
@@ -50,15 +121,18 @@ function JournalList() {
       const parsedJournalData = journalData.map((journal) => {
         return {
           ...journal,
-          contentPreview: `${journal.content.slice(0, 30)}${journal.content.length > 30? '...' : ''}`,
-          parsedCreatedAt: parseDate(journal.createdAt),
-          parsedUpdatedAt: parseDate(journal.updatedAt),
-        }
-      })
+          contentPreview: `${journal.content.slice(0, 30)}${
+            journal.content.length > 30 ? '...' : ''
+          }`,
+          parsedCreatedAt: new Date(Number(journal.createdAt)),
+          parsedUpdatedAt: new Date(Number(journal.updatedAt)),
+        };
+      });
       setJournals(parsedJournalData);
     };
     getJournals();
   }, []);
+
   return (
     <>
       <div className="card">
@@ -70,19 +144,53 @@ function JournalList() {
           rows={5}
           rowsPerPageOptions={[5, 10]}
           tableStyle={{ minWidth: '50rem' }}
-          selectionMode='checkbox'
+          selectionMode="checkbox"
           selection={selectedJournals}
           onSelectionChange={(e) => setSelectedJournals(e.value)}
           dataKey="_id"
-          emptyMessage="No journals found."
+          filters={filters}
+          filterDisplay="row"
+          emptyMessage="沒有任何筆記"
         >
-          {/* <Column field="_id" header="Id"></Column> */}
           <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
-          <Column field="title" filter sortable header="名稱"></Column>
-          {/* <Column field="type" showFilterMenu={false} filter filterElement={typeRowFilterTemplate} body={typeItemTemplate} sortable header="類型"></Column> */}
-          <Column field="type" showFilterMenu={false} sortable header="類型"></Column>
-          <Column field="parsedCreatedAt" sortable header="建立時間"></Column>
-          <Column field="parsedUpdatedAt" sortable header="更新時間"></Column>
+          <Column
+            field="title"
+            filterField="title"
+            filter
+            sortable
+            body={titleBodyTemplate}
+            header="名稱"
+          ></Column>
+          <Column
+            field="type"
+            showFilterMenu={false}
+            filter
+            filterElement={typeRowFilterTemplate}
+            sortable
+            body={typeBodyTemplate}
+            header="類型"
+          ></Column>
+          <Column
+            field="parsedCreatedAt"
+            filterField="parsedCreatedAt"
+            dataType="date"
+            body={dateBodyTemplate}
+            filter
+            filterElement={createdDateFilterTemplate}
+            sortable
+            header="建立時間"
+          ></Column>
+          <Column
+            field="parsedUpdatedAt"
+            filterField="parsedUpdatedAt"
+            dataType="date"
+            body={dateBodyTemplate}
+            filter
+            filterElement={updatedDateFilterTemplate}
+            sortable
+            header="建立時間"
+          ></Column>
+          {/* <Column field="updatedAt" sortable header="更新時間"></Column> */}
           <Column field="contentPreview" sortable header="內容"></Column>
         </DataTable>
       </div>
