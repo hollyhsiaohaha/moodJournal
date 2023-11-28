@@ -68,3 +68,18 @@ query GetJournalsbyUserId {
   }
 }
 `;
+
+export const GET_DIARIES_BY_MONTH = gql`
+query GetDiariesbyMonth($month: String!) {
+  getDiariesbyMonth(month: $month) {
+    _id
+    title
+    content
+    createdAt
+    updatedAt
+    moodScore
+    moodFeelings
+    moodFactors
+  }
+}
+`;
