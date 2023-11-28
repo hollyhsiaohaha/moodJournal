@@ -9,8 +9,10 @@ import AudioRecording from './AudioRecording';
 import Emotion from './Emotion';
 import Backlink from './Backlink';
 import { GET_JOURNAL_BY_ID } from '../queries/journals';
-import { UPDATE_JOURNAL } from '../mutations/journals';
+import { UPDATE_JOURNAL, DELETE_JOURNAL } from '../mutations/journals';
 import { useMutation, useLazyQuery } from '@apollo/client';
+import { useNavigate } from 'react-router-dom';
+
 
 function Journal() {
   const { journalId } = useParams();
@@ -25,6 +27,8 @@ function Journal() {
   const [date, setDate] = useState(new Date());
   const [getJournalById] = useLazyQuery(GET_JOURNAL_BY_ID);
   const [updateJournal] = useMutation(UPDATE_JOURNAL);
+  const [deleteJournal] = useMutation(DELETE_JOURNAL);
+  const navigate = useNavigate();
 
   const dateParser = (yourDate) => {
     const offset = yourDate.getTimezoneOffset();
@@ -82,6 +86,17 @@ function Journal() {
     updateExistingJournal();
   };
 
+  const deleteThisJournal = async () => {
+    const { data } = await deleteJournal({ variables: { id: journalId } });
+    const deleteRes = data.deleteJournal;
+    if (deleteRes) {
+      alert('刪除成功');
+    } else {
+      alert('刪除失敗');
+    }
+    navigate('/journalList');
+  }
+
   // TODO: 判斷有變動才顯示 save + 按鈕
   return (
     <>
@@ -137,6 +152,12 @@ function Journal() {
       <div className="card flex justify-content-center">
         <span className="p-buttonset">
           <Button label="Save" icon="pi pi-check" onClick={update} key={journalId} />
+          <Button
+            label="Delete"
+            severity="danger"
+            icon="pi pi-times"
+            onClick={deleteThisJournal}
+          />
         </span>
       </div>
     </>
