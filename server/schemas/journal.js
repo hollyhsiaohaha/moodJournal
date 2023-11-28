@@ -42,6 +42,8 @@ const userTypeDef = gql`
     "Requires authentication"
     getUserLatestJournals(amount: Int!, type: JournalType!): [Journal]!
     "Requires authentication"
+    getDiariesbyMonth(month: String!): [Journal]!
+    "Requires authentication"
     searchJournals(keyword: String!): [Journal]!
     "Requires authentication"
     autoCompleteJournals(keyword: String!): [Journal]!
