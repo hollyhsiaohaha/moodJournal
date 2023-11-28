@@ -83,3 +83,20 @@ query GetDiariesbyMonth($month: String!) {
   }
 }
 `;
+
+export const GET_LATEST_JOURNALS = gql`
+query GetUserLatestJournals($amount: Int!, $type: JournalType!) {
+  getUserLatestJournals(amount: $amount, type: $type) {
+    _id
+    title
+    type
+    content
+    userId
+    createdAt
+    updatedAt
+    moodScore
+    moodFeelings
+    moodFactors
+  }
+}
+`;
