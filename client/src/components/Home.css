@@ -1,0 +1,21 @@
+.mood-circle {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 50%;
+  text-align: center;
+  color: black;
+  margin: 2px;
+}
+
+.mood-10 { background-color: #FCE4EC }
+.mood-9 { background-color: #FFF3E0 }
+.mood-8 { background-color: #FFF8E1 }
+.mood-7 { background-color: #FFFDE7 }
+.mood-6 { background-color: #F9FBE7 }
+.mood-5 { background-color: #E8F5E9 }
+.mood-4 { background-color: #E0F2F1 }
+.mood-3 { background-color: #E0F7FA }
+.mood-2 { background-color: #E1F5FE }
+.mood-1 { background-color: #E3F2FD }

@@ -127,6 +127,19 @@ const journalResolver = {
       const res = await Journal.find({ userId, type }).sort({ updatedAt: -1 }).limit(amount);
       return res;
     },
+    async getDiariesbyMonth(_, { month }, context) {
+      const userId = context.user._id;
+      const date = new Date(month);
+      const y = date.getFullYear();
+      const m = date.getMonth();
+      const firstDay = new Date(y, m, 1);
+      const lastDay = new Date(y, m + 1, 0);
+      const res = await Journal.find({
+        userId,
+        diaryDate: { $gte: firstDay, $lte: lastDay },
+      });
+      return res;
+    },
     async searchJournals(_, { keyword }, context) {
       const userId = context.user._id;
       const res = await Journal.aggregate([
