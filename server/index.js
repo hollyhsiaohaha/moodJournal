@@ -44,7 +44,7 @@ morganBody(app, {
 });
 
 // define statics path
-app.use(express.static(path.join(workingDir, 'build')));
+app.use(express.static(path.join(workingDir, 'dist')));
 app.use('/static', express.static(path.join(workingDir, 'public')));
 app.set('views', path.join(workingDir, 'views'));
 app.set('view engine', 'pug');
@@ -64,6 +64,9 @@ const server = new ApolloServer({
 });
 await server.start();
 server.applyMiddleware({ app });
+
+app.get('*', (req, res) => res.sendFile(path.join(workingDir, 'dist', 'index.html')));
+console.log(path.join(workingDir, 'dist', 'index.html'));
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
