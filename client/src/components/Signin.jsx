@@ -15,7 +15,7 @@ function Signin() {
   const [loading, setLoading] = useState(false);
   const [signIn] = useMutation(SIGN_IN);
   const navigate = useNavigate();
-  const { loginState, setLoginState, setLogoutState } = useUserState();
+  const { setLoginState, setUserInfoState } = useUserState();
 
 
   const submit = async () => {
@@ -30,8 +30,11 @@ function Signin() {
         },
       });
       const token = data.signIn?.jwtToken;
+      const userId = data.signIn?._id;
+      const userName = data.signIn?.name;
       Cookies.set('JWT_TOKEN', token, { expires: 1 }); // day
-      setLoginState();
+      setLoginState(true);
+      setUserInfoState( {id: userId, name: userName, email: userEmail} );
       navigate('/home');
       alert('成功登入');
     } catch (error) {

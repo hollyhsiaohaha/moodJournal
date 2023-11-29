@@ -133,7 +133,7 @@ const journalResolver = {
       const y = date.getFullYear();
       const m = date.getMonth();
       const firstDay = new Date(y, m, 1);
-      const lastDay = new Date(y, m + 1, 0);
+      const lastDay = new Date(y, m + 1, 2);
       const res = await Journal.find({
         userId,
         diaryDate: { $gte: firstDay, $lte: lastDay },

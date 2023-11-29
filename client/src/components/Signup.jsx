@@ -15,7 +15,7 @@ function Signup() {
   const [loading, setLoading] = useState(false);
   const [signUp] = useMutation(SIGN_UP);
   const navigate = useNavigate();
-  const { loginState, setLoginState, setLogoutState } = useUserState();
+  const { setLoginState, setUserInfoState } = useUserState();
 
   const validateEmail = (email) => {
     var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -39,9 +39,11 @@ function Signup() {
         },
       });
       const token = data.signUp?.jwtToken;
+      const userId = data.signUp?._id;
       Cookies.set('JWT_TOKEN', token, { expires: 1 }); // day
-      setLoginState();
-      navigate('/profile');
+      setLoginState(true);
+      setUserInfoState( {id: userId, name: userName, email: userEmail} );
+      navigate('/home');
       alert('成功登入');
     } catch (error) {
       error.message === 'email exist' ? alert('Email 已被註冊') : console.error(error);
