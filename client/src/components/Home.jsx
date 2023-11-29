@@ -20,8 +20,8 @@ function Home() {
   const [monthJournals, setMonthJournals] = useState(0);
   const [latestDiaries, setLatestDiaries] = useState([]);
   const [latestNotes, setLatestNotes] = useState([]);
-  const [getMonthDiaries] = useLazyQuery(GET_DIARIES_BY_MONTH);
-  const [getLatesJournals] = useLazyQuery(GET_LATEST_JOURNALS);
+  const [getMonthDiaries] = useLazyQuery(GET_DIARIES_BY_MONTH, { fetchPolicy: 'network-only' });
+  const [getLatesJournals] = useLazyQuery(GET_LATEST_JOURNALS, { fetchPolicy: 'network-only' });
   const navigate = useNavigate();
 
   // === calendar ===

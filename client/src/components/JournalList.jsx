@@ -14,11 +14,12 @@ import { Calendar } from 'primereact/calendar';
 
 function JournalList() {
   const navigate = useNavigate();
-  const [getJournalsByUser] = useLazyQuery(Get_JOURNALS_BY_USER);
+  const [getJournalsByUser] = useLazyQuery(Get_JOURNALS_BY_USER, { fetchPolicy: 'network-only' });
+  const [deleteJournals] = useMutation(DELETE_JOURNALS);
+  const [refreshFlag, setRefreshFlag] = useState(0);
   const [journals, setJournals] = useState([]);
   const [deleteButtonVisiual, setDeleteButtonVisiual] = useState(false);
   const [selectedJournals, setSelectedJournals] = useState([]);
-  const [deleteJournals] = useMutation(DELETE_JOURNALS);
   const [types] = useState(['note', 'diary']);
   const [filters, setFilters] = useState({
     title: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
@@ -129,7 +130,7 @@ function JournalList() {
     }
     failList.length ? alert (`以下筆記刪除失敗： ${failList.join(',')}`) : alert('刪除成功');
     setSelectedJournals([]);
-    // TODO: 重新 render
+    setRefreshFlag(refreshFlag + 1);
   };
 
   useEffect(() => {
@@ -150,7 +151,7 @@ function JournalList() {
       setJournals(parsedJournalData);
     };
     getJournals();
-  }, []);
+  }, [refreshFlag]);
 
   useEffect(() => {
     setDeleteButtonVisiual(selectedJournals.length ? true : false);

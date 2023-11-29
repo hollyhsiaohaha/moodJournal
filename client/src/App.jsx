@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react';
 import { PrimeReactProvider } from 'primereact/api';
 import "primereact/resources/primereact.min.css";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
@@ -16,11 +17,15 @@ import Graph from './components/Graph';
 import Dashboard from './components/Dashboard';
 import Profile from './components/Profile';
 import Welcome from './components/Welcome'
+import Authentication from './components/Authentication';
 
 function App() {
+  const location = useLocation();
+
   return (
     <>
     <PrimeReactProvider>
+      <Authentication path={location.pathname}/>
       <Header/>
       <Routes>
         <Route path='/' element={<Welcome />}></Route>
