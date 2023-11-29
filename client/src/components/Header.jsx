@@ -1,8 +1,10 @@
 import { TabMenu } from 'primereact/tabmenu';
 import { useNavigate } from 'react-router-dom';
+import { useUserState } from '../state/state.js';
 
 function Header() {
   const navigate = useNavigate();
+  const { loginState } = useUserState();
   const items = [
     {
       label: 'Home',
@@ -43,7 +45,7 @@ function Header() {
 
   return (
     <div className="card">
-      <TabMenu model={items} />
+      {loginState ? <TabMenu model={items} /> : null}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar } from 'primereact/calendar';
 import { DataView } from 'primereact/dataview';
-import { Rating } from 'primereact/rating';
 import { GET_DIARIES_BY_MONTH, GET_LATEST_JOURNALS } from '../queries/journals';
 import { useLazyQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
@@ -77,7 +76,7 @@ function Home() {
           type: 'diary',
         },
       });
-      console.log(data);
+      // console.log(data);
       if (data) setLatestDiaries(data.getUserLatestJournals);
     };
     getNotes();

@@ -6,6 +6,7 @@ import { useMutation } from '@apollo/client';
 import { SIGN_IN } from '../mutations/users.js';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import { useUserState } from '../state/state.js';
 
 
 function Signin() {
@@ -14,6 +15,8 @@ function Signin() {
   const [loading, setLoading] = useState(false);
   const [signIn] = useMutation(SIGN_IN);
   const navigate = useNavigate();
+  const { loginState, setLoginState, setLogoutState } = useUserState();
+
 
   const submit = async () => {
     setLoading(true);
@@ -28,6 +31,7 @@ function Signin() {
       });
       const token = data.signIn?.jwtToken;
       Cookies.set('JWT_TOKEN', token, { expires: 1 }); // day
+      setLoginState();
       navigate('/home');
       alert('成功登入');
     } catch (error) {

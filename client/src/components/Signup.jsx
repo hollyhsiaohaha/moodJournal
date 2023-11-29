@@ -6,7 +6,7 @@ import { useMutation } from '@apollo/client';
 import { SIGN_UP } from '../mutations/users.js';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
-
+import { useUserState } from '../state/state.js';
 
 function Signup() {
   const [userEmail, setUserEmail] = useState('');
@@ -15,6 +15,7 @@ function Signup() {
   const [loading, setLoading] = useState(false);
   const [signUp] = useMutation(SIGN_UP);
   const navigate = useNavigate();
+  const { loginState, setLoginState, setLogoutState } = useUserState();
 
   const validateEmail = (email) => {
     var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -39,6 +40,7 @@ function Signup() {
       });
       const token = data.signUp?.jwtToken;
       Cookies.set('JWT_TOKEN', token, { expires: 1 }); // day
+      setLoginState();
       navigate('/profile');
       alert('成功登入');
     } catch (error) {
