@@ -1,13 +1,16 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.jsx';
 import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
+const { protocol, hostname } = window.location;
+const port = hostname === 'localhost' ? ':3000' : '';
+const uri = `${protocol}//${hostname}${port}/graphql`;
 const httpLink = createHttpLink({
-  uri: 'http://localhost:3000/graphql',
+  uri,
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -16,8 +19,8 @@ const authLink = setContext((_, { headers }) => {
     headers: {
       ...headers,
       authorization: token || '',
-    }
-  }
+    },
+  };
 });
 
 const client = new ApolloClient({
@@ -30,5 +33,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </ApolloProvider>
-)
+  </ApolloProvider>,
+);
