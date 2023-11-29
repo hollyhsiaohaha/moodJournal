@@ -100,3 +100,18 @@ query GetUserLatestJournals($amount: Int!, $type: JournalType!) {
   }
 }
 `;
+
+export const SEARCH_JOURNALS = gql`
+query SearchJournals($keyword: String!) {
+  searchJournals(keyword: $keyword) {
+    _id
+    title
+    type
+    content
+    updatedAt
+    moodScore
+    moodFeelings
+    moodFactors
+  }
+}
+`;
