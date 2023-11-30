@@ -5,10 +5,16 @@ const chartTypeDef = gql`
     labels: [String]
     data: [Int]
   }
+  type PieChartData {
+    labels: [String]
+    data: [Int]
+  }
   # Queries
   type Query {
     "Requires authentication"
     getMoodScoreLineChart(period: String!, selectedDate: String!): LineChartData
+    "Requires authentication"
+    getFeelingPieChart(period: String!, selectedDate: String!): PieChartData
   }
 `;
 

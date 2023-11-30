@@ -1,23 +1,23 @@
 export const Feelings = [
   {
-    name: '喜悅',
-    values: ['興奮', '刺激', '愉快', '有趣', '樂觀'],
-  },
-  {
     name: '平靜',
     values: ['放鬆', '感恩', '安全', '親密', '深思'],
   },
   {
-    name: '力量',
-    values: ['覺察', '自豪', '被尊重', '有價值', '充滿信心'],
+    name: '喜悅',
+    values: ['愉快', '樂觀', '有趣', '興奮', '刺激'],
   },
   {
-    name: '恐懼',
-    values: ['迷惑', '氣餒', '無助', '信心不足', '尷尬', '焦慮'],
+    name: '力量',
+    values: ['覺察', '被尊重', '自豪', '有價值', '充滿信心'],
   },
   {
     name: '生氣',
-    values: ['懷疑', '憤怒', '嫉妒', '受挫', '敵意', '受傷'],
+    values: ['懷疑', '受挫', '受傷', '憤怒', '嫉妒', '敵意'],
+  },
+  {
+    name: '恐懼',
+    values: ['迷惑', '尷尬', '氣餒', '無助', '信心不足', '焦慮'],
   },
   {
     name: '悲傷',
@@ -40,11 +40,11 @@ export const Factors = [
   },
 ];
 
-const feelingOptions = [];
+export const feelingOptions = [];
 Feelings.forEach((feelingCategory) => {
   feelingOptions.push(...feelingCategory.values);
 });
-const factorOptions = [];
+export const factorOptions = [];
 Factors.forEach((factorCategory) => {
   factorOptions.push(...factorCategory.values);
 });

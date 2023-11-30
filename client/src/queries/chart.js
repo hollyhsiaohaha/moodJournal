@@ -8,3 +8,12 @@ query GetMoodScoreLineChart($period: String!, $selectedDate: String!) {
   }
 }
 `;
+
+export const GET_FEELING_PIE_CHART = gql`
+query GetFeelingPieChart($period: String!, $selectedDate: String!) {
+  getFeelingPieChart(period: $period, selectedDate: $selectedDate) {
+    labels
+    data
+  }
+}
+`;

@@ -3,16 +3,58 @@ import { Chart } from 'primereact/chart';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
-import { GET_MOOD_SCORE_LINE_CHART } from '../queries/chart.js';
+import { GET_MOOD_SCORE_LINE_CHART, GET_FEELING_PIE_CHART } from '../queries/chart.js';
 import { useLazyQuery } from '@apollo/client';
 import 'chartjs-adapter-date-fns';
+
+const FeelingColorMapping = {
+  愉快: '--yellow-100',
+  樂觀: '--yellow-200',
+  有趣: '--yellow-300',
+  興奮: '--yellow-400',
+  刺激: '--yellow-500',
+  放鬆: '--teal-100',
+  感恩: '--teal-200',
+  安全: '--teal-300',
+  親密: '--teal-400',
+  深思: '--teal-500',
+  覺察: '--orange-100',
+  被尊重: '--orange-200',
+  自豪: '--orange-300',
+  有價值: '--orange-400',
+  充滿信心: '--orange-500',
+  迷惑: '--purple-100',
+  尷尬: '--purple-200',
+  氣餒: '--purple-300',
+  無助: '--purple-400',
+  信心不足: '--purple-500',
+  焦慮: '--purple-600',
+  懷疑: '--pink-100',
+  受挫: '--pink-200',
+  受傷: '--pink-300',
+  憤怒: '--pink-400',
+  嫉妒: '--pink-500',
+  敵意: '--pink-600',
+  疲倦: '--indigo-100',
+  無聊: '--indigo-200',
+  孤獨: '--indigo-300',
+  憂鬱: '--indigo-400',
+  慚愧: '--indigo-500',
+  後悔: '--indigo-600',
+};
 
 function Dashboard() {
   const [date, setDate] = useState(null);
   const [selectedView, setSelectedView] = useState(null);
   const [lineChartData, setLineChartData] = useState({});
   const [linechartOptions, setLineChartOptions] = useState({});
+  const [pieChartData, setPieChartData] = useState({});
+  const [pieChartOptions, setPieChartOptions] = useState({});
   const [getMoodScoreLineChart] = useLazyQuery(GET_MOOD_SCORE_LINE_CHART, {
+    fetchPolicy: 'network-only',
+  });
+
+  const [getFeelingPieChart] = useLazyQuery(GET_FEELING_PIE_CHART, {
     fetchPolicy: 'network-only',
   });
 
@@ -27,8 +69,6 @@ function Dashboard() {
   ];
 
   const refreshMoodScoreLineChart = async (view, selectedDate) => {
-    console.log(view);
-    console.log(selectedDate);
     const period = view.name;
     const res = await getMoodScoreLineChart({ variables: { period, selectedDate } });
     const data = {
@@ -38,7 +78,7 @@ function Dashboard() {
           label: 'Mood Score',
           data: res.data?.getMoodScoreLineChart?.data || [],
           fill: false,
-          borderColor: documentStyle.getPropertyValue('--blue-500'),
+          borderColor: documentStyle.getPropertyValue('--blue-300'),
           tension: 0.1,
         },
       ],
@@ -65,10 +105,35 @@ function Dashboard() {
     setLineChartData(data);
     setLineChartOptions(options);
   };
+  const refreshFeelingPieChart = async (view, selectedDate) => {
+    const period = view.name;
+    const res = await getFeelingPieChart({ variables: { period, selectedDate } });
+    const labels = res.data?.getFeelingPieChart?.labels || [];
+    const chartDate = res.data?.getFeelingPieChart?.data || [];
+    const backgroundColor = labels.map((label) =>
+      documentStyle.getPropertyValue(FeelingColorMapping[label]),
+    );
+    const data = {
+      labels,
+      datasets: [
+        {
+          data: chartDate,
+          backgroundColor,
+        },
+      ],
+    };
+    const options = {
+      plugins: { legend: { labels: { usePointStyle: true } } },
+    };
+
+    setPieChartData(data);
+    setPieChartOptions(options);
+  };
 
   const applyChange = () => {
     if (selectedView && date) {
       refreshMoodScoreLineChart(selectedView, date);
+      refreshFeelingPieChart(selectedView, date);
     }
   };
 
@@ -78,6 +143,7 @@ function Dashboard() {
     setSelectedView(initSelectedView);
     setDate(initDate);
     refreshMoodScoreLineChart(initSelectedView, initDate);
+    refreshFeelingPieChart(initSelectedView, initDate);
   }, []);
 
   return (
@@ -109,6 +175,14 @@ function Dashboard() {
             <Chart type="line" data={lineChartData} options={linechartOptions} />
           </div>
           <h3>情緒分佈</h3>
+          <div className="card flex justify-content-center">
+            <Chart
+              type="pie"
+              data={pieChartData}
+              options={pieChartOptions}
+              className="w-full md:w-30rem"
+            />
+          </div>
           <h3>影響因素</h3>
           <h3>關鍵字</h3>
         </div>
