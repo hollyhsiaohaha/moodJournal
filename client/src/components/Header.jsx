@@ -54,17 +54,17 @@ function Header() {
       },
     },
     {
-      label: 'Graph',
-      icon: 'pi pi-fw pi-share-alt',
-      command: () => {
-        navigate('/graph');
-      },
-    },
-    {
       label: 'Dashboard',
       icon: 'pi pi-fw pi-chart-bar',
       command: () => {
         navigate('/dashboard');
+      },
+    },
+    {
+      label: 'Graph',
+      icon: 'pi pi-fw pi-share-alt',
+      command: () => {
+        navigate('/graph');
       },
     },
     {

@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-express';
 
-const userTypeDef = gql`
+const journalTypeDef = gql`
   # Types
   enum JournalType {
     diary
@@ -64,4 +64,4 @@ const userTypeDef = gql`
   }
 `;
 
-export default userTypeDef;
+export default journalTypeDef;

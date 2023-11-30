@@ -9,9 +9,7 @@ import Cookies from 'js-cookie';
 const { protocol, hostname } = window.location;
 const port = hostname === 'localhost' ? ':3000' : '';
 const uri = `${protocol}//${hostname}${port}/graphql`;
-const httpLink = createHttpLink({
-  uri,
-});
+const httpLink = createHttpLink({ uri });
 
 const authLink = setContext((_, { headers }) => {
   const token = Cookies.get('JWT_TOKEN');
