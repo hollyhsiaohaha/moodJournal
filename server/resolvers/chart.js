@@ -2,7 +2,7 @@ import { logger } from '../utils/logger.js';
 import { Journal } from '../models/Journal.js';
 import { throwCustomError, ErrorTypes } from '../utils/errorHandler.js';
 import mongoose from 'mongoose';
-import { feelingOptions } from '../models/Emotion.js';
+import { Feelings, feelingOptions } from '../models/Emotion.js';
 
 // === helper functions ===
 const calculateDatePeriod = (targetDate, period) => {
@@ -83,6 +83,35 @@ const chartResolver = {
         chartData.push({ label: key, data: [{ x: scoreAverage, y: count }] });
       }
       return chartData;
+    },
+    async getKeywordBarChart(_, { period, selectedDate, keyword }, context) {
+      const res = await Journal.findOne({ userId: context.user._id, title: keyword }).exec();
+      const keywordJournalId = res?._id;
+      const journals = (await getPeriodJournals(context.user._id, period, selectedDate)) || [];
+      const mentionedKeywordJournals = journals.filter((journal) =>
+        journal.linkedNoteIds.includes(keywordJournalId),
+      );
+      const feelingsCount = {};
+      mentionedKeywordJournals.forEach((journal) => {
+        journal.moodFeelings.forEach((mood) => {
+          feelingsCount[mood] ? (feelingsCount[mood] += 1) : (feelingsCount[mood] = 1);
+        });
+      });
+      const labels = Feelings.map((category) => category.name);
+      const datasets = [];
+      for (let i = 0; i < Feelings.length; i++) {
+        const category = Feelings[i];
+        category.values.forEach((feeling) => {
+          if (feelingsCount[feeling]) {
+            const data = new Array(labels.length).fill(0);
+            data[i] = feelingsCount[feeling];
+            const dataset = { label: feeling, data };
+            datasets.push(dataset);
+          }
+        });
+      }
+      const data = { labels, datasets };
+      return data;
     },
   },
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Chart } from 'primereact/chart';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
@@ -8,48 +8,14 @@ import {
   GET_MOOD_SCORE_LINE_CHART,
   GET_FEELING_PIE_CHART,
   GET_FACTOR_SCATTER_CHART,
+  GET_KEYWORD_BAR_CHART,
 } from '../queries/chart.js';
 import { useLazyQuery } from '@apollo/client';
 import { AutoComplete } from 'primereact/autocomplete';
 import { Scatter } from 'react-chartjs-2';
+import { FeelingColorMapping, FactorColorMapping } from '../utils/colorMapping.js';
 import 'chartjs-adapter-date-fns';
 import 'chart.js/auto';
-
-const FeelingColorMapping = {
-  愉快: '--yellow-100',
-  樂觀: '--yellow-200',
-  有趣: '--yellow-300',
-  興奮: '--yellow-400',
-  刺激: '--yellow-500',
-  放鬆: '--teal-100',
-  感恩: '--teal-200',
-  安全: '--teal-300',
-  親密: '--teal-400',
-  深思: '--teal-500',
-  覺察: '--orange-100',
-  被尊重: '--orange-200',
-  自豪: '--orange-300',
-  有價值: '--orange-400',
-  充滿信心: '--orange-500',
-  迷惑: '--purple-100',
-  尷尬: '--purple-200',
-  氣餒: '--purple-300',
-  無助: '--purple-400',
-  信心不足: '--purple-500',
-  焦慮: '--purple-600',
-  懷疑: '--pink-100',
-  受挫: '--pink-200',
-  受傷: '--pink-300',
-  憤怒: '--pink-400',
-  嫉妒: '--pink-500',
-  敵意: '--pink-600',
-  疲倦: '--indigo-100',
-  無聊: '--indigo-200',
-  孤獨: '--indigo-300',
-  憂鬱: '--indigo-400',
-  慚愧: '--indigo-500',
-  後悔: '--indigo-600',
-};
 
 function Dashboard() {
   const [date, setDate] = useState(null);
@@ -60,12 +26,16 @@ function Dashboard() {
   const [pieChartOptions, setPieChartOptions] = useState({});
   const [scatterChartData, setScatterChartData] = useState({ datasets: [] });
   const [scatterChartOptions, setScatterChartOptions] = useState({});
+  const [barChartData, setBarChartData] = useState({});
+  const [barChartOptions, setBarChartOptions] = useState({});
   const [autocompleteValue, setAutocompleteValue] = useState('');
+  const [selectedAutocompleteValue, setSelectedAutocompleteValue] = useState('');
   const [autocompleteItems, setAutocompleteItems] = useState([]);
   const fetchPolicy = 'network-only';
   const [getMoodScoreLineChart] = useLazyQuery(GET_MOOD_SCORE_LINE_CHART, { fetchPolicy });
   const [getFeelingPieChart] = useLazyQuery(GET_FEELING_PIE_CHART, { fetchPolicy });
   const [getFactorScatterChart] = useLazyQuery(GET_FACTOR_SCATTER_CHART, { fetchPolicy });
+  const [getKeywordBarChart] = useLazyQuery(GET_KEYWORD_BAR_CHART, { fetchPolicy });
   const [getAutocomplete] = useLazyQuery(GET_AUTOCOMPLETE, { fetchPolicy });
 
   const documentStyle = getComputedStyle(document.documentElement);
@@ -138,7 +108,6 @@ function Dashboard() {
     setPieChartData(data);
     setPieChartOptions(options);
   };
-
   const refreshFactorScatterChart = async (view, selectedDate) => {
     const period = view.name;
     const res = await getFactorScatterChart({ variables: { period, selectedDate } });
@@ -147,23 +116,61 @@ function Dashboard() {
       return {
         label: factor.label,
         data: factor.data,
+        backgroundColor: documentStyle.getPropertyValue(FactorColorMapping[factor.label]),
       };
     });
     const data = { datasets };
     const options = {
       scales: {
+        x: { title: { display: true, text: '平均分數' } },
+        y: { title: { display: true, text: '提及次數' }, ticks: { stepSize: 1 } },
+      },
+      elements: { point: { radius: 8 } },
+    };
+    setScatterChartData(data);
+    setScatterChartOptions(options);
+  };
+
+  const refreshKeywordBarChart = async (view, selectedDate, keyword) => {
+    const options = {
+      maintainAspectRatio: false,
+      aspectRatio: 0.8,
+      plugins: {
+        tooltips: { mode: 'index', intersect: false },
+        legend: { labels: { color: textColor } },
+      },
+      scales: {
         x: {
-          type: 'linear',
-          title: { display: true, text: '平均分數' },
+          stacked: true,
+          ticks: { color: textColorSecondary },
+          grid: { color: surfaceBorder },
         },
         y: {
-          type: 'linear',
+          stacked: true,
+          ticks: { color: textColorSecondary, stepSize: 1 },
+          grid: { color: surfaceBorder },
           title: { display: true, text: '提及次數' },
         },
       },
     };
-    setScatterChartData(data);
-    setScatterChartOptions(options);
+
+    if (!keyword) return setBarChartOptions(options);
+    const period = view.name;
+    const res = await getKeywordBarChart({ variables: { period, selectedDate, keyword } });
+    const keywordFeeling = res?.data?.getKeywordBarChart;
+    if (!keywordFeeling) return setBarChartOptions(options);
+    const data = {
+      labels: keywordFeeling.labels,
+      datasets: keywordFeeling.datasets.map((dataset) => {
+        return {
+          label: dataset.label,
+          data: dataset.data,
+          backgroundColor: documentStyle.getPropertyValue(FeelingColorMapping[dataset.label]),
+        };
+      }),
+    };
+    setBarChartData(data);
+    setBarChartOptions(options);
   };
 
   const applyChange = () => {
@@ -171,22 +178,25 @@ function Dashboard() {
       refreshMoodScoreLineChart(selectedView, date);
       refreshFeelingPieChart(selectedView, date);
       refreshFactorScatterChart(selectedView, date);
+      refreshKeywordBarChart(selectedView, date, selectedAutocompleteValue);
     }
   };
 
   useEffect(() => {
     const initSelectedView = views[0];
-    // TODO: 開發完後改回來
-    // const initDate = new Date();
-    const initDate = new Date('2023-11-01');
+    const initDate = new Date();
     setSelectedView(initSelectedView);
     setDate(initDate);
     refreshMoodScoreLineChart(initSelectedView, initDate);
     refreshFeelingPieChart(initSelectedView, initDate);
     refreshFactorScatterChart(initSelectedView, initDate);
+    refreshKeywordBarChart(initSelectedView, initDate, selectedAutocompleteValue);
   }, []);
 
-  // TODO: 按 shift 會跳錯誤
+  useEffect(() => {
+    refreshKeywordBarChart(selectedView, date, selectedAutocompleteValue);
+  }, [selectedAutocompleteValue]);
+
   const autocomplete = async (event) => {
     const { data } = await getAutocomplete({ variables: { keyword: event.query.trim() } });
     const suggestions = data.autoCompleteJournals.map((journal) => journal.title);
@@ -238,14 +248,17 @@ function Dashboard() {
           <h3>關鍵字</h3>
           <AutoComplete
             className="p-inputtext-sm"
-            placeholder="筆記標題"
+            placeholder="輸入筆記標題"
             value={autocompleteValue}
             suggestions={autocompleteItems}
             completeMethod={autocomplete}
-            // onSelect={select}
+            onSelect={(e) => setSelectedAutocompleteValue(e.value)}
             onChange={(e) => setAutocompleteValue(e.value)}
             loadingIcon="pi pi-spin pi-spinner"
           />
+          <div className="card">
+            <Chart type="bar" data={barChartData} options={barChartOptions} />
+          </div>
         </div>
       ) : null}
     </>

@@ -29,3 +29,15 @@ query GetFactorScatterChart($period: String!, $selectedDate: String!) {
   }
 }
 `;
+
+export const GET_KEYWORD_BAR_CHART = gql`
+query GetKeywordBarChart($period: String!, $selectedDate: String!, $keyword: String!) {
+  getKeywordBarChart(period: $period, selectedDate: $selectedDate, keyword: $keyword) {
+    labels
+    datasets {
+      label
+      data
+    }
+  }
+}
+`;

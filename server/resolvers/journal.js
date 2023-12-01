@@ -27,7 +27,7 @@ const getLinkedNoteIds = async (content, userId) => {
   return linkedNoteIds;
 };
 
-const getBackLinkeds = async (journalId) => {
+export const getBackLinkeds = async (journalId) => {
   const res = await Journal.aggregate([
     {
       $match: {

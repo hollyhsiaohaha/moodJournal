@@ -11,11 +11,19 @@ const chartTypeDef = gql`
   }
   type Point {
     x: Float
-    y: Float
+    y: Int
   }
   type ScatterChartData {
     label: String!
     data: [Point]!
+  }
+  type BarChartDataSet {
+    label: String!
+    data: [Int]!
+  }
+  type BarChartData {
+    labels: [String]!
+    datasets: [BarChartDataSet]!
   }
   # Queries
   type Query {
@@ -25,6 +33,8 @@ const chartTypeDef = gql`
     getFeelingPieChart(period: String!, selectedDate: String!): PieChartData
     "Requires authentication"
     getFactorScatterChart(period: String!, selectedDate: String!): [ScatterChartData]
+    "Requires authentication"
+    getKeywordBarChart(period: String!, selectedDate: String!, keyword: String!): BarChartData
   }
 `;
 
