@@ -17,3 +17,15 @@ query GetFeelingPieChart($period: String!, $selectedDate: String!) {
   }
 }
 `;
+
+export const GET_FACTOR_SCATTER_CHART = gql`
+query GetFactorScatterChart($period: String!, $selectedDate: String!) {
+  getFactorScatterChart(period: $period, selectedDate: $selectedDate) {
+    label
+    data {
+      x
+      y
+    }
+  }
+}
+`;

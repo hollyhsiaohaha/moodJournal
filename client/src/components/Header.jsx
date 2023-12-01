@@ -16,7 +16,7 @@ function Header() {
   const search = (event) => {
     const getSuggestions = async() => {
       const {data} = await searchJournals({ variables: { keyword: event.query.trim() } });
-      console.log(data)
+      // console.log(data)
       return setSearchItems(data.searchJournals);
     }
     getSuggestions();

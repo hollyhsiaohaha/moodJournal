@@ -1,11 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Chart } from 'primereact/chart';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
-import { GET_MOOD_SCORE_LINE_CHART, GET_FEELING_PIE_CHART } from '../queries/chart.js';
+import { GET_AUTOCOMPLETE } from '../queries/journals.js';
+import {
+  GET_MOOD_SCORE_LINE_CHART,
+  GET_FEELING_PIE_CHART,
+  GET_FACTOR_SCATTER_CHART,
+} from '../queries/chart.js';
 import { useLazyQuery } from '@apollo/client';
+import { AutoComplete } from 'primereact/autocomplete';
+import { Scatter } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
+import 'chart.js/auto';
 
 const FeelingColorMapping = {
   愉快: '--yellow-100',
@@ -50,13 +58,15 @@ function Dashboard() {
   const [linechartOptions, setLineChartOptions] = useState({});
   const [pieChartData, setPieChartData] = useState({});
   const [pieChartOptions, setPieChartOptions] = useState({});
-  const [getMoodScoreLineChart] = useLazyQuery(GET_MOOD_SCORE_LINE_CHART, {
-    fetchPolicy: 'network-only',
-  });
-
-  const [getFeelingPieChart] = useLazyQuery(GET_FEELING_PIE_CHART, {
-    fetchPolicy: 'network-only',
-  });
+  const [scatterChartData, setScatterChartData] = useState({ datasets: [] });
+  const [scatterChartOptions, setScatterChartOptions] = useState({});
+  const [autocompleteValue, setAutocompleteValue] = useState('');
+  const [autocompleteItems, setAutocompleteItems] = useState([]);
+  const fetchPolicy = 'network-only';
+  const [getMoodScoreLineChart] = useLazyQuery(GET_MOOD_SCORE_LINE_CHART, { fetchPolicy });
+  const [getFeelingPieChart] = useLazyQuery(GET_FEELING_PIE_CHART, { fetchPolicy });
+  const [getFactorScatterChart] = useLazyQuery(GET_FACTOR_SCATTER_CHART, { fetchPolicy });
+  const [getAutocomplete] = useLazyQuery(GET_AUTOCOMPLETE, { fetchPolicy });
 
   const documentStyle = getComputedStyle(document.documentElement);
   const textColor = documentStyle.getPropertyValue('--text-color');
@@ -125,26 +135,64 @@ function Dashboard() {
     const options = {
       plugins: { legend: { labels: { usePointStyle: true } } },
     };
-
     setPieChartData(data);
     setPieChartOptions(options);
+  };
+
+  const refreshFactorScatterChart = async (view, selectedDate) => {
+    const period = view.name;
+    const res = await getFactorScatterChart({ variables: { period, selectedDate } });
+    const factorArray = res.data.getFactorScatterChart;
+    const datasets = factorArray.map((factor) => {
+      return {
+        label: factor.label,
+        data: factor.data,
+      };
+    });
+    const data = { datasets };
+    const options = {
+      scales: {
+        x: {
+          type: 'linear',
+          title: { display: true, text: '平均分數' },
+        },
+        y: {
+          type: 'linear',
+          title: { display: true, text: '提及次數' },
+        },
+      },
+    };
+    setScatterChartData(data);
+    setScatterChartOptions(options);
   };
 
   const applyChange = () => {
     if (selectedView && date) {
       refreshMoodScoreLineChart(selectedView, date);
       refreshFeelingPieChart(selectedView, date);
+      refreshFactorScatterChart(selectedView, date);
     }
   };
 
   useEffect(() => {
     const initSelectedView = views[0];
-    const initDate = new Date();
+    // TODO: 開發完後改回來
+    // const initDate = new Date();
+    const initDate = new Date('2023-11-01');
     setSelectedView(initSelectedView);
     setDate(initDate);
     refreshMoodScoreLineChart(initSelectedView, initDate);
     refreshFeelingPieChart(initSelectedView, initDate);
+    refreshFactorScatterChart(initSelectedView, initDate);
   }, []);
+
+  // TODO: 按 shift 會跳錯誤
+  const autocomplete = async (event) => {
+    const { data } = await getAutocomplete({ variables: { keyword: event.query.trim() } });
+    const suggestions = data.autoCompleteJournals.map((journal) => journal.title);
+    if (suggestions) return setAutocompleteItems(suggestions);
+    else return [];
+  };
 
   return (
     <>
@@ -184,7 +232,20 @@ function Dashboard() {
             />
           </div>
           <h3>影響因素</h3>
+          <div className="card flex justify-content-center">
+            <Scatter data={scatterChartData} options={scatterChartOptions} />
+          </div>
           <h3>關鍵字</h3>
+          <AutoComplete
+            className="p-inputtext-sm"
+            placeholder="筆記標題"
+            value={autocompleteValue}
+            suggestions={autocompleteItems}
+            completeMethod={autocomplete}
+            // onSelect={select}
+            onChange={(e) => setAutocompleteValue(e.value)}
+            loadingIcon="pi pi-spin pi-spinner"
+          />
         </div>
       ) : null}
     </>

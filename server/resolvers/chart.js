@@ -66,6 +66,24 @@ const chartResolver = {
       const chartData = { labels, data };
       return chartData;
     },
+    async getFactorScatterChart(_, { period, selectedDate }, context) {
+      const journals = await getPeriodJournals(context.user._id, period, selectedDate);
+      const factorScores = {};
+      journals.forEach((journal) => {
+        journal.moodFactors.forEach((factor) => {
+          factorScores[factor] ? null : (factorScores[factor] = []);
+          factorScores[factor].push(journal.moodScore);
+        });
+      });
+      const chartData = [];
+      for (const [key, value] of Object.entries(factorScores)) {
+        const count = value.length;
+        const scoreSum = value.reduce((partialSum, a) => partialSum + a, 0);
+        const scoreAverage = (scoreSum / count).toFixed(2);
+        chartData.push({ label: key, data: [{ x: scoreAverage, y: count }] });
+      }
+      return chartData;
+    },
   },
 };
 
