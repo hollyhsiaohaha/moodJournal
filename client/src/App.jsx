@@ -12,7 +12,7 @@ import Signin from './components/Signin';
 import Signup from './components/Signup';
 import Home from './components/Home';
 import Journal from './components/Journal';
-import JournalList from './components/journalList';
+import JournalList from './components/JournalList';
 import Graph from './components/Graph';
 import Dashboard from './components/Dashboard';
 import Profile from './components/Profile';

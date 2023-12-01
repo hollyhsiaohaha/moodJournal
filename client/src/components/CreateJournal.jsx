@@ -56,7 +56,7 @@ function CreateJournal() {
         const { title } = data.createJournal;
         const journalId = data.createJournal._id;
         console.log(journalId);
-        navigate(`/journal/${journalId}`);
+        navigate('/journalList');
         alert(`筆記新增成功：${title}`);
       } catch (error) {
         if (error.message.includes('DUPLICATE_KEY')) return alert('筆記名稱重複');

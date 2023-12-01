@@ -76,6 +76,7 @@ function Journal() {
         console.log(res);
         const { data } = await updateJournal({ variables: { id: journalId, journalInput } });
         const { title } = data.updateJournal;
+        navigate('/journalList');
         alert(`筆記修改成功：${title}`);
       } catch (error) {
         if (error.message.includes('DUPLICATE_TITLE'))

@@ -25,7 +25,8 @@ const emotionResolver = {
             { role: 'user', content: prompt },
             { role: 'user', content: journalContent },
           ],
-          model: 'gpt-4-1106-preview',
+          // model: 'gpt-4-1106-preview',
+          model: 'gpt-3.5-turbo-1106',
           temperature: 0,
           seed: 12,
         });

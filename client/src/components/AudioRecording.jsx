@@ -58,7 +58,10 @@ function AudioRecorder ({ setAudioNameS3 }) {
       const headers = formData.getHeaders ? formData.getHeaders() : {};
       const token = Cookies.get('JWT_TOKEN');
       headers['Authorization'] = token;
-      const res = await fetch('http://localhost:3000/api/audio', {
+      const { protocol, hostname } = window.location;
+      const port = hostname === 'localhost' ? ':3000' : '';
+      const apiUri = `${protocol}//${hostname}${port}/api/audio`;
+      const res = await fetch(apiUri, {
           method: 'POST',
           body: formData,
           headers,
