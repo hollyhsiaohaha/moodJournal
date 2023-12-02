@@ -40,7 +40,7 @@ function Home() {
     for (const journal of monthJournals) {
       if (journal.title === dateString) return navigate(`/journal/${journal._id}`);
     }
-    alert('日記不存在');
+    navigate(`/newJournal/${dateString}`);
   };
 
   const dateStyleTemplate = (dateMeta) => {

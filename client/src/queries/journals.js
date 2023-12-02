@@ -115,3 +115,17 @@ query SearchJournals($keyword: String!) {
   }
 }
 `;
+
+export const GET_JOURNALS_LINKED_TYPE = gql`
+query GetJournalsbyUserId {
+  getJournalsbyUserId {
+    _id
+    title
+    type
+    linkedNotes {
+      _id
+      type
+    }
+  }
+}
+`;

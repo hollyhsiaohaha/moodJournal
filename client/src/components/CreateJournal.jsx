@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { SelectButton } from 'primereact/selectbutton';
@@ -8,9 +8,10 @@ import AudioRecording from './AudioRecording';
 import Emotion from './Emotion';
 import { CREATE_JOURNAL } from '../mutations/journals';
 import { useMutation } from '@apollo/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 function CreateJournal() {
+  const { newJournalDate } = useParams();
   const [audioNameS3, setAudioNameS3] = useState('');
   const journalTypeOption = ['diary', 'note'];
   const [type, setType] = useState(journalTypeOption[0]);
@@ -19,7 +20,7 @@ function CreateJournal() {
   const [moodScore, setMoodScore] = useState(1);
   const [moodFeelings, setMoodFeelings] = useState([]);
   const [moodFactors, setMoodFactors] = useState([]);
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(new Date(newJournalDate));
   const [createJournal] = useMutation(CREATE_JOURNAL);
   const navigate = useNavigate();
 
