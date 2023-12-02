@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLazyQuery } from '@apollo/client';
-import { GET_FORCE_GRAPH } from '../queries/graph.js';
+// import { GET_FORCE_GRAPH } from '../queries/graph.js';
+import { GET_JOURNALS_LINKED_TYPE } from '../queries/journals.js';
 import { useNavigate } from 'react-router-dom';
 import { ListBox } from 'primereact/listbox';
 import * as d3 from 'd3';
@@ -14,17 +15,38 @@ function Graph() {
   const height = 680;
   const color = d3.scaleOrdinal(d3.schemeCategory10);
   const fetchPolicy = 'network-only';
-  const [getForceGraph] = useLazyQuery(GET_FORCE_GRAPH, { fetchPolicy });
+  // const [getForceGraph] = useLazyQuery(GET_FORCE_GRAPH, { fetchPolicy });
+  const [GetJournalsLinkedType] = useLazyQuery(GET_JOURNALS_LINKED_TYPE, { fetchPolicy });
   const navigate = useNavigate();
+
+  const parseGraphData = (journals, types) => {
+    console.log(types)
+    const nodes = [];
+    const links = [];
+    journals.forEach((journal) => {
+      const journalId = journal._id.toString();
+      const node = { id: journalId, group: journal.type, label: journal.title };
+      nodes.push(node);
+      journal.linkedNotes.forEach((linkedJournal) => {
+        const link = { source: journalId, target: linkedJournal._id.toString(), value: 1 };
+        links.push(link);
+      });
+    });
+    const data = { nodes, links };
+    return data;
+  };
 
   const refreshForceGraph = async (types) => {
     const emptyData = { nodes: [], links: [] };
     if (!types) return setGraphData(emptyData);
-    const res = await getForceGraph({ variables: { types } });
-    const data = res?.data?.getForceGraph || emptyData;
-    setGraphData(data);
+    const res = await GetJournalsLinkedType();
+    const graphJournals = res.data.getJournalsbyUserId;
+    const graphData = parseGraphData(graphJournals, types);
+    console.log(graphData);
+    setGraphData(graphData);
   };
 
+  // TODO: 考慮要不要做連越多越大顆
   useEffect(() => {
     refreshForceGraph(selectedTypes.map((typeOption) => typeOption.name));
   }, [selectedTypes]);
@@ -137,6 +159,16 @@ function Graph() {
 
   return (
     <>
+      <div className="card flex justify-content-center">
+        <ListBox
+          multiple
+          value={selectedTypes}
+          onChange={(e) => setSelectedTypes(e.value)}
+          options={typesOptions}
+          optionLabel="name"
+          className="w-full md:w-14rem"
+        />
+      </div>
       <svg ref={ref} width={width} height={height} />
     </>
   );
