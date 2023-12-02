@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLazyQuery } from '@apollo/client';
-// import { GET_FORCE_GRAPH } from '../queries/graph.js';
 import { GET_JOURNALS_LINKED_TYPE } from '../queries/journals.js';
+import { JournalTypeColorMapping } from '../utils/colorMapping.js';
 import { useNavigate } from 'react-router-dom';
 import { ListBox } from 'primereact/listbox';
 import * as d3 from 'd3';
@@ -13,26 +13,39 @@ function Graph() {
   const [selectedTypes, setSelectedTypes] = useState(typesOptions);
   const width = 928;
   const height = 680;
-  const color = d3.scaleOrdinal(d3.schemeCategory10);
   const fetchPolicy = 'network-only';
-  // const [getForceGraph] = useLazyQuery(GET_FORCE_GRAPH, { fetchPolicy });
   const [GetJournalsLinkedType] = useLazyQuery(GET_JOURNALS_LINKED_TYPE, { fetchPolicy });
   const navigate = useNavigate();
+  const documentStyle = getComputedStyle(document.documentElement);
 
   const parseGraphData = (journals, types) => {
-    console.log(types)
     const nodes = [];
     const links = [];
+    const linkedCounts = {};
     journals.forEach((journal) => {
-      const journalId = journal._id.toString();
-      const node = { id: journalId, group: journal.type, label: journal.title };
-      nodes.push(node);
-      journal.linkedNotes.forEach((linkedJournal) => {
-        const link = { source: journalId, target: linkedJournal._id.toString(), value: 1 };
-        links.push(link);
-      });
+      if (types.includes(journal.type)) {
+        const journalId = journal._id.toString();
+        const node = { id: journalId, group: journal.type, label: journal.title };
+        nodes.push(node);
+        journal.linkedNotes.forEach((linkedJournal) => {
+          if (types.includes(linkedJournal.type)) {
+            const linkedJournalId = linkedJournal._id.toString();
+            const link = { source: journalId, target: linkedJournalId, value: 1 };
+            links.push(link);
+            linkedCounts[linkedJournalId]
+              ? (linkedCounts[linkedJournalId] += 1)
+              : (linkedCounts[linkedJournalId] = 1);
+          }
+        });
+      }
     });
-    const data = { nodes, links };
+    const nodesWithLinkedCount = nodes.map((node) => {
+      return {
+        ...node,
+        linkedCount: linkedCounts[node.id] || 0,
+      };
+    });
+    const data = { nodes: nodesWithLinkedCount, links };
     return data;
   };
 
@@ -42,11 +55,9 @@ function Graph() {
     const res = await GetJournalsLinkedType();
     const graphJournals = res.data.getJournalsbyUserId;
     const graphData = parseGraphData(graphJournals, types);
-    console.log(graphData);
     setGraphData(graphData);
   };
 
-  // TODO: 考慮要不要做連越多越大顆
   useEffect(() => {
     refreshForceGraph(selectedTypes.map((typeOption) => typeOption.name));
   }, [selectedTypes]);
@@ -80,7 +91,6 @@ function Graph() {
       .selectAll('line')
       .data(links)
       .join('line')
-      .attr('stroke-width', (d) => Math.sqrt(d.value));
 
     const node = svg
       .append('g')
@@ -89,8 +99,8 @@ function Graph() {
       .selectAll('circle')
       .data(nodes)
       .join('circle')
-      .attr('r', 5)
-      .attr('fill', (d) => color(d.group));
+      .attr('r', (d) => 5 + d.linkedCount * 0.2)
+      .attr('fill', (d) => documentStyle.getPropertyValue(JournalTypeColorMapping[d.group]));
 
     const labels = svg
       .append('g')
@@ -141,11 +151,17 @@ function Graph() {
 
     node
       .on('mouseover', function (event, d) {
-        d3.select(this).attr('r', 7);
+        d3.select(this).attr('stroke', 'black');
+        link
+          .filter((linkD) => linkD.source.id === d.id || linkD.target.id === d.id)
+          .attr('stroke', 'black');
         labels.filter((ld) => ld.id === d.id).style('opacity', 1);
       })
       .on('mouseout', function (event, d) {
-        d3.select(this).attr('r', 5);
+        d3.select(this).attr('stroke', '#fff');
+        link
+          .filter((linkD) => linkD.source.id === d.id || linkD.target.id === d.id)
+          .attr('stroke', '#999');
         labels.filter((ld) => ld.id === d.id).style('opacity', 0);
       })
       .on('click', function (event, d) {

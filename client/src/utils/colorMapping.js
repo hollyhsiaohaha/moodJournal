@@ -49,3 +49,8 @@ export const FactorColorMapping = {
   時事: '--orange-200',
   金錢: '--orange-300',
 };
+
+export const JournalTypeColorMapping = {
+  note: '--orange-500',
+  diary: '--cyan-200',
+};
