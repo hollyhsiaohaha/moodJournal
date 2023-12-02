@@ -29,7 +29,7 @@ function App() {
       <Header/>
       <Routes>
         <Route path='/' element={<Welcome />}></Route>
-        <Route path='newJournal' element={<CreateJournal />}></Route>
+        <Route path='newJournal/:newJournalDate' element={<CreateJournal />}></Route>
         <Route path='signin' element={<Signin />}></Route>
         <Route path='signup' element={<Signup />}></Route>
         <Route path='home' element={<Home />}></Route>

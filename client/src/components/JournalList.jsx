@@ -34,11 +34,19 @@ function JournalList() {
     },
   });
 
+  // TODO: 現在是 yyyy-mm-d
+  // TODO: 跟 dateParser() 整合
   const formatDate = (value) => {
     const dd_mm_yyyy = value.toLocaleDateString();
     const yyyy_mm_dd = dd_mm_yyyy.replace(/(\d+)\/(\d+)\/(\d+)/g, '$3-$1-$2');
     return yyyy_mm_dd;
   };
+
+  const dateParser = (yourDate) => {
+    const offset = yourDate.getTimezoneOffset()
+    yourDate = new Date(yourDate.getTime() - (offset*60*1000))
+    return yourDate.toISOString().split('T')[0];
+  }
 
   const getSeverity = (type) => {
     switch (type) {
@@ -232,7 +240,7 @@ function JournalList() {
         icon="pi pi-fw pi-plus"
         iconPos="right"
         onClick={() => {
-          navigate('/newJournal');
+          navigate(`/newJournal/${dateParser(new Date())}`);
         }}
       />
     </>
