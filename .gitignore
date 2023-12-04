@@ -3,7 +3,7 @@ node_modules
 .vscode
 
 # Server
-https-cert
+mood-journal_https-cert
 build
 logs
 .env
