@@ -119,12 +119,10 @@ function Dashboard() {
         backgroundColor: documentStyle.getPropertyValue(FactorColorMapping[factor.label]),
       };
     });
-    // console.log(datasets)
     let maxY = 1;
     datasets.forEach((item) => {
       item.data[0]?.y > maxY ? maxY = item.data[0]?.y : null;
     });
-    console.log(maxY)
     const data = { datasets };
     const options = {
       scales: {
