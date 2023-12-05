@@ -81,6 +81,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
     easyMDEInstance.current = new EasyMDE({
       element: editorRef.current,
       initialValue: content,
+      spellChecker: false,
       previewRender: (plainText, preview) => {
         setTimeout( async () => {
           preview.innerHTML = await customRender(plainText);
