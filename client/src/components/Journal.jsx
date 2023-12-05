@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { SelectButton } from 'primereact/selectbutton';
@@ -12,7 +12,7 @@ import { GET_JOURNAL_BY_ID } from '../queries/journals';
 import { UPDATE_JOURNAL, DELETE_JOURNAL } from '../mutations/journals';
 import { useMutation, useLazyQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-
+import { Toast } from 'primereact/toast';
 
 function Journal() {
   const { journalId } = useParams();
@@ -24,6 +24,8 @@ function Journal() {
   const [moodScore, setMoodScore] = useState(1);
   const [moodFeelings, setMoodFeelings] = useState([]);
   const [moodFactors, setMoodFactors] = useState([]);
+  const [toastVisible, setToastVisible] = useState(false);
+  const toastBC = useRef(null);
   const [date, setDate] = useState(new Date());
   const [getJournalById] = useLazyQuery(GET_JOURNAL_BY_ID);
   const [updateJournal] = useMutation(UPDATE_JOURNAL);
@@ -70,7 +72,6 @@ function Journal() {
           moodFactors,
         };
       }
-      // console.log(journalInput)
       try {
         const res = await updateJournal({ variables: { id: journalId, journalInput } });
         console.log(res);
@@ -98,9 +99,33 @@ function Journal() {
     navigate('/journalList');
   }
 
+
+  const clearToast = () => {
+    toastBC.current.clear();
+    setToastVisible(false);
+  };
+
+  const confirm = () => {
+    if (!toastVisible) {
+      setToastVisible(true);
+        toastBC.current.clear();
+        toastBC.current.show({
+            severity: 'warn',
+            sticky: true,
+            content: () => (
+                <div className="flex flex-column align-items-left" style={{ flex: '1' }}>
+                    <div className="font-medium text-lg my-3 text-900">{`確定要刪除筆記嗎: ${title}`}</div>
+                    <Button className="p-button-sm flex" label="確認" severity="error" onClick={deleteThisJournal}></Button>
+                </div>
+            )
+        });
+    }
+  };
+
   // TODO: 判斷有變動才顯示 save + 按鈕
   return (
     <>
+      <Toast ref={toastBC} position="bottom-center" onRemove={clearToast} />
       <div className="card flex justify-content-center">
         <SelectButton
           disabled={true}
@@ -157,7 +182,7 @@ function Journal() {
             label="Delete"
             severity="danger"
             icon="pi pi-times"
-            onClick={deleteThisJournal}
+            onClick={confirm}
           />
         </span>
       </div>
