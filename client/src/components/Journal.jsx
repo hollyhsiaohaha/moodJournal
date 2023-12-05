@@ -20,7 +20,7 @@ function Journal() {
   const journalTypeOption = ['diary', 'note'];
   const [type, setType] = useState(journalTypeOption[0]);
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(' ');
   const [moodScore, setMoodScore] = useState(1);
   const [moodFeelings, setMoodFeelings] = useState([]);
   const [moodFactors, setMoodFactors] = useState([]);
@@ -153,15 +153,13 @@ function Journal() {
         )}
       </div>
       <AudioRecording audioNameS3={audioNameS3} setAudioNameS3={setAudioNameS3} />
-      {content ? (
-        <MarkdownEditor
-          audioNameS3={audioNameS3}
-          setAudioNameS3={setAudioNameS3}
-          setContent={setContent}
-          content={content}
-          journalId={journalId}
-        />
-      ) : null}
+      <MarkdownEditor
+        audioNameS3={audioNameS3}
+        setAudioNameS3={setAudioNameS3}
+        setContent={setContent}
+        content={content}
+        journalId={journalId}
+      />
       {type === 'diary' && title ? (
         <Emotion
           moodScore={moodScore}
