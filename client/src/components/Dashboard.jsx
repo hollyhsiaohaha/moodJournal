@@ -119,11 +119,17 @@ function Dashboard() {
         backgroundColor: documentStyle.getPropertyValue(FactorColorMapping[factor.label]),
       };
     });
+    // console.log(datasets)
+    let maxY = 1;
+    datasets.forEach((item) => {
+      item.data[0]?.y > maxY ? maxY = item.data[0]?.y : null;
+    });
+    console.log(maxY)
     const data = { datasets };
     const options = {
       scales: {
-        x: { title: { display: true, text: '平均分數' } },
-        y: { title: { display: true, text: '提及次數' }, ticks: { stepSize: 1 } },
+        x: { title: { display: true, text: '平均分數' }, min: 0, max: 10 },
+        y: { title: { display: true, text: '提及次數' }, ticks: { stepSize: 1 } , min: 0, max: Math.ceil(maxY * 1.2) },
       },
       elements: { point: { radius: 8 } },
     };

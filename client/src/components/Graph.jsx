@@ -86,7 +86,7 @@ function Graph() {
 
     const link = svg
       .append('g')
-      .attr('stroke', '#999')
+      .attr('stroke', '#d6d6d6')
       .attr('stroke-opacity', 0.6)
       .selectAll('line')
       .data(links)
@@ -99,7 +99,7 @@ function Graph() {
       .selectAll('circle')
       .data(nodes)
       .join('circle')
-      .attr('r', (d) => 5 + d.linkedCount * 0.2)
+      .attr('r', (d) => 5 + d.linkedCount * 0.3)
       .attr('fill', (d) => documentStyle.getPropertyValue(JournalTypeColorMapping[d.group]));
 
     const labels = svg
@@ -161,7 +161,7 @@ function Graph() {
         d3.select(this).attr('stroke', '#fff');
         link
           .filter((linkD) => linkD.source.id === d.id || linkD.target.id === d.id)
-          .attr('stroke', '#999');
+          .attr('stroke', '#d6d6d6');
         labels.filter((ld) => ld.id === d.id).style('opacity', 0);
       })
       .on('click', function (event, d) {
