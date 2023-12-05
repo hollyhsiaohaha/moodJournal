@@ -27,9 +27,10 @@ function Journal() {
   const [toastVisible, setToastVisible] = useState(false);
   const toastBC = useRef(null);
   const [date, setDate] = useState(new Date());
-  const [getJournalById] = useLazyQuery(GET_JOURNAL_BY_ID);
-  const [updateJournal] = useMutation(UPDATE_JOURNAL);
-  const [deleteJournal] = useMutation(DELETE_JOURNAL);
+  const fetchPolicy = 'network-only';
+  const [getJournalById] = useLazyQuery(GET_JOURNAL_BY_ID, fetchPolicy);
+  const [updateJournal] = useMutation(UPDATE_JOURNAL, fetchPolicy);
+  const [deleteJournal] = useMutation(DELETE_JOURNAL, fetchPolicy);
   const navigate = useNavigate();
 
   const dateParser = (yourDate) => {
@@ -37,19 +38,21 @@ function Journal() {
     yourDate = new Date(yourDate.getTime() - offset * 60 * 1000);
     return yourDate.toISOString().split('T')[0];
   };
+
+  const getJournalInfo = async (id) => {
+    const { data } = await getJournalById({ variables: { id } });
+    if (!data) return alert('筆記不存在');
+    setType(data.getJournalbyId.type);
+    setContent(data.getJournalbyId.content);
+    setMoodScore(data.getJournalbyId.moodScore);
+    setMoodFeelings(data.getJournalbyId.moodFeelings);
+    setMoodFactors(data.getJournalbyId.moodFactors);
+    setTitle(data.getJournalbyId.title);
+    setDate(new Date(data.getJournalbyId.title));
+  };
+
   useEffect(() => {
-    const getJournalInfo = async () => {
-      const { data } = await getJournalById({ variables: { id: journalId } });
-      if (!data) return alert('筆記不存在');
-      setType(data.getJournalbyId.type);
-      setContent(data.getJournalbyId.content);
-      setMoodScore(data.getJournalbyId.moodScore);
-      setMoodFeelings(data.getJournalbyId.moodFeelings);
-      setMoodFactors(data.getJournalbyId.moodFactors);
-      setTitle(data.getJournalbyId.title);
-      setDate(new Date(data.getJournalbyId.title));
-    };
-    getJournalInfo();
+    getJournalInfo(journalId);
   }, [journalId]);
 
   const update = () => {
