@@ -3,6 +3,7 @@ import { useLazyQuery } from '@apollo/client';
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
 import PropTypes from 'prop-types';
+import { CDN_PATH } from '../utils/conf';
 import {
   GET_AUTOCOMPLETE,
   GET_JOURNAL_ID_BY_TITLE,
@@ -123,7 +124,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
       const fileName = audioNameS3;
       const currentContent = easyMDEInstance.current.value();
       const audioTag = `\n<audio id=" ${fileName}" controls="" preload="auto">
-          <source id="${fileName}-src" src="https://mood-journal.s3.ap-northeast-1.amazonaws.com/${fileName}">
+          <source id="${fileName}-src" src="${CDN_PATH}/${fileName}">
         </audio>
       `;
       easyMDEInstance.current.value(currentContent + audioTag);

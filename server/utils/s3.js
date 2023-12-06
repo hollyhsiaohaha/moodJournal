@@ -47,7 +47,6 @@ export async function getAudioS3(key) {
   const command = new GetObjectCommand(params);
   try {
     const res = await s3.send(command);
-    // return res;
     if (res.Body && res.Body instanceof stream.Readable) {
       const contentType = res.ContentType;
       const knownLength = res.ContentLength;
