@@ -21,13 +21,13 @@ const filename = fileURLToPath(import.meta.url);
 const workingDir = path.dirname(filename);
 
 const s3Proxy = createProxyMiddleware({
-  target: process.env.BUCKET_PUBLIC_PATH,
+  target: process.env.CDN_PATH,
   changeOrigin: true,
   pathRewrite: (path) => path.replace('/assets', '/dist/assets'),
 });
 
 const indexProxy = createProxyMiddleware({
-  target: process.env.BUCKET_PUBLIC_PATH,
+  target: process.env.CDN_PATH,
   changeOrigin: true,
   pathRewrite: () => '/dist/index.html',
 });
