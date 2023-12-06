@@ -40,3 +40,11 @@
 .read-the-docs {
   color: #888;
 }
+
+.CodeMirror, .EasyMDEContainer .CodeMirror-scroll {
+  text-align: left;
+}
+
+.EasyMDEContainer .editor-preview {
+  text-align: left;
+}
