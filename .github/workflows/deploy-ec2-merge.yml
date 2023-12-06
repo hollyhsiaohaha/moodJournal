@@ -19,5 +19,6 @@ jobs:
             cd /home/ubuntu/mood_journal
             git switch main
             git pull
+            cd /home/ubuntu/mood_journal/server
             npm install
             npx pm2 restart mood-journal

@@ -18,6 +18,7 @@ jobs:
             echo "Hello from github action, start deploy ${BRANCH} to ec2"
             cd /home/ubuntu/mood_journal
             git pull
+            cd /home/ubuntu/mood_journal/server
             git switch $BRANCH
             npm install
             npx pm2 restart mood-journal
