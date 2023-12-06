@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Button } from 'primereact/button';
 import { DataView } from 'primereact/dataview';
 import { Tag } from 'primereact/tag';
 import { GET_BACKLINK } from '../queries/journals';
@@ -8,7 +7,8 @@ import PropTypes from 'prop-types';
 import { Link } from "react-router-dom";
 
 function Backlink({ journalId }) {
-  const [getBackLink] = useLazyQuery(GET_BACKLINK);
+  const fetchPolicy = 'network-only';
+  const [getBackLink] = useLazyQuery(GET_BACKLINK, fetchPolicy);
   const [backlinks, setBacklinks] = useState([]);
 
   const getSeverity = (journal) => {
@@ -20,12 +20,13 @@ function Backlink({ journalId }) {
     }
   };
 
+  const getBackLinkInfo = async (id) => {
+    const { data } = await getBackLink({ variables: { id } });
+    if (data) setBacklinks(data.getBackLinkedJournals);
+  };
+
   useEffect(() => {
-    const getBackLinkInfo = async () => {
-      const { data } = await getBackLink({ variables: { id: journalId } });
-      if (data) setBacklinks(data.getBackLinkedJournals);
-    };
-    getBackLinkInfo();
+    getBackLinkInfo(journalId);
   }, [journalId]);
 
   const itemTemplate = (journal) => {

@@ -14,10 +14,23 @@ import { connectDB } from './utils/db.js';
 import typeDefs from './schemas/typeDefs.js';
 import resolvers from './resolvers/resolvers.js';
 import context from './context/context.js';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 dotenv.config();
 const filename = fileURLToPath(import.meta.url);
 const workingDir = path.dirname(filename);
+
+const s3Proxy = createProxyMiddleware({
+  target: process.env.BUCKET_PUBLIC_PATH,
+  changeOrigin: true,
+  pathRewrite: (path) => path.replace('/assets', '/dist/assets'),
+});
+
+const indexProxy = createProxyMiddleware({
+  target: process.env.BUCKET_PUBLIC_PATH,
+  changeOrigin: true,
+  pathRewrite: () => '/dist/index.html',
+});
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -44,7 +57,7 @@ morganBody(app, {
 });
 
 // define statics path
-app.use(express.static(path.join(workingDir, 'dist')));
+app.use('/assets', s3Proxy);
 app.use('/static', express.static(path.join(workingDir, 'public')));
 app.set('views', path.join(workingDir, 'views'));
 app.set('view engine', 'pug');
@@ -65,8 +78,7 @@ const server = new ApolloServer({
 await server.start();
 server.applyMiddleware({ app });
 
-app.get('*', (req, res) => res.sendFile(path.join(workingDir, 'dist', 'index.html')));
-console.log(path.join(workingDir, 'dist', 'index.html'));
+app.get('*', indexProxy);
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {

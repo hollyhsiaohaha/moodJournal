@@ -3,7 +3,12 @@ import { useLazyQuery } from '@apollo/client';
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
 import PropTypes from 'prop-types';
-import { GET_AUTOCOMPLETE, GET_JOURNAL_ID_BY_TITLE, GET_VOICE_TO_TEXT, GET_JOURNAL_BY_ID } from '../queries/journals';
+import {
+  GET_AUTOCOMPLETE,
+  GET_JOURNAL_ID_BY_TITLE,
+  GET_VOICE_TO_TEXT,
+  GET_JOURNAL_BY_ID,
+} from '../queries/journals';
 
 // helper functions
 function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, content, journalId }) {
@@ -20,11 +25,11 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
   // === helper functions ===
   const triggerAutocomplete = async (keyword) => {
     try {
-      const { data } = await getAutocomplete({ 
+      const { data } = await getAutocomplete({
         variables: { keyword },
-      })
+      });
       if (data) {
-        const autocompletList = data.autoCompleteJournals.map(journal => journal.title);
+        const autocompletList = data.autoCompleteJournals.map((journal) => journal.title);
         setAutoCompleteResults(autocompletList);
       }
     } catch (error) {
@@ -44,30 +49,32 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
       const keyword = textBeforeCursor.slice(lastOpeningBracket + 2, cursor.ch);
       keyword ? triggerAutocomplete(keyword) : null;
     } else setAutoCompleteResults([]);
-  }
+  };
 
   const customRender = async (plainText) => {
     const matches = [...plainText.matchAll(/\[\[(.*?)\]\]/g)];
-    const replacements = await Promise.all(matches.map(async (match) => {
-      const keyword = match[1];
-      try {
-        const { data } = await getJournalIdByTitle({ variables: { title: keyword } });
-        const journalId = data?.getJournalbyTitle?._id;
-        if (!journalId) {
-          // TODO: 看要不要放在一個 state 中，印出給 user 一個違規清單 ???
-          const message = `連結筆記不存在： ${keyword}`;
-          throw new Error(message);
+    const replacements = await Promise.all(
+      matches.map(async (match) => {
+        const keyword = match[1];
+        try {
+          const { data } = await getJournalIdByTitle({ variables: { title: keyword } });
+          const journalId = data?.getJournalbyTitle?._id;
+          if (!journalId) {
+            // TODO: 看要不要放在一個 state 中，印出給 user 一個違規清單 ???
+            const message = `連結筆記不存在： ${keyword}`;
+            throw new Error(message);
+          }
+          const domain = window.location.origin;
+          return {
+            match,
+            replacement: `[${keyword}](${domain}/journal/${journalId})`,
+          };
+        } catch (error) {
+          console.error(error);
+          return { match, replacement: keyword };
         }
-        const domain = window.location.origin;
-        return {
-          match,
-          replacement: `[${keyword}](${domain}/journal/${journalId})`
-        };
-      } catch (error) {
-        console.error(error);
-        return { match, replacement: keyword };
-      }
-    }));
+      }),
+    );
 
     let customRenderedText = plainText;
     replacements.forEach(({ match, replacement }) => {
@@ -81,11 +88,12 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
     easyMDEInstance.current = new EasyMDE({
       element: editorRef.current,
       initialValue: content,
+      spellChecker: false,
       previewRender: (plainText, preview) => {
-        setTimeout( async () => {
+        setTimeout(async () => {
           preview.innerHTML = await customRender(plainText);
-      }, 100);
-        return "Loading...";
+        }, 100);
+        return 'Loading...';
       },
     });
 
@@ -93,24 +101,24 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
     return () => {
       const ele = document.querySelector('.EasyMDEContainer');
       ele?.remove();
-    }
+    };
   }, []);
-  
+
   useEffect(() => {
     const getJournalInfo = async () => {
-      const {data} = await getJournalById({variables: {id: journalId}});
-      easyMDEInstance.current.value(data.getJournalbyId.content)
-    }
+      const { data } = await getJournalById({ variables: { id: journalId } });
+      easyMDEInstance.current.value(data.getJournalbyId.content);
+    };
     if (journalId) getJournalInfo();
   }, [journalId]);
 
   // === useEffect for audio filename update ===
   useEffect(() => {
     const voiceToText = async (fileName) => {
-      const {data, error} = await getVoiceToText({variables: { fileName }});
+      const { data, error } = await getVoiceToText({ variables: { fileName } });
       if (error) return setVoiceToTextResults('錯誤：目前無法進行 voice to text');
       if (data.voiceToText) return setVoiceToTextResults(data.voiceToText);
-    }
+    };
     if (audioNameS3) {
       const fileName = audioNameS3;
       const currentContent = easyMDEInstance.current.value();
@@ -122,14 +130,14 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
       setAudioNameS3('');
       voiceToText(fileName);
     }
-  }, [audioNameS3, setAudioNameS3, getVoiceToText])
+  }, [audioNameS3, setAudioNameS3, getVoiceToText]);
 
   useEffect(() => {
     const voiceToText = voiceToTextResults;
     const currentContent = easyMDEInstance.current.value();
     easyMDEInstance.current.value(`${currentContent}\n${voiceToText}`);
     setVoiceToTextResults('');
-  }, [voiceToTextResults])
+  }, [voiceToTextResults]);
 
   //  === Autocomplete List ===
   const renderAutocompleteList = () => {
@@ -162,8 +170,8 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
       const lastOpeningBracket = textBeforeCursor.lastIndexOf('[[');
       cm.replaceRange(
         `${selectedTitle}]]`,
-        { line: cursor.line, ch: lastOpeningBracket + 2},
-        cursor
+        { line: cursor.line, ch: lastOpeningBracket + 2 },
+        cursor,
       );
       setAutoCompleteResults([]);
     }
@@ -178,7 +186,6 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
     return { top: 0, left: 0 };
   };
   //  ===========================
-
 
   return (
     <>

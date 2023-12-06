@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
@@ -21,6 +21,11 @@ function Signup() {
     var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     return re.test(email);
   };
+
+  useEffect(() => {
+    const token = Cookies.get('JWT_TOKEN');
+    token ? navigate('/home') : null;
+  }, []);
 
   const submit = async () => {
     setLoading(true);
