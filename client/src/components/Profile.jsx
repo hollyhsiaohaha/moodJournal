@@ -17,13 +17,13 @@ function Profile() {
 
   return (
     <>
-    <h1 className="text-left ml-8">Profile</h1>
-    <div className="flex flex-wrap flex-column text-left ml-8">
-      <p>{`Id: ${userInfoState.id}`}</p>
-      <p>{`Name: ${userInfoState.name}`}</p>
-      <p>{`Email: ${userInfoState.email}`}</p>
-      <Button label="Sign Out" onClick={signOut}/>
-    </div>
+      <h1 className="text-left ml-8">Profile</h1>
+      <div className="flex flex-wrap flex-column text-left ml-8">
+        <p>{`Id: ${userInfoState.id}`}</p>
+        <p>{`Name: ${userInfoState.name}`}</p>
+        <p>{`Email: ${userInfoState.email}`}</p>
+        <Button label="Sign Out" onClick={signOut}/>
+      </div>
     </>
   );
 }
