@@ -16,6 +16,11 @@ const token =
 const query = GET_JOURNALS_BY_USER;
 const payload = { query, operationName: 'GetJournalsbyUserId' };
 
+// === GET_AUTOCOMPLETE ===
+// const query = GET_AUTOCOMPLETE;
+// const variables = { keyword: 'Ap' };
+// const payload = { query, variables, operationName: 'AutoCompleteJournals' };
+
 // === GET_JOURNAL_ID_BY_TITLE ===
 // const query = GET_JOURNAL_ID_BY_TITLE;
 // const variables = { title: '子華' };
@@ -25,11 +30,6 @@ const payload = { query, operationName: 'GetJournalsbyUserId' };
 // const query = GET_BACKLINK;
 // const variables = { id: '65570b7a77238dc23a63ac77' };
 // const payload = { query, variables, operationName: 'GetBackLinkedJournals' };
-
-// === GET_AUTOCOMPLETE ===
-// const query = GET_AUTOCOMPLETE;
-// const variables = { keyword: 'Ap' };
-// const payload = { query, variables, operationName: 'AutoCompleteJournals' };
 
 // === SEARCH_JOURNALS ===
 // const query = SEARCH_JOURNALS;
@@ -54,8 +54,8 @@ export const options = {
   // == stress ==
   stages: [
     { duration: '10m', target: 200 }, // traffic ramp-up from 1 to a higher 200 users over 10 minutes.
-    // { duration: '30m', target: 200 }, // stay at higher 200 users for 30 minutes
-    // { duration: '5m', target: 0 }, // ramp-down to 0 users
+    { duration: '30m', target: 200 }, // stay at higher 200 users for 30 minutes
+    { duration: '5m', target: 0 }, // ramp-down to 0 users
   ],
 };
 
