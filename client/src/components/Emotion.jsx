@@ -40,7 +40,6 @@ function Emotion({
     return resArray;
   };
 
-  // TODO: 要再加父節點
   const ArrayToNodes = (array, nodeList) => {
     const nodesMapping = {};
     const nodes = {};
@@ -53,6 +52,7 @@ function Emotion({
     for (const item of array) {
       const key = nodesMapping[item];
       nodes[key] = { checked: true, partialChecked: false };
+      nodes[key.split('-')[0]] = { checked: false, partialChecked: true };
     }
     return nodes;
   };
@@ -105,6 +105,7 @@ function Emotion({
   }, [journalId]);
 
   useEffect(() => {
+    console.log(selectedFeelingNodes);
     setMoodFeelings(nodesToArray(selectedFeelingNodes, feelingNodes));
   }, [selectedFeelingNodes]);
 
@@ -152,7 +153,7 @@ function Emotion({
           <Knob value={moodScore} onChange={(e) => setMoodScore(e.value)} min={1} max={10} />
         </div>
         <div className="mr-5">
-        <h4>感受</h4>
+          <h4>感受</h4>
           <TreeSelect
             value={selectedFeelingNodes}
             onChange={(e) => setSelectedFeelingNodes(e.value)}
