@@ -16,6 +16,16 @@ function Emotion({
   content,
   journalId,
 }) {
+  const [feelingNodes, setFeelingNodes] = useState(null);
+  const [selectedFeelingNodes, setSelectedFeelingNodes] = useState(null);
+  const [factorNodes, setFactorNodes] = useState(null);
+  const [selectedFactorNodes, setSelectedFactorNodes] = useState(null);
+  const fetchPolicy = 'network-only';
+  const [getFeelings] = useLazyQuery(GET_FEELINGS, fetchPolicy);
+  const [getFactors] = useLazyQuery(GET_FACTORS, fetchPolicy);
+  const [getSentimentAnalysis] = useLazyQuery(SENTIMENT_ANALYSIS, fetchPolicy);
+  const [loading, setLoading] = useState(false);
+
   const nodesToArray = (nodes, nodeList) => {
     const resArray = [];
     if (!nodes) return resArray;
@@ -30,6 +40,7 @@ function Emotion({
     return resArray;
   };
 
+  // TODO: 要再加父節點
   const ArrayToNodes = (array, nodeList) => {
     const nodesMapping = {};
     const nodes = {};
@@ -45,14 +56,6 @@ function Emotion({
     }
     return nodes;
   };
-  const [feelingNodes, setFeelingNodes] = useState(null);
-  const [selectedFeelingNodes, setSelectedFeelingNodes] = useState(null);
-  const [factorNodes, setFactorNodes] = useState(null);
-  const [selectedFactorNodes, setSelectedFactorNodes] = useState(null);
-  const [getFeelings] = useLazyQuery(GET_FEELINGS);
-  const [getFactors] = useLazyQuery(GET_FACTORS);
-  const [getSentimentAnalysis] = useLazyQuery(SENTIMENT_ANALYSIS);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const initFeelingNodes = async () => {
