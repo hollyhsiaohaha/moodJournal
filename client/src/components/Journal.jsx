@@ -130,30 +130,28 @@ function Journal() {
     <>
       <Toast ref={toastBC} position="bottom-center" onRemove={clearToast} />
       <div className="card flex justify-content-center">
-        <SelectButton
-          disabled={true}
-          value={type}
-          allowEmpty={false}
-          onChange={(e) => setType(e.value)}
-          options={journalTypeOption}
-        />
-      </div>
-      <div className="card flex justify-content-center">
-        {type === 'note' ? (
-          <span className="p-float-label">
-            <InputText id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <label htmlFor="title">Title</label>
-          </span>
-        ) : (
-          <div className="card flex justify-content-center">
-            <Calendar
-              value={date}
-              onChange={(e) => setDate(e.value)}
-              dateFormat="yy-mm-dd"
-              showIcon
-            />
-          </div>
-        )}
+        <div className="mr-5">
+          <SelectButton
+            disabled={true}
+            value={type}
+            allowEmpty={false}
+            onChange={(e) => setType(e.value)}
+            options={journalTypeOption}
+          />
+        </div>
+      {type === 'note' ? (
+        <span className="p-float-label">
+          <InputText id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <label htmlFor="title">Title</label>
+        </span>
+      ) : (
+          <Calendar
+            value={date}
+            onChange={(e) => setDate(e.value)}
+            dateFormat="yy-mm-dd"
+            showIcon
+          />
+      )}
       </div>
       <AudioRecording audioNameS3={audioNameS3} setAudioNameS3={setAudioNameS3} />
       <MarkdownEditor

@@ -143,30 +143,38 @@ function Emotion({
     <>
       <h3>情緒</h3>
       <Button label="情緒偵測" severity="secondary" loading={loading} onClick={emotionAnalysis} />
-      <h4>分數</h4>
-      <Knob value={moodScore} onChange={(e) => setMoodScore(e.value)} min={1} max={10} />
-      <h4>感受</h4>
-      <TreeSelect
-        value={selectedFeelingNodes}
-        onChange={(e) => setSelectedFeelingNodes(e.value)}
-        options={feelingNodes}
-        metaKeySelection={false}
-        className="md:w-20rem w-full"
-        selectionMode="checkbox"
-        display="chip"
-        placeholder="Select Items"
-      ></TreeSelect>
-      <h4>影響因素</h4>
-      <TreeSelect
-        value={selectedFactorNodes}
-        onChange={(e) => setSelectedFactorNodes(e.value)}
-        options={factorNodes}
-        metaKeySelection={false}
-        className="md:w-20rem w-full"
-        selectionMode="checkbox"
-        display="chip"
-        placeholder="Select Items"
-      ></TreeSelect>
+      <div className="card flex justify-content-center">
+        <div className="mr-8">
+          <h4>分數</h4>
+          <Knob value={moodScore} onChange={(e) => setMoodScore(e.value)} min={1} max={10} />
+        </div>
+        <div className="mr-5">
+        <h4>感受</h4>
+          <TreeSelect
+            value={selectedFeelingNodes}
+            onChange={(e) => setSelectedFeelingNodes(e.value)}
+            options={feelingNodes}
+            metaKeySelection={false}
+            className="md:w-20rem w-full"
+            selectionMode="checkbox"
+            display="chip"
+            placeholder="Select Items"
+          ></TreeSelect>
+        </div>
+        <div className="mr-5">
+          <h4>影響因素</h4>
+          <TreeSelect
+            value={selectedFactorNodes}
+            onChange={(e) => setSelectedFactorNodes(e.value)}
+            options={factorNodes}
+            metaKeySelection={false}
+            className="md:w-20rem w-full"
+            selectionMode="checkbox"
+            display="chip"
+            placeholder="Select Items"
+          ></TreeSelect>
+        </div>
+      </div>
     </>
   );
 }
