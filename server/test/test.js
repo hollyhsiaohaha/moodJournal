@@ -2,9 +2,9 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import {
   GET_JOURNALS_BY_USER,
+  GET_AUTOCOMPLETE,
   GET_JOURNAL_ID_BY_TITLE,
   GET_BACKLINK,
-  GET_AUTOCOMPLETE,
   SEARCH_JOURNALS,
 } from './testConf.js';
 
@@ -13,13 +13,13 @@ const token =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTU0YWQ1NjM1NmYzMzI1OWYxNWIxMDMiLCJuYW1lIjoidGVzdCIsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImlhdCI6MTcwMjAxNTE1MSwiZXhwIjoxNzAyMTAxNTUxfQ.oAhtge5OKUdcHrbUbiPIldTNVJGhrQxz2KS9gUoSEXQ';
 
 // === GET_JOURNALS_BY_USER ===
-const query = GET_JOURNALS_BY_USER;
-const payload = { query, operationName: 'GetJournalsbyUserId' };
+// const query = GET_JOURNALS_BY_USER;
+// const payload = { query, operationName: 'GetJournalsbyUserId' };
 
 // === GET_AUTOCOMPLETE ===
-// const query = GET_AUTOCOMPLETE;
-// const variables = { keyword: 'Ap' };
-// const payload = { query, variables, operationName: 'AutoCompleteJournals' };
+const query = GET_AUTOCOMPLETE;
+const variables = { keyword: 'Ap' };
+const payload = { query, variables, operationName: 'AutoCompleteJournals' };
 
 // === GET_JOURNAL_ID_BY_TITLE ===
 // const query = GET_JOURNAL_ID_BY_TITLE;
