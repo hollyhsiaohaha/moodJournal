@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { TabMenu } from 'primereact/tabmenu';
 import { AutoComplete } from 'primereact/autocomplete';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserState } from '../state/state.js';
 import { SEARCH_JOURNALS } from '../queries/journals';
 import { useLazyQuery } from '@apollo/client';
 
 function Header() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { loginState } = useUserState();
   const [searchValue, setSearchValue] = useState('');
   const [searchItems, setSearchItems] = useState([]);
@@ -22,6 +23,23 @@ function Header() {
     getSuggestions();
   };
 
+  const getActiveIndex = () => {
+    switch(location.pathname) {
+      case '/home':
+        return 0;
+      case '/journalList':
+        return 1;
+      case '/dashboard':
+        return 2;
+      case '/graph':
+        return 3;
+      case '/profile':
+        return 4;
+      default:
+        return -1; // 如果沒有匹配的路徑，則不選擇任何項目
+    }
+  }
+  
   const select = (event) => {
     setSearchValue('');
     if (event.value) return navigate(`/journal/${event.value._id}`);
@@ -80,7 +98,7 @@ function Header() {
     <>
       {loginState ? (
         <div className="card flex justify-content-between">
-          <TabMenu model={menuItems} />
+          <TabMenu model={menuItems} activeIndex={getActiveIndex()}/>
           <AutoComplete
             className="p-inputtext-sm"
             placeholder="search"
