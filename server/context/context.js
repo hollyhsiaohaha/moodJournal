@@ -19,6 +19,7 @@ const context = async ({ req }) => {
     journalUserLoader: journalUserDataloader(),
     journalLinkLoader: journalLinkDataloader(),
   };
+  const io = req.app.get('socketio');
   const operationName = req.body.operationName;
   const notRequireAuthOperations = [
     'SignUp',
@@ -37,6 +38,7 @@ const context = async ({ req }) => {
     return {
       user: payload,
       loaders,
+      io,
     };
   } catch (error) {
     logger.error(error);

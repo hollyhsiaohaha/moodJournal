@@ -4,6 +4,7 @@ import { GET_JOURNALS_LINKED_TYPE } from '../queries/journals.js';
 import { JournalTypeColorMapping } from '../utils/colorMapping.js';
 import { useNavigate } from 'react-router-dom';
 import { ListBox } from 'primereact/listbox';
+import { io } from 'socket.io-client';
 import * as d3 from 'd3';
 
 function Graph() {
@@ -51,12 +52,30 @@ function Graph() {
 
   const refreshForceGraph = async (types) => {
     const emptyData = { nodes: [], links: [] };
+    console.log(types)
     if (!types) return setGraphData(emptyData);
     const res = await GetJournalsLinkedType();
     const graphJournals = res.data.getJournalsbyUserId;
     const graphData = parseGraphData(graphJournals, types);
     setGraphData(graphData);
   };
+
+  useEffect(() => {
+    const socket = io(import.meta.env.VITE_URI);
+    socket.on('connection', () => {
+      console.log('[Client] connected to server');
+    });
+    socket.on('message', (msg) => {
+      if (msg === 'journal update') {
+        console.log('refresh due to journal update');
+        refreshForceGraph(selectedTypes.map((typeOption) => typeOption.name));
+      }
+    });
+    socket.on('disconnect', () => {
+      console.log('[Client] disconnected');
+    });
+    return () => socket.disconnect();
+  }, []);
 
   useEffect(() => {
     refreshForceGraph(selectedTypes.map((typeOption) => typeOption.name));
@@ -90,7 +109,7 @@ function Graph() {
       .attr('stroke-opacity', 0.6)
       .selectAll('line')
       .data(links)
-      .join('line')
+      .join('line');
 
     const node = svg
       .append('g')
