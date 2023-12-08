@@ -228,7 +228,7 @@ function Dashboard() {
           optionLabel="name"
           className="w-full md:w-14rem"
         />
-        <Button label="Apply" onClick={applyChange} />
+        <Button label="更新圖表" onClick={applyChange} />
       </div>
       {selectedView && date ? (
         <div>

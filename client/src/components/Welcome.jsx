@@ -31,7 +31,7 @@ function Welcome() {
       </div>
       <div className="card flex justify-content-center">
         <Button
-          label="Sign In or Sign Up >>>"
+          label="登入或註冊 >>>"
           link
           onClick={() => {
             navigate('/signin');

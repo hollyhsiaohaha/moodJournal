@@ -40,35 +40,35 @@ function Header() {
 
   const menuItems = [
     {
-      label: 'Home',
+      label: '主頁',
       icon: 'pi pi-fw pi-home',
       command: () => {
         navigate('/home');
       },
     },
     {
-      label: 'Journals',
+      label: '筆記',
       icon: 'pi pi-fw pi-inbox',
       command: () => {
         navigate('/journalList');
       },
     },
     {
-      label: 'Dashboard',
+      label: '儀表板',
       icon: 'pi pi-fw pi-chart-bar',
       command: () => {
         navigate('/dashboard');
       },
     },
     {
-      label: 'Graph',
+      label: '力導向圖',
       icon: 'pi pi-fw pi-share-alt',
       command: () => {
         navigate('/graph');
       },
     },
     {
-      label: 'User',
+      label: '使用者',
       icon: 'pi pi-fw pi-user',
       command: () => {
         navigate('/profile');
