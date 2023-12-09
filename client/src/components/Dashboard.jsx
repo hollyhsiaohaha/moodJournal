@@ -180,12 +180,14 @@ function Dashboard() {
   };
 
   const applyChange = () => {
-    if (selectedView && date) {
-      refreshMoodScoreLineChart(selectedView, date);
-      refreshFeelingPieChart(selectedView, date);
-      refreshFactorScatterChart(selectedView, date);
-      refreshKeywordBarChart(selectedView, date, selectedAutocompleteValue);
-    }
+    setTimeout(() => {
+      if (selectedView && date) {
+        refreshMoodScoreLineChart(selectedView, date);
+        refreshFeelingPieChart(selectedView, date);
+        refreshFactorScatterChart(selectedView, date);
+        refreshKeywordBarChart(selectedView, date, selectedAutocompleteValue);
+      }
+    }, 50)
   };
 
   useEffect(() => {
@@ -200,7 +202,10 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_URI);
+    const { protocol, hostname } = window.location;
+    const port = hostname === 'localhost' ? ':3000' : '';
+    const uri = `${protocol}//${hostname}${port}`;
+    const socket = io(uri);
     socket.on('connection', () => {
       console.log('[Client] connected to server');
     });

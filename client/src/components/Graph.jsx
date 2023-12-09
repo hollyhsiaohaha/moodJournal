@@ -61,7 +61,10 @@ function Graph() {
   };
 
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_URI);
+    const { protocol, hostname } = window.location;
+    const port = hostname === 'localhost' ? ':3000' : '';
+    const uri = `${protocol}//${hostname}${port}`;
+    const socket = io(uri);
     socket.on('connection', () => {
       console.log('[Client] connected to server');
     });
