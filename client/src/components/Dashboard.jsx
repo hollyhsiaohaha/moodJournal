@@ -18,10 +18,13 @@ import 'chartjs-adapter-date-fns';
 import 'chart.js/auto';
 import { io } from 'socket.io-client';
 
-
 function Dashboard() {
-  const [date, setDate] = useState(null);
-  const [selectedView, setSelectedView] = useState(null);
+  const views = [
+    { name: 'Month', axisScale: 'day' },
+    { name: 'Year', axisScale: 'month' },
+  ];
+  const [date, setDate] = useState(new Date());
+  const [selectedView, setSelectedView] = useState(views[0]);
   const [lineChartData, setLineChartData] = useState({});
   const [linechartOptions, setLineChartOptions] = useState({});
   const [pieChartData, setPieChartData] = useState({});
@@ -44,11 +47,6 @@ function Dashboard() {
   const textColor = documentStyle.getPropertyValue('--text-color');
   const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
   const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
-
-  const views = [
-    { name: 'Month', axisScale: 'day' },
-    { name: 'Year', axisScale: 'month' },
-  ];
 
   const refreshMoodScoreLineChart = async (view, selectedDate) => {
     const period = view.name;
@@ -123,13 +121,18 @@ function Dashboard() {
     });
     let maxY = 1;
     datasets.forEach((item) => {
-      item.data[0]?.y > maxY ? maxY = item.data[0]?.y : null;
+      item.data[0]?.y > maxY ? (maxY = item.data[0]?.y) : null;
     });
     const data = { datasets };
     const options = {
       scales: {
         x: { title: { display: true, text: '平均分數' }, min: 0, max: 10 },
-        y: { title: { display: true, text: '提及次數' }, ticks: { stepSize: 1 } , min: 0, max: Math.ceil(maxY * 1.2) },
+        y: {
+          title: { display: true, text: '提及次數' },
+          ticks: { stepSize: 1 },
+          min: 0,
+          max: Math.ceil(maxY * 1.2),
+        },
       },
       elements: { point: { radius: 8 } },
     };
@@ -180,26 +183,15 @@ function Dashboard() {
   };
 
   const applyChange = () => {
-    setTimeout(() => {
-      if (selectedView && date) {
-        refreshMoodScoreLineChart(selectedView, date);
-        refreshFeelingPieChart(selectedView, date);
-        refreshFactorScatterChart(selectedView, date);
-        refreshKeywordBarChart(selectedView, date, selectedAutocompleteValue);
-      }
-    }, 50)
+    if (selectedView && date) {
+      refreshMoodScoreLineChart(selectedView, date);
+      refreshFeelingPieChart(selectedView, date);
+      refreshFactorScatterChart(selectedView, date);
+      refreshKeywordBarChart(selectedView, date, selectedAutocompleteValue);
+    }
   };
 
-  useEffect(() => {
-    const initSelectedView = views[0];
-    const initDate = new Date();
-    setSelectedView(initSelectedView);
-    setDate(initDate);
-    refreshMoodScoreLineChart(initSelectedView, initDate);
-    refreshFeelingPieChart(initSelectedView, initDate);
-    refreshFactorScatterChart(initSelectedView, initDate);
-    refreshKeywordBarChart(initSelectedView, initDate, selectedAutocompleteValue);
-  }, []);
+  useEffect(() => applyChange(), []);
 
   useEffect(() => {
     const { protocol, hostname } = window.location;

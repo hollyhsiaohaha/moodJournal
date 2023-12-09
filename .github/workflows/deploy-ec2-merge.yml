@@ -17,8 +17,8 @@ jobs:
           script: |
             echo "Hello from github action, start deploy main to ec2"
             cd /home/ubuntu/mood_journal
+            git switch main
             git pull
             cd /home/ubuntu/mood_journal/server
-            git switch main
             npm install
             npx pm2 restart mood-journal
