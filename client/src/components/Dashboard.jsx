@@ -16,6 +16,8 @@ import { Scatter } from 'react-chartjs-2';
 import { FeelingColorMapping, FactorColorMapping } from '../utils/colorMapping.js';
 import 'chartjs-adapter-date-fns';
 import 'chart.js/auto';
+import { io } from 'socket.io-client';
+
 
 function Dashboard() {
   const [date, setDate] = useState(null);
@@ -198,6 +200,23 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
+    const socket = io(import.meta.env.VITE_URI);
+    socket.on('connection', () => {
+      console.log('[Client] connected to server');
+    });
+    socket.on('message', (msg) => {
+      if (msg === 'journal update') {
+        console.log('refresh due to journal update');
+        applyChange();
+      }
+    });
+    socket.on('disconnect', () => {
+      console.log('[Client] disconnected');
+    });
+    return () => socket.disconnect();
+  }, []);
+
+  useEffect(() => {
     refreshKeywordBarChart(selectedView, date, selectedAutocompleteValue);
   }, [selectedAutocompleteValue]);
 
@@ -228,7 +247,7 @@ function Dashboard() {
           optionLabel="name"
           className="w-full md:w-14rem"
         />
-        <Button label="Apply" onClick={applyChange} />
+        <Button label="更新圖表" onClick={applyChange} />
       </div>
       {selectedView && date ? (
         <div>

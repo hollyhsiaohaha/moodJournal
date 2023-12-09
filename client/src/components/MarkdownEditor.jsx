@@ -17,11 +17,11 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
   const easyMDEInstance = useRef(null);
   const [autoCompleteResults, setAutoCompleteResults] = useState([]);
   const [voiceToTextResults, setVoiceToTextResults] = useState('');
-
-  const [getAutocomplete] = useLazyQuery(GET_AUTOCOMPLETE);
-  const [getJournalIdByTitle] = useLazyQuery(GET_JOURNAL_ID_BY_TITLE);
-  const [getVoiceToText] = useLazyQuery(GET_VOICE_TO_TEXT);
-  const [getJournalById] = useLazyQuery(GET_JOURNAL_BY_ID);
+  const fetchPolicy = 'network-only';
+  const [getAutocomplete] = useLazyQuery(GET_AUTOCOMPLETE, fetchPolicy);
+  const [getJournalIdByTitle] = useLazyQuery(GET_JOURNAL_ID_BY_TITLE, fetchPolicy);
+  const [getVoiceToText] = useLazyQuery(GET_VOICE_TO_TEXT, fetchPolicy);
+  const [getJournalById] = useLazyQuery(GET_JOURNAL_BY_ID, fetchPolicy);
 
   // === helper functions ===
   const triggerAutocomplete = async (keyword) => {

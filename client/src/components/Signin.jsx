@@ -70,10 +70,10 @@ function Signin() {
           <label htmlFor="password">Password</label>
         </span>
       </div>
-      <Button label="Sign In" loading={loading} onClick={submit} />
+      <Button label="登入" loading={loading} onClick={submit} />
       <br/>
       <Button
-          label="Sign Up >>>"
+          label="註冊 >>>"
           link
           onClick={() => {
             navigate('/signup');

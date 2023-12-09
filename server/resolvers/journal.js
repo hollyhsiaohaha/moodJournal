@@ -198,6 +198,7 @@ const journalResolver = {
       context,
     ) {
       const userId = context.user._id;
+      const { io } = context;
       const linkedNoteIds = await getLinkedNoteIds(content, userId);
       const journal = new Journal({
         title,
@@ -214,6 +215,7 @@ const journalResolver = {
         const res = await journal.save();
         logger.info('Journal created:');
         logger.info(res);
+        io.emit('message', 'journal update');
         return { ...res._doc };
       } catch (error) {
         if (error.message.includes('duplicate key error')) {
@@ -225,20 +227,25 @@ const journalResolver = {
     },
     async deleteJournal(_, { ID }, context) {
       const userId = context.user._id;
+      const { io } = context;
       const res = await deleteSingleJournal(ID, userId);
+      io.emit('message', 'journal update');
       return res;
     },
     async deleteJournals(_, { Ids }, context) {
       const userId = context.user._id;
+      const { io } = context;
       const resArray = [];
       for (const journalId of Ids) {
         const res = await deleteSingleJournal(journalId, userId);
         resArray.push(res);
       }
+      io.emit('message', 'journal update');
       return resArray;
     },
     async updateJournal(_, { ID, journalInput }, context) {
       const userId = context.user._id;
+      const { io } = context;
       const targetJournal = await Journal.findById(ID);
       if (!targetJournal || targetJournal.userId.toString() !== userId)
         throwCustomError('Target journal not exist', ErrorTypes.BAD_USER_INPUT);
@@ -274,6 +281,7 @@ const journalResolver = {
         }
         await session.commitTransaction();
         await session.endSession();
+        io.emit('message', 'journal update');
         return updatedJournal;
       } catch (error) {
         await session.abortTransaction();

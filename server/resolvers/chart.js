@@ -43,6 +43,29 @@ const chartResolver = {
       const chartData = { labels, data };
       return chartData;
     },
+    // async getFeelingPieChart(_, { period, selectedDate }, context) {
+    //   const journals = await getPeriodJournals(context.user._id, period, selectedDate);
+    //   const feelingsCount = {};
+    //   journals.forEach((journal) => {
+    //     journal.moodFeelings.forEach((mood) => {
+    //       feelingsCount[mood] ? (feelingsCount[mood] += 1) : (feelingsCount[mood] = 1);
+    //     });
+    //   });
+    //   const sortFeelingsCount = {};
+    //   feelingOptions.forEach((key) => {
+    //     if (Object.prototype.hasOwnProperty.call(feelingsCount, key)) {
+    //       sortFeelingsCount[key] = feelingsCount[key];
+    //     }
+    //   });
+    //   const labels = [];
+    //   const data = [];
+    //   for (const [key, value] of Object.entries(sortFeelingsCount)) {
+    //     labels.push(key);
+    //     data.push(value);
+    //   }
+    //   const chartData = { labels, data };
+    //   return chartData;
+    // },
     async getFeelingPieChart(_, { period, selectedDate }, context) {
       const journals = await getPeriodJournals(context.user._id, period, selectedDate);
       const feelingsCount = {};
@@ -51,17 +74,13 @@ const chartResolver = {
           feelingsCount[mood] ? (feelingsCount[mood] += 1) : (feelingsCount[mood] = 1);
         });
       });
-      const sortFeelingsCount = {};
-      feelingOptions.forEach((key) => {
-        if (Object.prototype.hasOwnProperty.call(feelingsCount, key)) {
-          sortFeelingsCount[key] = feelingsCount[key];
-        }
-      });
       const labels = [];
       const data = [];
-      for (const [key, value] of Object.entries(sortFeelingsCount)) {
-        labels.push(key);
-        data.push(value);
+      for (const category of Feelings) {
+        labels.push(category.name);
+        let countSum = 0;
+        category.values.forEach((feeling) => (countSum += feelingsCount[feeling] || 0));
+        data.push(countSum);
       }
       const chartData = { labels, data };
       return chartData;
