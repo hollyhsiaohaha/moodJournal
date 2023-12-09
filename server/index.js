@@ -15,6 +15,7 @@ import typeDefs from './schemas/typeDefs.js';
 import resolvers from './resolvers/resolvers.js';
 import context from './context/context.js';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import { Server } from 'socket.io';
 
 dotenv.config();
 const filename = fileURLToPath(import.meta.url);
@@ -38,7 +39,7 @@ const log = fs.createWriteStream(path.join(workingDir, 'logs', 'request.log'), {
   flags: 'a',
 });
 
-// CORS setting for React
+// CORS setting for React and Apollo sandbox
 app.use(
   cors({
     origin: ['http://localhost:5173', 'https://studio.apollographql.com'],
@@ -68,15 +69,15 @@ app.use('/api', apiRoutes);
 
 connectDB();
 
-const server = new ApolloServer({
+const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
   introspection: true,
   playground: true,
   context,
 });
-await server.start();
-server.applyMiddleware({ app });
+await apolloServer.start();
+apolloServer.applyMiddleware({ app });
 
 app.get('*', indexProxy);
 
@@ -96,6 +97,23 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   logger.info(`This app is listening to localhost: ${port}`);
+});
+
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:5173', // The client URL
+    methods: ['GET', 'POST'],
+  },
+});
+app.set('socketio', io);
+io.on('connection', (socket) => {
+  logger.info('[Server] a user connected');
+  socket.on('disconnect', () => {
+    logger.info('[Server] a user disconnected');
+  });
+  socket.on('connect_error', (err) => {
+    logger.error(`[Server] connect_error due to ${err.message}`);
+  });
 });
