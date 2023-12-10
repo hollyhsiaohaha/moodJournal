@@ -16,6 +16,10 @@ import resolvers from './resolvers/resolvers.js';
 import context from './context/context.js';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { Server } from 'socket.io';
+// import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
+// import Keyv from 'keyv';
+// import { KeyvAdapter } from '@apollo/utils.keyvadapter';
+// import responseCachePlugin from '@apollo/server-plugin-response-cache';
 
 dotenv.config();
 const filename = fileURLToPath(import.meta.url);
@@ -74,8 +78,12 @@ const apolloServer = new ApolloServer({
   resolvers,
   introspection: true,
   playground: true,
+  debug: true,
   context,
+  // cache: new InMemoryLRUCache(),
+  // plugins: [responseCachePlugin()],
 });
+
 await apolloServer.start();
 apolloServer.applyMiddleware({ app });
 

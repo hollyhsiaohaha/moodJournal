@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { journalUserDataloader, journalLinkDataloader } from '../dataloader/journal.js';
 import { throwCustomError, ErrorTypes } from '../utils/errorHandler.js';
 import { logger } from '../utils/logger.js';
+import { redisClient } from '../utils/redis.js';
 
 const { JWT_SECRET } = process.env;
 
@@ -39,6 +40,7 @@ const context = async ({ req }) => {
       user: payload,
       loaders,
       io,
+      redisClient,
     };
   } catch (error) {
     logger.error(error);
