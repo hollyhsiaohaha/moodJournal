@@ -4,7 +4,6 @@ import { throwCustomError, ErrorTypes } from '../utils/errorHandler.js';
 import mongoose from 'mongoose';
 
 // === helper functions ===
-const { REDIS_ENABLED, REDIS_EXPIRED } = process.env;
 const getLinkedNoteIds = async (content, userId) => {
   const linkedNoteIds = [];
   const uniqLinkedNoteIds = {}; // to make sure linkedNoteIds with unique values
@@ -84,15 +83,11 @@ const deleteSingleJournal = async (journalId, userId) => {
     await session.endSession();
     logger.error(error.stack);
     return false;
-    // throwCustomError('Error occur when journal deleting', ErrorTypes.INTERNAL_SERVER_ERROR);
   }
-};
-const cacheInvalid = async (key, client) => {
-  Number(REDIS_ENABLED) && client?.status === 'ready' ? await client.del(key) : null;
 };
 
 // === resolvers ===
-const journalCacheResolver = {
+const journalResolver = {
   Journal: {
     user: async (parent, args, context) => {
       const { loaders } = context;
@@ -123,35 +118,8 @@ const journalCacheResolver = {
     },
     async getJournalsbyUserId(_, args, context, info) {
       const userId = context.user._id;
-      const { redisClient } = context;
       // info.cacheControl.setCacheHint({ maxAge: 30 });
-      let res;
-      if (Number(REDIS_ENABLED) && redisClient?.status === 'ready') {
-        const cacheRes = await redisClient.get(userId);
-        if (cacheRes) {
-          console.log('data from cache');
-          res = JSON.parse(cacheRes).map((journal) => {
-            return {
-              _id: new mongoose.Types.ObjectId(journal._id),
-              title: journal.title,
-              type: journal.type,
-              content: journal.content,
-              userId: new mongoose.Types.ObjectId(journal.userId),
-              linkedNoteIds: journal.linkedNoteIds.map((id) => new mongoose.Types.ObjectId(id)),
-              moodFeelings: journal.moodFeelings,
-              moodFactors: journal.moodFactors,
-              createdAt: new Date(journal.createdAt),
-              updatedAt: new Date(journal.updatedAt),
-            };
-          });
-          return res;
-        }
-        res = await Journal.find({ userId });
-        await redisClient.set(userId, JSON.stringify(res), 'EX', REDIS_EXPIRED);
-        console.log('data from db');
-        return res;
-      }
-      res = await Journal.find({ userId });
+      const res = await Journal.find({ userId });
       return res;
     },
     async getUserLatestJournals(_, { amount, type }, context) {
@@ -230,7 +198,7 @@ const journalCacheResolver = {
       context,
     ) {
       const userId = context.user._id;
-      const { io, redisClient } = context;
+      const { io } = context;
       const linkedNoteIds = await getLinkedNoteIds(content, userId);
       const journal = new Journal({
         title,
@@ -247,7 +215,6 @@ const journalCacheResolver = {
         const res = await journal.save();
         logger.info('Journal created:');
         logger.info(res);
-        await cacheInvalid(userId, redisClient);
         io.emit('message', 'journal update');
         return { ...res._doc };
       } catch (error) {
@@ -260,27 +227,25 @@ const journalCacheResolver = {
     },
     async deleteJournal(_, { ID }, context) {
       const userId = context.user._id;
-      const { io, redisClient } = context;
+      const { io } = context;
       const res = await deleteSingleJournal(ID, userId);
-      await cacheInvalid(userId, redisClient);
       io.emit('message', 'journal update');
       return res;
     },
     async deleteJournals(_, { Ids }, context) {
       const userId = context.user._id;
-      const { io, redisClient } = context;
+      const { io } = context;
       const resArray = [];
       for (const journalId of Ids) {
         const res = await deleteSingleJournal(journalId, userId);
         resArray.push(res);
       }
-      await cacheInvalid(userId, redisClient);
       io.emit('message', 'journal update');
       return resArray;
     },
     async updateJournal(_, { ID, journalInput }, context) {
       const userId = context.user._id;
-      const { io, redisClient } = context;
+      const { io } = context;
       const targetJournal = await Journal.findById(ID);
       if (!targetJournal || targetJournal.userId.toString() !== userId)
         throwCustomError('Target journal not exist', ErrorTypes.BAD_USER_INPUT);
@@ -316,7 +281,6 @@ const journalCacheResolver = {
         }
         await session.commitTransaction();
         await session.endSession();
-        await cacheInvalid(userId, redisClient);
         io.emit('message', 'journal update');
         return updatedJournal;
       } catch (error) {
@@ -331,4 +295,4 @@ const journalCacheResolver = {
   },
 };
 
-export default journalCacheResolver;
+export default journalResolver;
