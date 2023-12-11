@@ -1,7 +1,5 @@
 import { Client } from '@elastic/elasticsearch';
 import * as fs from 'fs';
-// import dotenv from 'dotenv';
-// dotenv.config();
 
 const { ELASTIC_USER, ELASTIC_PASSWORD } = process.env;
 
@@ -98,7 +96,6 @@ export const autoCompleteElasticSearch = async (userId, prefix) => {
 export const deleteIndex = async (userId) => {
   const indexName = `${userId}-autocomplete`;
   const isIndexExist = await elasticClient.indices.exists({ index: indexName });
-  // const isIndexExist = await checkIndexExist(userId);
   console.log('isIndexExist', isIndexExist);
   if (isIndexExist) {
     await elasticClient.indices.delete({ index: indexName });

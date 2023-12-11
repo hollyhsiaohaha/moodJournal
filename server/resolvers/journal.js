@@ -114,8 +114,13 @@ const cacheInvalid = async (key, client) => {
   Number(REDIS_ENABLED) && client?.status === 'ready' ? await client.del(key) : null;
 };
 
-const elasticSearchInvalid = async (userId) => {
-  Number(ELASTIC_SEARCH_ENABLED) ? await deleteIndex(userId) : null;
+const elasticSearchReload = async (userId) => {
+  if (Number(ELASTIC_SEARCH_ENABLED)) {
+    await deleteIndex(userId);
+    const journals = await Journal.find({ userId });
+    await insertElasticSearch(userId, journals);
+    console.log('autocomplete input elastic search');
+  }
 };
 
 // === resolvers ===
@@ -227,14 +232,10 @@ const journalCacheResolver = {
           const elasticRes = await autoCompleteElasticSearch(userId, keyword);
           console.log('autocomplete from elastic search');
           return elasticRes;
-        } else {
-          const journals = await Journal.find({ userId });
-          await insertElasticSearch(userId, journals);
-          console.log('autocomplete input elastic search');
         }
       }
-      console.log('autocomplete from DB');
       const res = await autoCompleteMongoAtlas(userId, keyword);
+      console.log('autocomplete from DB');
       return res;
     },
     async getBackLinkedJournals(_, { ID }, context) {
@@ -271,7 +272,7 @@ const journalCacheResolver = {
         logger.info('Journal created:');
         logger.info(res);
         await cacheInvalid(userId, redisClient);
-        await elasticSearchInvalid(userId);
+        await elasticSearchReload(userId);
         io.emit('message', 'journal update');
         return { ...res._doc };
       } catch (error) {
@@ -287,7 +288,7 @@ const journalCacheResolver = {
       const { io, redisClient } = context;
       const res = await deleteSingleJournal(ID, userId);
       await cacheInvalid(userId, redisClient);
-      await elasticSearchInvalid(userId);
+      await elasticSearchReload(userId);
       io.emit('message', 'journal update');
       return res;
     },
@@ -300,7 +301,7 @@ const journalCacheResolver = {
         resArray.push(res);
       }
       await cacheInvalid(userId, redisClient);
-      await elasticSearchInvalid(userId);
+      await elasticSearchReload(userId);
       io.emit('message', 'journal update');
       return resArray;
     },
@@ -343,7 +344,7 @@ const journalCacheResolver = {
         await session.commitTransaction();
         await session.endSession();
         await cacheInvalid(userId, redisClient);
-        await elasticSearchInvalid(userId);
+        await elasticSearchReload(userId);
         io.emit('message', 'journal update');
         return updatedJournal;
       } catch (error) {
