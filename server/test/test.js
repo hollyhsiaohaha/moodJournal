@@ -23,7 +23,7 @@ const payload = { query, operationName: 'GetJournalsbyUserId' };
 
 // === GET_AUTOCOMPLETE ===
 // const query = GET_AUTOCOMPLETE;
-// const variables = { keyword: 'Ap' };
+// const variables = { keyword: '第一百筆' };
 // const payload = { query, variables, operationName: 'AutoCompleteJournals' };
 
 // === GET_JOURNAL_ID_BY_TITLE ===
@@ -48,8 +48,8 @@ const headers = {
 
 export const options = {
   // == smoke ===
-  // vus: 3,
-  // duration: '3s',
+  vus: 3,
+  duration: '3s',
   // == load ==
   // stages: [
   //   { duration: '5m', target: 100 }, // traffic ramp-up from 1 to 100 users over 5 minutes.
@@ -63,17 +63,17 @@ export const options = {
   //   { duration: '5m', target: 0 }, // ramp-down to 0 users
   // ],
   // == spike ==
-  stages: [
-    { duration: '2m', target: 200 }, // fast ramp-up to a high point
-    // No plateau
-    { duration: '1m', target: 0 }, // quick ramp-down to 0 users
-  ],
+  // stages: [
+  //   { duration: '2m', target: 200 }, // fast ramp-up to a high point
+  //   // No plateau
+  //   { duration: '1m', target: 0 }, // quick ramp-down to 0 users
+  // ],
 };
 
 export default () => {
   const urlRes = http.post(url, JSON.stringify(payload), { headers });
   let responseBody = JSON.parse(urlRes.body);
-  // console.log('Response body:', responseBody);
+  console.log('Response body:', responseBody);
   // console.log('Data:', responseBody.data);
   // console.log('Errors:', responseBody.errors);
   check(urlRes, {
