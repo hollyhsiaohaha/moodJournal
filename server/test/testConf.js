@@ -30,6 +30,20 @@ export const GET_JOURNALS_BY_USER = `
   }
 `;
 
+export const GET_JOURNALS_LINKED_TYPE = `
+  query GetJournalsbyUserId {
+    getJournalsbyUserId {
+      _id
+      title
+      type
+      linkedNotes {
+        _id
+        type
+      }
+    }
+  }
+`;
+
 export const GET_JOURNAL_ID_BY_TITLE = `
 query GetJournalbyTitle($title: String!) {
   getJournalbyTitle(title: $title) {

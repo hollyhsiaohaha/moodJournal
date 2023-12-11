@@ -2,6 +2,7 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import {
   GET_JOURNALS_BY_USER,
+  GET_JOURNALS_LINKED_TYPE,
   GET_AUTOCOMPLETE,
   GET_JOURNAL_ID_BY_TITLE,
   GET_BACKLINK,
@@ -10,16 +11,20 @@ import {
 
 const url = 'https://mood-journal.holly-hsiao.com/graphql';
 const token =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTU0YWQ1NjM1NmYzMzI1OWYxNWIxMDMiLCJuYW1lIjoidGVzdCIsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImlhdCI6MTcwMjAxNTE1MSwiZXhwIjoxNzAyMTAxNTUxfQ.oAhtge5OKUdcHrbUbiPIldTNVJGhrQxz2KS9gUoSEXQ';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTcxNzRiMWYxOTY5NWQ2ZTcyYzNjNzUiLCJuYW1lIjoidGVzdDEiLCJlbWFpbCI6InRlc3QxQHRlc3QuY29tIiwiaWF0IjoxNzAyMjEyMDk3LCJleHAiOjE3MDIyOTg0OTd9.ZSjTw8jm8vqM7qYjCzg-PUS4DnimE4YwOrT83wKALxU';
 
 // === GET_JOURNALS_BY_USER ===
-// const query = GET_JOURNALS_BY_USER;
+const query = GET_JOURNALS_BY_USER;
+const payload = { query, operationName: 'GetJournalsbyUserId' };
+
+// === GET_JOURNALS_LINKED_TYPE ===
+// const query = GET_JOURNALS_LINKED_TYPE;
 // const payload = { query, operationName: 'GetJournalsbyUserId' };
 
 // === GET_AUTOCOMPLETE ===
-const query = GET_AUTOCOMPLETE;
-const variables = { keyword: 'Ap' };
-const payload = { query, variables, operationName: 'AutoCompleteJournals' };
+// const query = GET_AUTOCOMPLETE;
+// const variables = { keyword: 'Ap' };
+// const payload = { query, variables, operationName: 'AutoCompleteJournals' };
 
 // === GET_JOURNAL_ID_BY_TITLE ===
 // const query = GET_JOURNAL_ID_BY_TITLE;
@@ -52,10 +57,16 @@ export const options = {
   //   { duration: '5m', target: 0 }, // ramp-down to 0 users
   // ],
   // == stress ==
+  // stages: [
+  //   { duration: '10m', target: 200 }, // traffic ramp-up from 1 to a higher 200 users over 10 minutes.
+  //   { duration: '30m', target: 200 }, // stay at higher 200 users for 30 minutes
+  //   { duration: '5m', target: 0 }, // ramp-down to 0 users
+  // ],
+  // == spike ==
   stages: [
-    { duration: '10m', target: 200 }, // traffic ramp-up from 1 to a higher 200 users over 10 minutes.
-    { duration: '30m', target: 200 }, // stay at higher 200 users for 30 minutes
-    { duration: '5m', target: 0 }, // ramp-down to 0 users
+    { duration: '2m', target: 200 }, // fast ramp-up to a high point
+    // No plateau
+    { duration: '1m', target: 0 }, // quick ramp-down to 0 users
   ],
 };
 
