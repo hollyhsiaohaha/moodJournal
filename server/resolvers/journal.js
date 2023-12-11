@@ -6,7 +6,7 @@ import {
   insertElasticSearch,
   deleteIndex,
   autoCompleteElasticSearch,
-} from '../utils/elasticsearch.js';
+} from '../utils/elasticSearch.js';
 import mongoose from 'mongoose';
 
 // === helper functions ===
