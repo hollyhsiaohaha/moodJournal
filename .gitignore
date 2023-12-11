@@ -4,6 +4,7 @@ node_modules
 
 # Server
 mood-journal_https-cert
+elastic_http_ca.crt
 build
 logs
 .env
