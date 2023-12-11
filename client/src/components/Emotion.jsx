@@ -21,9 +21,9 @@ function Emotion({
   const [factorNodes, setFactorNodes] = useState(null);
   const [selectedFactorNodes, setSelectedFactorNodes] = useState(null);
   const fetchPolicy = 'network-only';
-  const [getFeelings] = useLazyQuery(GET_FEELINGS, fetchPolicy);
-  const [getFactors] = useLazyQuery(GET_FACTORS, fetchPolicy);
-  const [getSentimentAnalysis] = useLazyQuery(SENTIMENT_ANALYSIS, fetchPolicy);
+  const [getFeelings] = useLazyQuery(GET_FEELINGS, { fetchPolicy });
+  const [getFactors] = useLazyQuery(GET_FACTORS, { fetchPolicy });
+  const [getSentimentAnalysis] = useLazyQuery(SENTIMENT_ANALYSIS, { fetchPolicy });
   const [loading, setLoading] = useState(false);
 
   const nodesToArray = (nodes, nodeList) => {

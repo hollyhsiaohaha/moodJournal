@@ -28,9 +28,9 @@ function Journal() {
   const toastBC = useRef(null);
   const [date, setDate] = useState(new Date());
   const fetchPolicy = 'network-only';
-  const [getJournalById] = useLazyQuery(GET_JOURNAL_BY_ID, fetchPolicy);
-  const [updateJournal] = useMutation(UPDATE_JOURNAL, fetchPolicy);
-  const [deleteJournal] = useMutation(DELETE_JOURNAL, fetchPolicy);
+  const [getJournalById] = useLazyQuery(GET_JOURNAL_BY_ID, { fetchPolicy });
+  const [updateJournal] = useMutation(UPDATE_JOURNAL, { fetchPolicy });
+  const [deleteJournal] = useMutation(DELETE_JOURNAL, { fetchPolicy });
   const navigate = useNavigate();
 
   const dateParser = (yourDate) => {
