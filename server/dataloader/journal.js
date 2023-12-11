@@ -24,6 +24,7 @@ async function getLinkJournal(journalIds) {
   const journals = await Journal.find({
     _id: { $in: journalIds },
   });
+  console.log('fetching DB in dataloader');
   const journalMap = new Map(journals.map((journal) => [journal.id.toString(), journal]));
   const res = journalIds.map((id) => journalMap.get(id.toString()));
   return res;

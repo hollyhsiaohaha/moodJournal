@@ -6,6 +6,7 @@ const journalTypeDef = gql`
     diary
     note
   }
+
   type Journal {
     _id: String
     title: String
