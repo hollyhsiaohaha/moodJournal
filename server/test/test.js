@@ -11,20 +11,20 @@ import {
 
 const url = 'https://mood-journal.holly-hsiao.com/graphql';
 const token =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTcxNzRiMWYxOTY5NWQ2ZTcyYzNjNzUiLCJuYW1lIjoidGVzdDEiLCJlbWFpbCI6InRlc3QxQHRlc3QuY29tIiwiaWF0IjoxNzAyMjEyMDk3LCJleHAiOjE3MDIyOTg0OTd9.ZSjTw8jm8vqM7qYjCzg-PUS4DnimE4YwOrT83wKALxU';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTcxNzRiMWYxOTY5NWQ2ZTcyYzNjNzUiLCJuYW1lIjoidGVzdDEiLCJlbWFpbCI6InRlc3QxQHRlc3QuY29tIiwiaWF0IjoxNzAyMjg4ODAzLCJleHAiOjE3MDIzNzUyMDN9.AirzhLnBnvrm7xt8jGekBGefWHhqwrAXGGAZ8NCuNwM';
 
 // === GET_JOURNALS_BY_USER ===
-const query = GET_JOURNALS_BY_USER;
-const payload = { query, operationName: 'GetJournalsbyUserId' };
+// const query = GET_JOURNALS_BY_USER;
+// const payload = { query, operationName: 'GetJournalsbyUserId' };
 
 // === GET_JOURNALS_LINKED_TYPE ===
 // const query = GET_JOURNALS_LINKED_TYPE;
 // const payload = { query, operationName: 'GetJournalsbyUserId' };
 
 // === GET_AUTOCOMPLETE ===
-// const query = GET_AUTOCOMPLETE;
-// const variables = { keyword: '第一百筆' };
-// const payload = { query, variables, operationName: 'AutoCompleteJournals' };
+const query = GET_AUTOCOMPLETE;
+const variables = { keyword: '第一百筆' };
+const payload = { query, variables, operationName: 'AutoCompleteJournals' };
 
 // === GET_JOURNAL_ID_BY_TITLE ===
 // const query = GET_JOURNAL_ID_BY_TITLE;
@@ -48,8 +48,8 @@ const headers = {
 
 export const options = {
   // == smoke ===
-  vus: 3,
-  duration: '3s',
+  // vus: 3,
+  // duration: '3s',
   // == load ==
   // stages: [
   //   { duration: '5m', target: 100 }, // traffic ramp-up from 1 to 100 users over 5 minutes.
@@ -57,11 +57,11 @@ export const options = {
   //   { duration: '5m', target: 0 }, // ramp-down to 0 users
   // ],
   // == stress ==
-  // stages: [
-  //   { duration: '10m', target: 200 }, // traffic ramp-up from 1 to a higher 200 users over 10 minutes.
-  //   { duration: '30m', target: 200 }, // stay at higher 200 users for 30 minutes
-  //   { duration: '5m', target: 0 }, // ramp-down to 0 users
-  // ],
+  stages: [
+    { duration: '10m', target: 200 }, // traffic ramp-up from 1 to a higher 200 users over 10 minutes.
+    { duration: '30m', target: 200 }, // stay at higher 200 users for 30 minutes
+    { duration: '5m', target: 0 }, // ramp-down to 0 users
+  ],
   // == spike ==
   // stages: [
   //   { duration: '2m', target: 200 }, // fast ramp-up to a high point
@@ -73,7 +73,7 @@ export const options = {
 export default () => {
   const urlRes = http.post(url, JSON.stringify(payload), { headers });
   let responseBody = JSON.parse(urlRes.body);
-  console.log('Response body:', responseBody);
+  // console.log('Response body:', responseBody);
   // console.log('Data:', responseBody.data);
   // console.log('Errors:', responseBody.errors);
   check(urlRes, {
