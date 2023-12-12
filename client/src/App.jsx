@@ -18,6 +18,7 @@ import Dashboard from './components/Dashboard';
 import Profile from './components/Profile';
 import Welcome from './components/Welcome'
 import Authentication from './components/Authentication';
+import Float from './components/Float'
 
 function App() {
   const location = useLocation();
@@ -39,6 +40,7 @@ function App() {
         <Route path='dashboard' element={<Dashboard />}></Route>
         <Route path='profile' element={<Profile />}></Route>
       </Routes>
+      <Float />
     </PrimeReactProvider>
     </>
   );
