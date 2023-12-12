@@ -149,7 +149,6 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
       left: `${cursorCoords.left}px`,
       zIndex: 1000,
       borderStyle: autoCompleteResults.length ? 'solid' : 'none',
-      //TODO: 以下條件可以放 css
       listStyleType: 'none',
     };
     return (
@@ -191,6 +190,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
   return (
     <>
       <h3>筆記內容</h3>
+      <p>使用 [[標題]] 來連結不同筆記 </p>
       <textarea ref={editorRef} />
       {renderAutocompleteList()}
     </>

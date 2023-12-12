@@ -18,6 +18,7 @@ import Dashboard from './components/Dashboard';
 import Profile from './components/Profile';
 import Welcome from './components/Welcome'
 import Authentication from './components/Authentication';
+import Float from './components/Float'
 
 function App() {
   const location = useLocation();
@@ -35,10 +36,11 @@ function App() {
         <Route path='journalList' element={<JournalList />}></Route>
         <Route path='journal/:journalId' element={<Journal />}></Route>
         <Route path='newJournal/:newJournalDate' element={<CreateJournal />}></Route>
-        <Route path='graph' element={<Graph />}></Route>
+        <Route path='graph' element={<Graph showFilter={true}/>}></Route>
         <Route path='dashboard' element={<Dashboard />}></Route>
         <Route path='profile' element={<Profile />}></Route>
       </Routes>
+      <Float />
     </PrimeReactProvider>
     </>
   );

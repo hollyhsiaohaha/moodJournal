@@ -51,8 +51,10 @@ function Emotion({
     }
     for (const item of array) {
       const key = nodesMapping[item];
-      nodes[key] = { checked: true, partialChecked: false };
-      nodes[key.split('-')[0]] = { checked: false, partialChecked: true };
+      if (key) {
+        nodes[key] = { checked: true, partialChecked: false };
+        nodes[key.split('-')[0]] = { checked: false, partialChecked: true };
+      }
     }
     return nodes;
   };

@@ -1,7 +1,7 @@
 import { Client } from '@elastic/elasticsearch';
 import * as fs from 'fs';
 
-const { ELASTIC_USER, ELASTIC_PASSWORD } = process.env;
+const { ELASTIC_SEARCH_ENABLED, ELASTIC_USER, ELASTIC_PASSWORD } = process.env;
 
 export const elasticClient = new Client({
   node: 'https://localhost:9200/',
@@ -15,10 +15,12 @@ export const elasticClient = new Client({
   },
 });
 
-elasticClient
-  .ping()
-  .then((res) => console.log('Elastic Search connection success: ', res))
-  .catch((err) => console.error('Elastic Search wrong connection: ', err));
+Number(ELASTIC_SEARCH_ENABLED)
+  ? elasticClient
+      .ping()
+      .then((res) => console.log('Elastic Search connection success: ', res))
+      .catch((err) => console.error('Elastic Search wrong connection: ', err))
+  : null;
 
 export const checkIndexExist = async (userId) => {
   const indexName = `${userId}-autocomplete`;
