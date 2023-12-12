@@ -1,0 +1,17 @@
+.autocomplete-list {
+  z-index: 1000;
+  border-color: rgba(211, 211, 211);
+  list-style-type: none;
+  border-radius: 5px;
+  padding: 5px 5px;
+  margin: 0;
+}
+
+.autocomplete-item {
+  text-align: left;
+  padding: 1px 5px;
+}
+
+.autocomplete-item:hover {
+  background-color: #e0f0ff; /* 浅蓝色背景 */
+}

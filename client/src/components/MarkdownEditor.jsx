@@ -4,6 +4,7 @@ import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
 import PropTypes from 'prop-types';
 import { CDN_PATH } from '../utils/conf';
+import './MarkdownEditor.css';
 import {
   GET_AUTOCOMPLETE,
   GET_JOURNAL_ID_BY_TITLE,
@@ -39,7 +40,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
   };
 
   const valueUpdate = (instance) => {
-    //  update content to parent compon
+    //  update content to parent component
     setContent(easyMDEInstance.current.value());
     // autocomplete trigger conditions
     const cursor = instance.getCursor();
@@ -61,7 +62,6 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
           const { data } = await getJournalIdByTitle({ variables: { title: keyword } });
           const journalId = data?.getJournalbyTitle?._id;
           if (!journalId) {
-            // TODO: 看要不要放在一個 state 中，印出給 user 一個違規清單 ???
             const message = `連結筆記不存在： ${keyword}`;
             throw new Error(message);
           }
@@ -147,15 +147,16 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
       position: 'absolute',
       top: `${cursorCoords.top}px`,
       left: `${cursorCoords.left}px`,
-      zIndex: 1000,
       borderStyle: autoCompleteResults.length ? 'solid' : 'none',
-      //TODO: 以下條件可以放 css
-      listStyleType: 'none',
     };
     return (
       <ul className="autocomplete-list" style={listStyle}>
         {autoCompleteResults.map((item, index) => (
-          <li key={index} onClick={() => handleAutocompleteSelect(item)}>
+          <li
+            key={index}
+            className="autocomplete-item"
+            onClick={() => handleAutocompleteSelect(item)}
+          >
             {item}
           </li>
         ))}
@@ -191,6 +192,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
   return (
     <>
       <h3>筆記內容</h3>
+      <p>Hint: 使用 [[標題]] 來連結不同筆記 </p>
       <textarea ref={editorRef} />
       {renderAutocompleteList()}
     </>

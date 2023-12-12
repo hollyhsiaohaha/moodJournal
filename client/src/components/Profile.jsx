@@ -2,6 +2,7 @@ import { Button } from 'primereact/button';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { useUserState } from '../state/state.js';
+import { toast } from 'react-toastify';
 
 function Profile() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ function Profile() {
     setLoginState(false);
     setUserInfoState({ id: '', name: '', email: '' });
     navigate('/');
-    alert('成功登出');
+    toast.success('成功登出');
   };
 
   return (
@@ -22,7 +23,7 @@ function Profile() {
         <p>{`Id: ${userInfoState.id}`}</p>
         <p>{`Name: ${userInfoState.name}`}</p>
         <p>{`Email: ${userInfoState.email}`}</p>
-        <Button label="登出" onClick={signOut}/>
+        <Button label="登出" onClick={signOut} />
       </div>
     </>
   );

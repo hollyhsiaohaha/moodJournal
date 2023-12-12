@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { useLazyQuery } from '@apollo/client';
 import { GET_FEELINGS, GET_FACTORS, SENTIMENT_ANALYSIS } from '../queries/emotion';
 import { Button } from 'primereact/button';
+import { toast } from 'react-toastify';
 
 function Emotion({
   moodScore,
@@ -51,8 +52,10 @@ function Emotion({
     }
     for (const item of array) {
       const key = nodesMapping[item];
-      nodes[key] = { checked: true, partialChecked: false };
-      nodes[key.split('-')[0]] = { checked: false, partialChecked: true };
+      if (key) {
+        nodes[key] = { checked: true, partialChecked: false };
+        nodes[key.split('-')[0]] = { checked: false, partialChecked: true };
+      }
     }
     return nodes;
   };
@@ -117,7 +120,7 @@ function Emotion({
     setLoading(true);
     if (!content.trim()) {
       setLoading(false);
-      return alert('請先輸入內容');
+      return toast.warn('請先輸入內容');
     }
     const regexBrackets = /\[\[(.*?)\]\]/g;
     const regexAudioTag = /\<audio.*?\<\/audio\>/gs;
@@ -133,14 +136,14 @@ function Emotion({
       const { score, factor, feeling } = res;
       if (!score || !factor || !feeling) {
         setLoading(false);
-        return alert('未偵測出任何情緒 請手動輸入');
+        return toast.warn('未偵測出任何情緒 請手動輸入');
       }
       const feelingNodeAnalysis = ArrayToNodes(feeling, feelingNodes);
       const factorNodeAnalysis = ArrayToNodes(factor, factorNodes);
       setMoodScore(score);
       setSelectedFeelingNodes(feelingNodeAnalysis);
       setSelectedFactorNodes(factorNodeAnalysis);
-    } else alert('目前無法使用情緒偵測');
+    } else toast.error('目前無法使用情緒偵測');
     setLoading(false);
   };
   return (

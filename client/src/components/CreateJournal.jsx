@@ -9,6 +9,7 @@ import Emotion from './Emotion';
 import { CREATE_JOURNAL } from '../mutations/journals';
 import { useMutation } from '@apollo/client';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function CreateJournal() {
   const { newJournalDate } = useParams();
@@ -34,14 +35,14 @@ function CreateJournal() {
     const createNewJournal = async () => {
       let journalInput;
       if (type === 'note') {
-        if (!title || !content) return alert('筆記名稱及內容不能為空白');
+        if (!title || !content) return toast.warn('筆記名稱及內容不能為空白');
         journalInput = {
           type,
           title,
           content,
         };
       } else {
-        if (!content) return alert('筆記內容不能為空白');
+        if (!content) return toast.warn('筆記內容不能為空白');
         journalInput= {
           type,
           title: dateParser(date),
@@ -58,9 +59,11 @@ function CreateJournal() {
         const journalId = data.createJournal._id;
         console.log(journalId);
         navigate('/journalList');
-        alert(`筆記新增成功：${title}`);
+        toast.success(`筆記新增成功：${title}`);
       } catch (error) {
-        if (error.message.includes('DUPLICATE_KEY')) return alert('筆記名稱重複');
+        console.log('here')
+        if (error.message.includes('Keyword not exist:')) return toast.error('連結筆記不存在');
+        if (error.message.includes('DUPLICATE_KEY')) return toast.error('筆記名稱重複');
         console.error(error);
       }
     };

@@ -1,0 +1,25 @@
+/* Float.css */
+.floating-icon {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.floating-icon .content {
+  position: fixed;
+  bottom: 60px;
+  right: 20px;
+  width: 30%;
+  height: 30%;
+  z-index: 999;
+  overflow: auto;
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.floating-icon-btn {
+  z-index: 1001;
+  border-radius: 50%;
+}
