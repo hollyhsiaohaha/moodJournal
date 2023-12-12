@@ -126,7 +126,6 @@ function Journal() {
     }
   };
 
-  // TODO: 判斷有變動才顯示 save + 按鈕
   return (
     <>
       <Toast ref={toastBC} position="bottom-center" onRemove={clearToast} />
