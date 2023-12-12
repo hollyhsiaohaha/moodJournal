@@ -164,12 +164,12 @@ const journalCacheResolver = {
           console.log('data from cache');
           res = JSON.parse(cacheRes).map((journal) => {
             return {
-              _id: new mongoose.Types.ObjectId(journal._id),
+              _id: journal._id,
               title: journal.title,
               type: journal.type,
               content: journal.content,
-              userId: new mongoose.Types.ObjectId(journal.userId),
-              linkedNoteIds: journal.linkedNoteIds.map((id) => new mongoose.Types.ObjectId(id)),
+              userId: journal.userId,
+              linkedNoteIds: journal.linkedNoteIds,
               moodFeelings: journal.moodFeelings,
               moodFactors: journal.moodFactors,
               createdAt: new Date(journal.createdAt),
