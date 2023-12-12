@@ -14,17 +14,17 @@ const token =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTcxNzRiMWYxOTY5NWQ2ZTcyYzNjNzUiLCJuYW1lIjoidGVzdDEiLCJlbWFpbCI6InRlc3QxQHRlc3QuY29tIiwiaWF0IjoxNzAyMjg4ODAzLCJleHAiOjE3MDIzNzUyMDN9.AirzhLnBnvrm7xt8jGekBGefWHhqwrAXGGAZ8NCuNwM';
 
 // === GET_JOURNALS_BY_USER ===
-// const query = GET_JOURNALS_BY_USER;
-// const payload = { query, operationName: 'GetJournalsbyUserId' };
+const query = GET_JOURNALS_BY_USER;
+const payload = { query, operationName: 'GetJournalsbyUserId' };
 
 // === GET_JOURNALS_LINKED_TYPE ===
 // const query = GET_JOURNALS_LINKED_TYPE;
 // const payload = { query, operationName: 'GetJournalsbyUserId' };
 
 // === GET_AUTOCOMPLETE ===
-const query = GET_AUTOCOMPLETE;
-const variables = { keyword: '第一百筆' };
-const payload = { query, variables, operationName: 'AutoCompleteJournals' };
+// const query = GET_AUTOCOMPLETE;
+// const variables = { keyword: '第一百筆' };
+// const payload = { query, variables, operationName: 'AutoCompleteJournals' };
 
 // === GET_JOURNAL_ID_BY_TITLE ===
 // const query = GET_JOURNAL_ID_BY_TITLE;

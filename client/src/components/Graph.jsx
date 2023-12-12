@@ -6,14 +6,15 @@ import { useNavigate } from 'react-router-dom';
 import { ListBox } from 'primereact/listbox';
 import { io } from 'socket.io-client';
 import * as d3 from 'd3';
+import PropTypes from 'prop-types';
 
-function Graph() {
+function Graph({ showFilter }) {
   const ref = useRef();
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const typesOptions = [{ name: 'note' }, { name: 'diary' }];
   const [selectedTypes, setSelectedTypes] = useState(typesOptions);
-  const width = 928;
-  const height = 680;
+  const width = 464;
+  const height = 340;
   const fetchPolicy = 'network-only';
   const [GetJournalsLinkedType] = useLazyQuery(GET_JOURNALS_LINKED_TYPE, { fetchPolicy });
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ function Graph() {
 
   const refreshForceGraph = async (types) => {
     const emptyData = { nodes: [], links: [] };
-    console.log(types)
+    console.log(types);
     if (!types) return setGraphData(emptyData);
     const res = await GetJournalsLinkedType();
     const graphJournals = res.data.getJournalsbyUserId;
@@ -197,19 +198,26 @@ function Graph() {
 
   return (
     <>
-      <div className="card flex justify-content-center">
-        <ListBox
-          multiple
-          value={selectedTypes}
-          onChange={(e) => setSelectedTypes(e.value)}
-          options={typesOptions}
-          optionLabel="name"
-          className="w-full md:w-14rem"
-        />
-      </div>
+      {showFilter ? (
+        <div className="card flex justify-content-center">
+          <ListBox
+            multiple
+            value={selectedTypes}
+            onChange={(e) => setSelectedTypes(e.value)}
+            options={typesOptions}
+            optionLabel="name"
+            className="w-full md:w-14rem"
+          />
+        </div>
+      ) : null}
       <svg ref={ref} width={width} height={height} />
     </>
   );
 }
+
+Graph.propTypes = {
+  showFilter: PropTypes.string,
+};
+
 
 export default Graph;

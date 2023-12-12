@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Graph from './Graph';
-import './Float.css'; // 引入CSS样式文件
+import { Button } from 'primereact/button';
+import './Float.css';
 
 function Float() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,9 +12,8 @@ function Float() {
 
   return (
     <div className="floating-icon">
-      <button onClick={toggleOpen} className="floating-icon-btn">Icon</button>
-      {/* {isOpen && <div className="content">这里是展开的内容</div>} */}
-      {isOpen && <div className="content"><Graph /></div>}
+      <Button className="floating-icon-btn" icon="pi pi-share-alt" onClick={toggleOpen} />
+      {isOpen && <div className="content"><Graph showFilter={false}/></div>}
     </div>
   );
 }

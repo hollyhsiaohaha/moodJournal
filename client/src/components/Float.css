@@ -1,26 +1,25 @@
 /* Float.css */
 .floating-icon {
-  position: fixed; /* 固定位置 */
-  bottom: 20px; /* 距底部20像素 */
-  right: 20px; /* 距右边20像素 */
-  z-index: 1000; /* 确保在最上层 */
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
 }
 
 .floating-icon .content {
-  position: fixed; /* 固定位置 */
-  bottom: 60px; /* 距底部60像素 */
-  right: 20px; /* 距右边20像素 */
-  width: 30%; /* 宽度为屏幕宽度的30% */
-  height: 40%; /* 高度为屏幕高度的40% */
-  z-index: 999; /* 确保内容在图标下方 */
-  overflow: auto; /* 如果内容超出指定高度，允许滚动 */
-  background-color: white; /* 背景色 */
-  border: 1px solid #ddd; /* 边框样式 */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* 阴影效果 */
-  /* 可以添加更多样式来装饰你的内容 */
+  position: fixed;
+  bottom: 60px;
+  right: 20px;
+  width: 30%;
+  height: 30%;
+  z-index: 999;
+  overflow: auto;
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .floating-icon-btn {
-  z-index: 1001; /* 确保按钮在内容上层 */
-  /* 添加按钮的其他样式 */
+  z-index: 1001;
+  border-radius: 50%;
 }

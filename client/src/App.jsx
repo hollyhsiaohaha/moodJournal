@@ -36,7 +36,7 @@ function App() {
         <Route path='journalList' element={<JournalList />}></Route>
         <Route path='journal/:journalId' element={<Journal />}></Route>
         <Route path='newJournal/:newJournalDate' element={<CreateJournal />}></Route>
-        <Route path='graph' element={<Graph />}></Route>
+        <Route path='graph' element={<Graph showFilter={true}/>}></Route>
         <Route path='dashboard' element={<Dashboard />}></Route>
         <Route path='profile' element={<Profile />}></Route>
       </Routes>
