@@ -7,7 +7,7 @@ import { SIGN_IN } from '../mutations/users.js';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import { useUserState } from '../state/state.js';
-
+import { toast } from 'react-toastify';
 
 function Signin() {
   const [userEmail, setUserEmail] = useState('');
@@ -40,9 +40,10 @@ function Signin() {
       setLoginState(true);
       setUserInfoState( {id: userId, name: userName, email: userEmail} );
       navigate('/home');
-      alert('成功登入');
+      toast.success('成功登入');
+      
     } catch (error) {
-      error.message === 'incorrect email or password' ? alert('錯誤的 Email 或密碼') : console.error(error);
+      error.message === 'incorrect email or password' ? toast.error('錯誤的 Email 或密碼') : console.error(error);
     }
     setLoading(false);
   };
