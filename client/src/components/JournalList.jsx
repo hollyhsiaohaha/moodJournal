@@ -11,6 +11,7 @@ import { Tag } from 'primereact/tag';
 import { Column } from 'primereact/column';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
+import { toast } from 'react-toastify';
 
 function JournalList() {
   const initFilters = {
@@ -40,7 +41,7 @@ function JournalList() {
 
   const getJournals = async () => {
     const { data } = await getJournalsByUser();
-    if (!data) return alert('資料讀取失敗');
+    if (!data) return toast.error('資料讀取失敗');
     const journalData = data.getJournalsbyUserId;
     const parsedJournalData = journalData.map((journal) => {
       return {
@@ -140,7 +141,7 @@ function JournalList() {
         failList.push(selectedJournals[i].title);
       }
     }
-    failList.length ? alert(`以下筆記刪除失敗： ${failList.join(',')}`) : alert('刪除成功');
+    failList.length ? toast.error(`以下筆記刪除失敗： ${failList.join(',')}`) : toast.success('刪除成功');
     setSelectedJournals([]);
     setRefreshFlag(refreshFlag + 1);
   };
@@ -178,6 +179,7 @@ function JournalList() {
             field="title"
             filterField="title"
             filter
+            filterPlaceholder='title'
             sortable
             body={titleBodyTemplate}
             header="名稱"

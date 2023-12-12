@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
 
 function AudioRecorder ({ setAudioNameS3 }) {
   const [stateIndex, setStateIndex] = useState(0);
@@ -73,7 +74,7 @@ function AudioRecorder ({ setAudioNameS3 }) {
       }
       throw new Error(data.error);
     } catch (error) {
-      alert('無法上傳音檔');
+      toast.error('無法上傳音檔');
       console.error(error)
     }
 

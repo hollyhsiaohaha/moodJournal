@@ -13,6 +13,7 @@ import { UPDATE_JOURNAL, DELETE_JOURNAL } from '../mutations/journals';
 import { useMutation, useLazyQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import { Toast } from 'primereact/toast';
+import { toast } from 'react-toastify';
 
 function Journal() {
   const { journalId } = useParams();
@@ -41,7 +42,10 @@ function Journal() {
 
   const getJournalInfo = async (id) => {
     const { data } = await getJournalById({ variables: { id } });
-    if (!data) return alert('筆記不存在');
+    if (!data) {
+      navigate('/journalList');
+      return toast.error('筆記不存在');
+    }
     setType(data.getJournalbyId.type);
     setContent(data.getJournalbyId.content);
     setMoodScore(data.getJournalbyId.moodScore);
@@ -59,13 +63,13 @@ function Journal() {
     const updateExistingJournal = async () => {
       let journalInput;
       if (type === 'note') {
-        if (!title || !content) return alert('筆記名稱及內容不能為空白');
+        if (!title || !content) return toast.error('筆記名稱及內容不能為空白');
         journalInput = {
           title,
           content,
         };
       } else {
-        if (!content) return alert('筆記內容不能為空白');
+        if (!content) return toast.error('筆記內容不能為空白');
         journalInput = {
           title: dateParser(date),
           diaryDate: dateParser(date),
@@ -81,11 +85,11 @@ function Journal() {
         const { data } = await updateJournal({ variables: { id: journalId, journalInput } });
         const { title } = data.updateJournal;
         navigate('/journalList');
-        alert(`筆記修改成功：${title}`);
+        toast.success(`筆記修改成功：${title}`);
       } catch (error) {
         if (error.message.includes('DUPLICATE_TITLE'))
-          return alert(`修改失敗，筆記名稱重複: ${title}`);
-        if (error.message.includes('Keyword not exist:')) return alert('連結筆記不存在');
+          return toast.error(`修改失敗，筆記名稱重複: ${title}`);
+        if (error.message.includes('Keyword not exist:')) return toast.error('連結筆記不存在');
         console.error(error);
       }
     };
@@ -96,13 +100,12 @@ function Journal() {
     const { data } = await deleteJournal({ variables: { id: journalId } });
     const deleteRes = data.deleteJournal;
     if (deleteRes) {
-      alert('刪除成功');
+      toast.success('刪除成功');
     } else {
-      alert('刪除失敗');
+      toast.error('刪除失敗');
     }
     navigate('/journalList');
-  }
-
+  };
 
   const clearToast = () => {
     toastBC.current.clear();
@@ -112,17 +115,22 @@ function Journal() {
   const confirm = () => {
     if (!toastVisible) {
       setToastVisible(true);
-        toastBC.current.clear();
-        toastBC.current.show({
-            severity: 'warn',
-            sticky: true,
-            content: () => (
-                <div className="flex flex-column align-items-left" style={{ flex: '1' }}>
-                    <div className="font-medium text-lg my-3 text-900">{`確定要刪除筆記嗎: ${title}`}</div>
-                    <Button className="p-button-sm flex" label="確認" severity="error" onClick={deleteThisJournal}></Button>
-                </div>
-            )
-        });
+      toastBC.current.clear();
+      toastBC.current.show({
+        severity: 'warn',
+        sticky: true,
+        content: () => (
+          <div className="flex flex-column align-items-left" style={{ flex: '1' }}>
+            <div className="font-medium text-lg my-3 text-900">{`確定要刪除筆記嗎: ${title}`}</div>
+            <Button
+              className="p-button-sm flex"
+              label="確認"
+              severity="error"
+              onClick={deleteThisJournal}
+            ></Button>
+          </div>
+        ),
+      });
     }
   };
 
@@ -139,19 +147,19 @@ function Journal() {
             options={journalTypeOption}
           />
         </div>
-      {type === 'note' ? (
-        <span className="p-float-label">
-          <InputText id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
-          <label htmlFor="title">Title</label>
-        </span>
-      ) : (
+        {type === 'note' ? (
+          <span className="p-float-label">
+            <InputText id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <label htmlFor="title">Title</label>
+          </span>
+        ) : (
           <Calendar
             value={date}
             onChange={(e) => setDate(e.value)}
             dateFormat="yy-mm-dd"
             showIcon
           />
-      )}
+        )}
       </div>
       <AudioRecording audioNameS3={audioNameS3} setAudioNameS3={setAudioNameS3} />
       <MarkdownEditor
@@ -177,12 +185,7 @@ function Journal() {
       <div className="card flex justify-content-center">
         <span className="p-buttonset">
           <Button label="Save" icon="pi pi-check" onClick={update} key={journalId} />
-          <Button
-            label="Delete"
-            severity="danger"
-            icon="pi pi-times"
-            onClick={confirm}
-          />
+          <Button label="Delete" severity="danger" icon="pi pi-times" onClick={confirm} />
         </span>
       </div>
     </>

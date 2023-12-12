@@ -7,6 +7,7 @@ import { SIGN_UP } from '../mutations/users.js';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import { useUserState } from '../state/state.js';
+import { toast } from 'react-toastify';
 
 function Signup() {
   const [userEmail, setUserEmail] = useState('');
@@ -32,7 +33,7 @@ function Signup() {
     try {
       if (!validateEmail(userEmail)) {
         setLoading(false);
-        return alert('Email 不符合格式');
+        return toast.error('Email 不符合格式');
       }
       const { data } = await signUp({
         variables: {
@@ -49,9 +50,9 @@ function Signup() {
       setLoginState(true);
       setUserInfoState( {id: userId, name: userName, email: userEmail} );
       navigate('/home');
-      alert('成功登入');
+      toast.success('成功登入');
     } catch (error) {
-      error.message === 'email exist' ? alert('Email 已被註冊') : console.error(error);
+      error.message === 'email exist' ? toast.warn('Email 已被註冊') : console.error(error);
     }
     setLoading(false);
   };
