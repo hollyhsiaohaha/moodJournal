@@ -1,9 +1,10 @@
 import { useParams } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { SelectButton } from 'primereact/selectbutton';
 import { Calendar } from 'primereact/calendar';
+import { ConfirmPopup, confirmPopup } from 'primereact/confirmpopup';
 import MarkdownEditor from './MarkdownEditor';
 import AudioRecording from './AudioRecording';
 import Emotion from './Emotion';
@@ -12,7 +13,6 @@ import { GET_JOURNAL_BY_ID } from '../queries/journals';
 import { UPDATE_JOURNAL, DELETE_JOURNAL } from '../mutations/journals';
 import { useMutation, useLazyQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-import { Toast } from 'primereact/toast';
 import { toast } from 'react-toastify';
 
 function Journal() {
@@ -25,8 +25,6 @@ function Journal() {
   const [moodScore, setMoodScore] = useState(1);
   const [moodFeelings, setMoodFeelings] = useState([]);
   const [moodFactors, setMoodFactors] = useState([]);
-  const [toastVisible, setToastVisible] = useState(false);
-  const toastBC = useRef(null);
   const [date, setDate] = useState(new Date());
   const fetchPolicy = 'network-only';
   const [getJournalById] = useLazyQuery(GET_JOURNAL_BY_ID, { fetchPolicy });
@@ -99,44 +97,25 @@ function Journal() {
   const deleteThisJournal = async () => {
     const { data } = await deleteJournal({ variables: { id: journalId } });
     const deleteRes = data.deleteJournal;
-    if (deleteRes) {
-      toast.success('刪除成功');
-    } else {
-      toast.error('刪除失敗');
-    }
+    if (deleteRes) toast.success('刪除成功');
+    else toast.error('刪除失敗');
     navigate('/journalList');
   };
 
-  const clearToast = () => {
-    toastBC.current.clear();
-    setToastVisible(false);
-  };
-
-  const confirm = () => {
-    if (!toastVisible) {
-      setToastVisible(true);
-      toastBC.current.clear();
-      toastBC.current.show({
-        severity: 'warn',
-        sticky: true,
-        content: () => (
-          <div className="flex flex-column align-items-left" style={{ flex: '1' }}>
-            <div className="font-medium text-lg my-3 text-900">{`確定要刪除筆記嗎: ${title}`}</div>
-            <Button
-              className="p-button-sm flex"
-              label="確認"
-              severity="error"
-              onClick={deleteThisJournal}
-            ></Button>
-          </div>
-        ),
-      });
-    }
+  const confirm = (event) => {
+    confirmPopup({
+      target: event.currentTarget,
+      message: '確定要刪除此則筆記？',
+      icon: 'pi pi-info-circle',
+      acceptClassName: 'p-button-danger',
+      accept: deleteThisJournal,
+      reject: () => toast.warn('取消'),
+    });
   };
 
   return (
     <>
-      <Toast ref={toastBC} position="bottom-center" onRemove={clearToast} />
+      <ConfirmPopup />
       <div className="card flex justify-content-center">
         <div className="mr-5">
           <SelectButton
@@ -184,8 +163,8 @@ function Journal() {
       <Backlink journalId={journalId} />
       <div className="card flex justify-content-center">
         <span className="p-buttonset">
-          <Button label="Save" icon="pi pi-check" onClick={update} key={journalId} />
-          <Button label="Delete" severity="danger" icon="pi pi-times" onClick={confirm} />
+          <Button label="儲存" icon="pi pi-check" onClick={update} key={journalId} />
+          <Button label="刪除" severity="danger" icon="pi pi-times" onClick={confirm} />
         </span>
       </div>
     </>

@@ -11,6 +11,7 @@ import { Tag } from 'primereact/tag';
 import { Column } from 'primereact/column';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
+import { ConfirmPopup, confirmPopup } from 'primereact/confirmpopup';
 import { toast } from 'react-toastify';
 
 function JournalList() {
@@ -141,9 +142,22 @@ function JournalList() {
         failList.push(selectedJournals[i].title);
       }
     }
-    failList.length ? toast.error(`以下筆記刪除失敗： ${failList.join(',')}`) : toast.success('刪除成功');
+    failList.length
+      ? toast.error(`以下筆記刪除失敗： ${failList.join(',')}`)
+      : toast.success('刪除成功');
     setSelectedJournals([]);
     setRefreshFlag(refreshFlag + 1);
+  };
+
+  const confirm = (event) => {
+    confirmPopup({
+      target: event.currentTarget,
+      message: '確定要刪除所選筆記？',
+      icon: 'pi pi-info-circle',
+      acceptClassName: 'p-button-danger',
+      accept: deleteSelected,
+      reject: () => toast.warn('取消'),
+    });
   };
 
   useEffect(() => {
@@ -152,11 +166,12 @@ function JournalList() {
 
   return (
     <>
+      <ConfirmPopup />
       <Button
-        label="Delete"
+        label="刪除選取"
         severity="danger"
         icon="pi pi-times"
-        onClick={deleteSelected}
+        onClick={confirm}
         visible={deleteButtonVisiual}
       />
       <div className="card">
@@ -179,7 +194,7 @@ function JournalList() {
             field="title"
             filterField="title"
             filter
-            filterPlaceholder='title'
+            filterPlaceholder="title"
             sortable
             body={titleBodyTemplate}
             header="名稱"
