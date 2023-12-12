@@ -216,7 +216,7 @@ function Graph({ showFilter }) {
 }
 
 Graph.propTypes = {
-  showFilter: PropTypes.string,
+  showFilter: PropTypes.bool,
 };
 
 

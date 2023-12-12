@@ -85,6 +85,7 @@ function Journal() {
       } catch (error) {
         if (error.message.includes('DUPLICATE_TITLE'))
           return alert(`修改失敗，筆記名稱重複: ${title}`);
+        if (error.message.includes('Keyword not exist:')) return alert('連結筆記不存在');
         console.error(error);
       }
     };

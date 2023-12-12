@@ -60,6 +60,8 @@ function CreateJournal() {
         navigate('/journalList');
         alert(`筆記新增成功：${title}`);
       } catch (error) {
+        console.log('here')
+        if (error.message.includes('Keyword not exist:')) return alert('連結筆記不存在');
         if (error.message.includes('DUPLICATE_KEY')) return alert('筆記名稱重複');
         console.error(error);
       }
