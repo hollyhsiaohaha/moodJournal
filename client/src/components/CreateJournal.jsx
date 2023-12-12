@@ -114,7 +114,7 @@ function CreateJournal() {
         />
       ) : null}
       <div className="card flex justify-content-center">
-        <Button label="Create" onClick={submit} />
+        <Button label="建立筆記" onClick={submit} />
       </div>
     </>
   );

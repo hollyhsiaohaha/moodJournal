@@ -148,7 +148,7 @@ function Emotion({
   };
   return (
     <>
-      <h3>情緒</h3>
+      <h3>情緒紀錄</h3>
       <Button label="情緒偵測" severity="secondary" loading={loading} onClick={emotionAnalysis} />
       <div className="card flex justify-content-center">
         <div className="mr-8">
