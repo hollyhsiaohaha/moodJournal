@@ -13,17 +13,12 @@ import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 
 function JournalList() {
-  const navigate = useNavigate();
-  const [getJournalsByUser] = useLazyQuery(Get_JOURNALS_BY_USER, { fetchPolicy: 'network-only' });
-  const [deleteJournals] = useMutation(DELETE_JOURNALS);
-  const [refreshFlag, setRefreshFlag] = useState(0);
-  const [journals, setJournals] = useState([]);
-  const [deleteButtonVisiual, setDeleteButtonVisiual] = useState(false);
-  const [selectedJournals, setSelectedJournals] = useState([]);
-  const [types] = useState(['note', 'diary']);
-  const [filters, setFilters] = useState({
+  const initFilters = {
     title: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-    type: { value: null, matchMode: FilterMatchMode.EQUALS },
+    type: {
+      operator: FilterOperator.OR,
+      constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
+    },
     parsedCreatedAt: {
       operator: FilterOperator.AND,
       constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
@@ -32,21 +27,44 @@ function JournalList() {
       operator: FilterOperator.AND,
       constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
     },
-  });
+  };
+  const navigate = useNavigate();
+  const [getJournalsByUser] = useLazyQuery(Get_JOURNALS_BY_USER, { fetchPolicy: 'network-only' });
+  const [deleteJournals] = useMutation(DELETE_JOURNALS);
+  const [refreshFlag, setRefreshFlag] = useState(0);
+  const [journals, setJournals] = useState([]);
+  const [deleteButtonVisiual, setDeleteButtonVisiual] = useState(false);
+  const [selectedJournals, setSelectedJournals] = useState([]);
+  const [types] = useState(['note', 'diary']);
+  const [filters, setFilters] = useState(initFilters);
 
-  // TODO: 現在是 yyyy-mm-d
-  // TODO: 跟 dateParser() 整合
-  const formatDate = (value) => {
-    const dd_mm_yyyy = value.toLocaleDateString();
-    const yyyy_mm_dd = dd_mm_yyyy.replace(/(\d+)\/(\d+)\/(\d+)/g, '$3-$1-$2');
-    return yyyy_mm_dd;
+  const getJournals = async () => {
+    const { data } = await getJournalsByUser();
+    if (!data) return alert('資料讀取失敗');
+    const journalData = data.getJournalsbyUserId;
+    const parsedJournalData = journalData.map((journal) => {
+      return {
+        ...journal,
+        contentPreview: `${journal.content.slice(0, 20)}${
+          journal.content.length > 20 ? '...' : ''
+        }`,
+        parsedCreatedAt: new Date(Number(journal.createdAt)),
+        parsedUpdatedAt: new Date(Number(journal.updatedAt)),
+      };
+    });
+    setJournals(parsedJournalData);
   };
 
-  const dateParser = (yourDate) => {
-    const offset = yourDate.getTimezoneOffset()
-    yourDate = new Date(yourDate.getTime() - (offset*60*1000))
-    return yourDate.toISOString().split('T')[0];
-  }
+  useEffect(() => {
+    getJournals();
+    setFilters(initFilters);
+  }, [refreshFlag]);
+
+  const dateParser = (myDate) => {
+    const offset = myDate.getTimezoneOffset();
+    myDate = new Date(myDate.getTime() - offset * 60 * 1000);
+    return myDate.toISOString().split('T')[0];
+  };
 
   const getSeverity = (type) => {
     switch (type) {
@@ -66,58 +84,44 @@ function JournalList() {
   const typeItemTemplate = (option) => {
     return <Tag value={option} severity={getSeverity(option)}></Tag>;
   };
-  const typeRowFilterTemplate = (option) => {
+  const typeRowFilterTemplate = (options) => {
     return (
       <Dropdown
         showClear
-        value={option.value}
+        value={options.value}
         options={types}
-        onChange={(e) => option.filterApplyCallback(e.value)}
+        onChange={(e) => options.filterCallback(e.value, options.index)}
         itemTemplate={typeItemTemplate}
-        placeholder="Select One"
+        placeholder="type"
         className="p-column-filter"
-        style={{ minWidth: '12rem' }}
       />
     );
   };
 
   const createdDateBodyTemplate = (rowData) => {
-    return formatDate(rowData.parsedCreatedAt);
+    return dateParser(rowData.parsedCreatedAt);
   };
   const updatedDateBodyTemplate = (rowData) => {
-    return formatDate(rowData.parsedUpdatedAt);
+    return dateParser(rowData.parsedUpdatedAt);
   };
 
-  // TODO: 日期篩選只能用 Date is 的
   const createdDateFilterTemplate = (options) => {
     return (
       <Calendar
         value={options.value}
-        onChange={(e) => {
-          // console.log(options)
-          let createdFilters = { ...filters };
-          createdFilters.parsedCreatedAt.constraints[options.index].value = e.value;
-          // updatedFilters.parsedCreatedAt.constraints[options.index].matchMode = options.filterModel.matchMode;
-          // updatedFilters.parsedCreatedAt = options.filterModel;
-          setFilters(createdFilters);
-          options.filterCallback(e.value, options.index);
-        }}
+        onChange={(e) => options.filterCallback(e.value, options.index)}
         dateFormat="yy-mm-dd"
         placeholder="yy-mm-dd"
         mask="9999-99-99"
       />
     );
   };
+
   const updatedDateFilterTemplate = (options) => {
     return (
       <Calendar
         value={options.value}
-        onChange={(e) => {
-          let updatedFilters = { ...filters };
-          updatedFilters.parsedUpdatedAt.constraints[options.index].value = e.value;
-          setFilters(updatedFilters);
-          options.filterCallback(e.value, options.index);
-        }}
+        onChange={(e) => options.filterCallback(e.value, options.index)}
         dateFormat="yy-mm-dd"
         placeholder="yy-mm-dd"
         mask="9999-99-99"
@@ -128,7 +132,7 @@ function JournalList() {
   const deleteSelected = async () => {
     const selectedIds = selectedJournals.map((journal) => journal._id);
     const { data } = await deleteJournals({ variables: { ids: selectedIds } });
-    console.log(data)
+    console.log(data);
     const deleteRes = data.deleteJournals;
     const failList = [];
     for (let i = 0; i < deleteRes.length; i++) {
@@ -136,30 +140,10 @@ function JournalList() {
         failList.push(selectedJournals[i].title);
       }
     }
-    failList.length ? alert (`以下筆記刪除失敗： ${failList.join(',')}`) : alert('刪除成功');
+    failList.length ? alert(`以下筆記刪除失敗： ${failList.join(',')}`) : alert('刪除成功');
     setSelectedJournals([]);
     setRefreshFlag(refreshFlag + 1);
   };
-
-  useEffect(() => {
-    const getJournals = async () => {
-      const { data } = await getJournalsByUser();
-      if (!data) return alert('資料讀取失敗');
-      const journalData = data.getJournalsbyUserId;
-      const parsedJournalData = journalData.map((journal) => {
-        return {
-          ...journal,
-          contentPreview: `${journal.content.slice(0, 30)}${
-            journal.content.length > 30 ? '...' : ''
-          }`,
-          parsedCreatedAt: new Date(Number(journal.createdAt)),
-          parsedUpdatedAt: new Date(Number(journal.updatedAt)),
-        };
-      });
-      setJournals(parsedJournalData);
-    };
-    getJournals();
-  }, [refreshFlag]);
 
   useEffect(() => {
     setDeleteButtonVisiual(selectedJournals.length ? true : false);
@@ -182,15 +166,11 @@ function JournalList() {
           paginator
           rows={5}
           rowsPerPageOptions={[5, 10]}
-          tableStyle={{ minWidth: '50rem' }}
           selectionMode="checkbox"
           selection={selectedJournals}
-          onSelectionChange={(e) => {
-            setSelectedJournals(e.value);
-          }}
+          onSelectionChange={(e) => setSelectedJournals(e.value)}
           dataKey="_id"
           filters={filters}
-          filterDisplay="row"
           emptyMessage="沒有任何筆記"
         >
           <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
@@ -204,8 +184,6 @@ function JournalList() {
           ></Column>
           <Column
             field="type"
-            style={{ width: '5%' }}
-            showFilterMenu={false}
             filter
             filterElement={typeRowFilterTemplate}
             sortable
