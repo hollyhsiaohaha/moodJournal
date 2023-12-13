@@ -3,6 +3,7 @@ import { Chart } from 'primereact/chart';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
+import { Tooltip } from 'primereact/tooltip';
 import { GET_AUTOCOMPLETE } from '../queries/journals.js';
 import {
   GET_MOOD_SCORE_LINE_CHART,
@@ -276,6 +277,16 @@ function Dashboard() {
             onChange={(e) => setAutocompleteValue(e.value)}
             loadingIcon="pi pi-spin pi-spinner"
           />
+          <span> </span>
+          <Tooltip target=".custom-target-icon" />
+          <i
+            className="custom-target-icon pi pi-info-circle p-text-secondary"
+            data-pr-tooltip="輸入存在的筆記標題進行搜尋"
+            data-pr-position="right"
+            data-pr-at="right+5 top"
+            data-pr-my="left center-2"
+            style={{ fontSize: '1rem', cursor: 'pointer' }}
+          ></i>
           <div className="card">
             <Chart type="bar" data={barChartData} options={barChartOptions} />
           </div>
