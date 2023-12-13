@@ -48,7 +48,7 @@ function Signup() {
       const userId = data.signUp?._id;
       Cookies.set('JWT_TOKEN', token, { expires: 1 }); // day
       setLoginState(true);
-      setUserInfoState( {id: userId, name: userName, email: userEmail} );
+      setUserInfoState({ id: userId, name: userName, email: userEmail });
       navigate('/home');
       toast.success('成功登入');
     } catch (error) {
@@ -58,43 +58,49 @@ function Signup() {
   };
   return (
     <>
-      <div className="card flex justify-content-center">
-        <span className="p-float-label">
-          <InputText id="userName" value={userName} onChange={(e) => setUserName(e.target.value)} />
-          <label htmlFor="userName">User name</label>
-        </span>
-      </div>
-      <div className="card flex justify-content-center">
-        <span className="p-float-label">
-          <InputText
-            id="userEmail"
-            value={userEmail}
-            onChange={(e) => setUserEmail(e.target.value)}
-          />
-          <label htmlFor="userEmail">Email</label>
-        </span>
-      </div>
-      <div className="card flex justify-content-center">
-        <span className="p-float-label">
-          <Password
-            inputId="password"
-            value={password}
-            feedback={false}
-            toggleMask
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <label htmlFor="password">Password</label>
-        </span>
+      <div className="flex flex-column align-items-center ml-5" style={{ width: '100%' }}>
+        <div className="card flex justify-content-start" style={{ width: '100%', maxWidth: '360px' }}>
+          <span className="p-float-label">
+            <InputText
+              id="userName"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+            />
+            <label htmlFor="userName">User name</label>
+          </span>
+        </div>
+        <div className="card flex justify-content-start" style={{ width: '100%', maxWidth: '360px' }}>
+          <span className="p-float-label">
+            <InputText
+              id="userEmail"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+            />
+            <label htmlFor="userEmail">Email</label>
+          </span>
+        </div>
+        <div className="card flex justify-content-start" style={{ width: '100%', maxWidth: '360px' }}>
+          <span className="p-float-label">
+            <Password
+              inputId="password"
+              value={password}
+              feedback={false}
+              toggleMask
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <label htmlFor="password">Password</label>
+          </span>
+        </div>
       </div>
       <Button label="註冊" loading={loading} onClick={submit} />
-      <br/>
+      <br />
       <Button
-          label="登入 >>>"
-          link
-          onClick={() => {
-            navigate('/signin');
-          }}
-        />
+        label="登入 >>>"
+        link
+        onClick={() => {
+          navigate('/signin');
+        }}
+      />
     </>
   );
 }

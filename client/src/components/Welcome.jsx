@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react';
 import { Button } from 'primereact/button';
 import { Image } from 'primereact/image';
 import { useNavigate } from 'react-router-dom';
-import angryFace from '../assets/angry.png';
-import whatFace from '../assets/what.png';
+// import angryFace from '../assets/angry.png';
+// import whatFace from '../assets/what.png';
 import happyFace from '../assets/happy.png';
-import reactSvg from '../assets/react.svg';
+// import reactSvg from '../assets/react.svg';
 import journalBook from '../assets/journal.png';
 import Cookies from 'js-cookie';
 
 function Welcome() {
   const navigate = useNavigate();
-  const [currentPersonImage, setCurrentPersonImage] = useState(angryFace);
-  const [currentIconImage, setCurrentIconImage] = useState(null);
+  // const [currentPersonImage, setCurrentPersonImage] = useState(angryFace);
+  // const [currentIconImage, setCurrentIconImage] = useState(null);
 
   useEffect(() => {
     const token = Cookies.get('JWT_TOKEN');
@@ -21,21 +21,21 @@ function Welcome() {
 
   return (
     <>
-      <div className="card flex justify-content-between">
+      <div className="card flex justify-content-center">
         <Image
-          src={currentPersonImage}
+          src={happyFace}
           alt="Image"
           height="500"
-          onMouseEnter={() => {
-            setCurrentPersonImage(happyFace);
-            setCurrentIconImage(journalBook);
-          }}
-          onMouseLeave={() => {
-            setCurrentPersonImage(angryFace);
-            setCurrentIconImage(null);
-          }}
+          // onMouseEnter={() => {
+          //   setCurrentPersonImage(happyFace);
+          //   setCurrentIconImage(journalBook);
+          // }}
+          // onMouseLeave={() => {
+          //   setCurrentPersonImage(angryFace);
+          //   setCurrentIconImage(null);
+          // }}
         />
-        <Image src={currentIconImage} alt="Image" width="300" />
+        <Image src={journalBook} alt="Image" width="300" />
       </div>
       <div className="card flex justify-content-center">
         <Button
