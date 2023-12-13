@@ -27,6 +27,7 @@ function App() {
       <PrimeReactProvider>
         <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} newestOnTo />
         <Authentication path={location.pathname} />
+        <h1>Mood Journal</h1>
         <Header />
         <Routes>
           <Route path="/" element={<Welcome />}></Route>
