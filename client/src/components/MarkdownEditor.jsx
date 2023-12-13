@@ -3,6 +3,7 @@ import { useLazyQuery } from '@apollo/client';
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
 import PropTypes from 'prop-types';
+import { Tooltip } from 'primereact/tooltip';
 import { CDN_PATH } from '../utils/conf';
 import './MarkdownEditor.css';
 import {
@@ -192,7 +193,15 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
   return (
     <>
       <h3>筆記內容</h3>
-      <p>Hint: 使用 [[標題]] 來連結不同筆記 </p>
+        <Tooltip target=".custom-target-icon" />
+        <i
+          className="custom-target-icon pi pi-info-circle p-text-secondary"
+          data-pr-tooltip="使用 [[筆記標題]] 來連結不同筆記"
+          data-pr-position="right"
+          data-pr-at="right+5 top"
+          data-pr-my="left center-2"
+          style={{ fontSize: '1rem', cursor: 'pointer' }}
+        ></i>
       <textarea ref={editorRef} />
       {renderAutocompleteList()}
     </>
