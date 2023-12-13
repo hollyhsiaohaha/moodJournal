@@ -231,7 +231,7 @@ function JournalList() {
         </DataTable>
       </div>
       <Button
-        label="New Journal"
+        label="新增筆記"
         icon="pi pi-fw pi-plus"
         iconPos="right"
         onClick={() => {
