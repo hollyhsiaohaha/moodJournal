@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { PrimeReactProvider } from 'primereact/api';
+import { Image } from 'primereact/image';
 import 'primereact/resources/primereact.min.css';
 import 'primereact/resources/themes/lara-light-cyan/theme.css';
 import 'primeicons/primeicons.css';
@@ -20,6 +21,8 @@ import Authentication from './components/Authentication';
 import Float from './components/Float';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import logo from './assets/logo.png';
+
 function App() {
   const location = useLocation();
   return (
@@ -27,7 +30,8 @@ function App() {
       <PrimeReactProvider>
         <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} newestOnTo />
         <Authentication path={location.pathname} />
-        <h1>Mood Journal</h1>
+        {/* <h1>Mood Journal</h1> */}
+        <Image src={logo} alt="Image" width="300" />
         <Header />
         <Routes>
           <Route path="/" element={<Welcome />}></Route>
