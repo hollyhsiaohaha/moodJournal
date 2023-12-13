@@ -9,7 +9,19 @@
   margin: 2px;
 }
 
-.mood-10 { background-color: #FCE4EC }
+/* For demo and video recording */
+.mood-10 { background-color: #f0bb67 }
+.mood-9 { background-color: #f4d29a }
+.mood-8 { background-color: #f5e09a }
+.mood-7 { background-color: #fef7ab }
+.mood-6 { background-color: #edf69d }
+.mood-5 { background-color: #acfab2 }
+.mood-4 { background-color: #a6efeb }
+.mood-3 { background-color: #92e1ec }
+.mood-2 { background-color: #90d4f4 }
+.mood-1 { background-color: #82c3f0 }
+
+/* .mood-10 { background-color: #FCE4EC }
 .mood-9 { background-color: #FFF3E0 }
 .mood-8 { background-color: #FFF8E1 }
 .mood-7 { background-color: #FFFDE7 }
@@ -18,4 +30,4 @@
 .mood-4 { background-color: #E0F2F1 }
 .mood-3 { background-color: #E0F7FA }
 .mood-2 { background-color: #E1F5FE }
-.mood-1 { background-color: #E3F2FD }
+.mood-1 { background-color: #E3F2FD } */
