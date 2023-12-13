@@ -21,8 +21,8 @@ function Profile() {
       <h1 className="text-left ml-8">基本資料</h1>
       <div className="flex flex-wrap flex-column text-left ml-8">
         <p>{`Id: ${userInfoState.id}`}</p>
-        <p>{`Name: ${userInfoState.name}`}</p>
-        <p>{`Email: ${userInfoState.email}`}</p>
+        <p>{`帳號: ${userInfoState.name}`}</p>
+        <p>{`電子信箱: ${userInfoState.email}`}</p>
         <Button label="登出" onClick={signOut} />
       </div>
     </>

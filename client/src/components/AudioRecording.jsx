@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { Button } from 'primereact/button';
 import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
@@ -84,14 +85,15 @@ function AudioRecorder ({ setAudioNameS3 }) {
     <div>
       <h3>錄音</h3>
       <div className="display">
-        {stateIndex === 1 && <p>Recording...</p>}
+        {stateIndex === 1 && <p>錄音中...</p>}
         {stateIndex === 2 && <audio controls src={audioURL} preload="auto"></audio>}
       </div>
+      <br/>
       <div className="controllers">
-        {stateIndex === 0 && <button onClick={record}>開始錄音</button>}
-        {stateIndex === 1 && <button onClick={stopRecording}>停止錄音</button>}
-        {stateIndex === 2 && <button onClick={record}>重新錄音</button>}
-        {stateIndex === 2 && <button onClick={uploadAudio}>上傳</button>}
+        {stateIndex === 0 && <Button onClick={record} severity="secondary" label="開始錄音" />}
+        {stateIndex === 1 && <Button onClick={stopRecording} severity="secondary" label="停止錄音" />}
+        {stateIndex === 2 && <Button onClick={record} severity="secondary" label="重新錄音" />}
+        {stateIndex === 2 && <Button onClick={uploadAudio} severity="secondary" label="上傳" />}
       </div>
     </div>
   );

@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react';
 import { Button } from 'primereact/button';
 import { Image } from 'primereact/image';
 import { useNavigate } from 'react-router-dom';
-import angryFace from '../assets/angry.png'
-import whatFace from '../assets/what.png'
-import reactSvg from '../assets/react.svg'
+import angryFace from '../assets/angry.png';
+import whatFace from '../assets/what.png';
+import happyFace from '../assets/happy.png';
+import reactSvg from '../assets/react.svg';
+import journalBook from '../assets/journal.png';
 import Cookies from 'js-cookie';
 
 function Welcome() {
   const navigate = useNavigate();
-  const [currentImage, setCurrentImage] = useState(angryFace);
+  const [currentPersonImage, setCurrentPersonImage] = useState(angryFace);
+  const [currentIconImage, setCurrentIconImage] = useState(null);
 
   useEffect(() => {
     const token = Cookies.get('JWT_TOKEN');
@@ -18,16 +21,21 @@ function Welcome() {
 
   return (
     <>
-      <h1>Mood Journal</h1>
       <div className="card flex justify-content-between">
-        <Image 
-          src={currentImage} 
-          alt="Image" 
+        <Image
+          src={currentPersonImage}
+          alt="Image"
           height="500"
-          onMouseEnter={() => setCurrentImage(whatFace)}
-          onMouseLeave={() => setCurrentImage(angryFace)} 
+          onMouseEnter={() => {
+            setCurrentPersonImage(happyFace);
+            setCurrentIconImage(journalBook);
+          }}
+          onMouseLeave={() => {
+            setCurrentPersonImage(angryFace);
+            setCurrentIconImage(null);
+          }}
         />
-        <Image src={reactSvg} alt="Image" width="300" />
+        <Image src={currentIconImage} alt="Image" width="300" />
       </div>
       <div className="card flex justify-content-center">
         <Button
