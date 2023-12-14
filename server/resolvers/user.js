@@ -37,6 +37,7 @@ const userResolver = {
     async signUp(_, { signUpInput: { name, email, password } }) {
       try {
         const existUser = await User.findOne({ email }).exec();
+        console.log(existUser);
         if (!validateEmail(email))
           throwCustomError('incorrect email format', ErrorTypes.BAD_USER_INPUT);
         if (existUser) throwCustomError('email exist', ErrorTypes.DUPLICATE_KEY);
@@ -67,8 +68,7 @@ const userResolver = {
       try {
         const existUser = await User.findOne({ email }).exec();
         if (!existUser) throwCustomError('incorrect email or password', ErrorTypes.UNAUTHENTICATED);
-        const encryptedPassword = await bcrypt.hash(password, saltRounds);
-        const isCorrectPassword = bcrypt.compare(existUser.password, encryptedPassword);
+        const isCorrectPassword = await bcrypt.compare(password, existUser.password);
         if (!isCorrectPassword)
           throwCustomError('incorrect email or password', ErrorTypes.UNAUTHENTICATED);
         const userInfo = {
