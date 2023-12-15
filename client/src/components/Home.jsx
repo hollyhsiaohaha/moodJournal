@@ -76,7 +76,6 @@ function Home() {
           type: 'diary',
         },
       });
-      // console.log(data);
       if (data) setLatestDiaries(data.getUserLatestJournals);
     };
     getNotes();
