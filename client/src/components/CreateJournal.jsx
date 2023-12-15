@@ -10,6 +10,7 @@ import { CREATE_JOURNAL } from '../mutations/journals';
 import { useMutation } from '@apollo/client';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Tooltip } from 'primereact/tooltip';
 
 function CreateJournal() {
   const { newJournalDate } = useParams();
@@ -67,7 +68,7 @@ function CreateJournal() {
           return toast.error(`連結筆記不存在： ${link}`);
         }
         if (error.message.includes('DUPLICATE_KEY')) {
-          return toast.error(`筆記名稱重複： ${journalTitle}`)
+          return toast.error(`筆記名稱重複： ${journalTitle}`);
         }
         console.error(error);
       }
@@ -78,6 +79,15 @@ function CreateJournal() {
   return (
     <>
       <div className="card flex justify-content-center">
+        <Tooltip target=".custom-target-icon" />
+        <i
+          className="custom-target-icon pi pi-info-circle p-text-secondary p-3"
+          data-pr-tooltip="點擊以切換不同筆記種類"
+          data-pr-position="left"
+          data-pr-at="left+5 top"
+          data-pr-my="right center-2"
+          style={{ fontSize: '1rem', cursor: 'pointer' }}
+        ></i>
         <div className="mr-5">
           <SelectButton
             value={type}

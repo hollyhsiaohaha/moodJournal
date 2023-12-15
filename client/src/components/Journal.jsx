@@ -168,8 +168,8 @@ function Journal() {
       <Backlink journalId={journalId} />
       <div className="card flex justify-content-center">
         <span className="p-buttonset">
-          <Button label="儲存" icon="pi pi-check" onClick={update} key={journalId} />
-          <Button label="刪除" severity="danger" icon="pi pi-times" onClick={confirm} />
+          <Button label="儲存變更" icon="pi pi-check" onClick={update} key={journalId} />
+          <Button label="刪除筆記" severity="danger" icon="pi pi-times" onClick={confirm} />
         </span>
       </div>
     </>
