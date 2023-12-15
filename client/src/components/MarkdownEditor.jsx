@@ -192,7 +192,10 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
 
   return (
     <>
-      <h3>筆記內容</h3>
+      <div className='m-3'>
+        <h3 className="m-2" style={{ display: 'inline' }}>
+          筆記內容
+        </h3>
         <Tooltip target=".custom-target-icon" />
         <i
           className="custom-target-icon pi pi-info-circle p-text-secondary"
@@ -202,6 +205,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
           data-pr-my="left center-2"
           style={{ fontSize: '1rem', cursor: 'pointer' }}
         ></i>
+      </div>
       <textarea ref={editorRef} />
       {renderAutocompleteList()}
     </>

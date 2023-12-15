@@ -277,11 +277,10 @@ function Dashboard() {
             onChange={(e) => setAutocompleteValue(e.value)}
             loadingIcon="pi pi-spin pi-spinner"
           />
-          <span> </span>
           <Tooltip target=".custom-target-icon" />
           <i
-            className="custom-target-icon pi pi-info-circle p-text-secondary"
-            data-pr-tooltip="輸入存在的筆記標題進行搜尋"
+            className="custom-target-icon pi pi-info-circle p-text-secondary p-1"
+            data-pr-tooltip="輸入筆記標題進行搜尋"
             data-pr-position="right"
             data-pr-at="right+5 top"
             data-pr-my="left center-2"

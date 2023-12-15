@@ -81,8 +81,8 @@ function CreateJournal() {
       <div className="card flex justify-content-center">
         <Tooltip target=".custom-target-icon" />
         <i
-          className="custom-target-icon pi pi-info-circle p-text-secondary p-3"
-          data-pr-tooltip="點擊以切換不同筆記種類"
+          className="custom-target-icon pi pi-info-circle p-text-secondary p-1 m-2"
+          data-pr-tooltip="點擊 diary / note 以切換不同筆記種類"
           data-pr-position="left"
           data-pr-at="left+5 top"
           data-pr-my="right center-2"
