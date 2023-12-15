@@ -41,8 +41,6 @@ function Header() {
   }
 
   useEffect(() => {
-    console.log('current path', location.pathname)
-    console.log('getActiveIndex', getActiveIndex(location.pathname))
     setActiveIndex(getActiveIndex(location.pathname));
   }, [location.pathname]);
 
