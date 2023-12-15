@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TabMenu } from 'primereact/tabmenu';
 import { AutoComplete } from 'primereact/autocomplete';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -12,12 +12,12 @@ function Header() {
   const { loginState } = useUserState();
   const [searchValue, setSearchValue] = useState('');
   const [searchItems, setSearchItems] = useState([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [searchJournals] = useLazyQuery(SEARCH_JOURNALS, { fetchPolicy: 'network-only' });
 
   const search = (event) => {
     const getSuggestions = async() => {
       const {data} = await searchJournals({ variables: { keyword: event.query.trim() } });
-      // console.log(data)
       return setSearchItems(data.searchJournals);
     }
     getSuggestions();
@@ -36,10 +36,16 @@ function Header() {
       case '/profile':
         return 4;
       default:
-        return -1; // 如果沒有匹配的路徑，則不選擇任何項目
+        return -1;
     }
   }
-  
+
+  useEffect(() => {
+    console.log('current path', location.pathname)
+    console.log('getActiveIndex', getActiveIndex(location.pathname))
+    setActiveIndex(getActiveIndex(location.pathname));
+  }, [location.pathname]);
+
   const select = (event) => {
     setSearchValue('');
     if (event.value) return navigate(`/journal/${event.value._id}`);
@@ -98,7 +104,7 @@ function Header() {
     <>
       {loginState ? (
         <div className="card flex justify-content-between">
-          <TabMenu model={menuItems} activeIndex={getActiveIndex()}/>
+          <TabMenu model={menuItems} activeIndex={activeIndex} key={activeIndex}/>
           <AutoComplete
             className="p-inputtext-sm"
             placeholder="search"
