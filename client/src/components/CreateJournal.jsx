@@ -10,6 +10,7 @@ import { CREATE_JOURNAL } from '../mutations/journals';
 import { useMutation } from '@apollo/client';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Tooltip } from 'primereact/tooltip';
 
 function CreateJournal() {
   const { newJournalDate } = useParams();
@@ -26,27 +27,28 @@ function CreateJournal() {
   const navigate = useNavigate();
 
   const dateParser = (yourDate) => {
-    const offset = yourDate.getTimezoneOffset()
-    yourDate = new Date(yourDate.getTime() - (offset*60*1000))
+    const offset = yourDate.getTimezoneOffset();
+    yourDate = new Date(yourDate.getTime() - offset * 60 * 1000);
     return yourDate.toISOString().split('T')[0];
-  }
+  };
 
   const submit = () => {
     const createNewJournal = async () => {
       let journalInput;
+      const journalTitle = type === 'diary' ? dateParser(date) : title;
+      if (!journalTitle) return toast.warn('筆記名稱不能為空白');
+      if (!content) return toast.warn('筆記內容不能為空白');
       if (type === 'note') {
-        if (!title || !content) return toast.warn('筆記名稱及內容不能為空白');
         journalInput = {
           type,
-          title,
+          title: journalTitle,
           content,
         };
       } else {
-        if (!content) return toast.warn('筆記內容不能為空白');
-        journalInput= {
+        journalInput = {
           type,
-          title: dateParser(date),
-          diaryDate: dateParser(date),
+          title: journalTitle,
+          diaryDate: journalTitle,
           content,
           moodScore,
           moodFeelings,
@@ -61,9 +63,13 @@ function CreateJournal() {
         navigate('/journalList');
         toast.success(`筆記新增成功：${title}`);
       } catch (error) {
-        console.log('here')
-        if (error.message.includes('Keyword not exist:')) return toast.error('連結筆記不存在');
-        if (error.message.includes('DUPLICATE_KEY')) return toast.error('筆記名稱重複');
+        if (error.message.includes('Keyword not exist:')) {
+          const link = error.message.split(':')[1];
+          return toast.error(`連結筆記不存在： ${link}`);
+        }
+        if (error.message.includes('DUPLICATE_KEY')) {
+          return toast.error(`筆記名稱重複： ${journalTitle}`);
+        }
         console.error(error);
       }
     };
@@ -73,6 +79,15 @@ function CreateJournal() {
   return (
     <>
       <div className="card flex justify-content-center">
+        <Tooltip target=".custom-target-icon" />
+        <i
+          className="custom-target-icon pi pi-info-circle p-text-secondary p-1 m-2"
+          data-pr-tooltip="點擊 diary / note 以切換不同筆記種類"
+          data-pr-position="left"
+          data-pr-at="left+5 top"
+          data-pr-my="right center-2"
+          style={{ fontSize: '1rem', cursor: 'pointer' }}
+        ></i>
         <div className="mr-5">
           <SelectButton
             value={type}
@@ -81,19 +96,19 @@ function CreateJournal() {
             options={journalTypeOption}
           />
         </div>
-          {type === 'note' ? (
-            <span className="p-float-label">
-              <InputText id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
-              <label htmlFor="title">Title</label>
-            </span>
-          ) : (
-              <Calendar
-                value={date}
-                onChange={(e) => setDate(e.value)}
-                dateFormat="yy-mm-dd"
-                showIcon
-              />
-          )}
+        {type === 'note' ? (
+          <span className="p-float-label">
+            <InputText id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <label htmlFor="title">Title</label>
+          </span>
+        ) : (
+          <Calendar
+            value={date}
+            onChange={(e) => setDate(e.value)}
+            dateFormat="yy-mm-dd"
+            showIcon
+          />
+        )}
       </div>
       <AudioRecording audioNameS3={audioNameS3} setAudioNameS3={setAudioNameS3} />
       <MarkdownEditor

@@ -60,17 +60,18 @@ function Journal() {
   const update = () => {
     const updateExistingJournal = async () => {
       let journalInput;
+      const journalTitle = type === 'diary' ? dateParser(date) : title;
+      if (!journalTitle) return toast.warn('筆記名稱不能為空白');
+      if (!content) return toast.warn('筆記內容不能為空白');
       if (type === 'note') {
-        if (!title || !content) return toast.error('筆記名稱及內容不能為空白');
         journalInput = {
-          title,
+          title: journalTitle,
           content,
         };
       } else {
-        if (!content) return toast.error('筆記內容不能為空白');
         journalInput = {
-          title: dateParser(date),
-          diaryDate: dateParser(date),
+          title: journalTitle,
+          diaryDate: journalTitle,
           content,
           moodScore,
           moodFeelings,
@@ -85,9 +86,13 @@ function Journal() {
         navigate('/journalList');
         toast.success(`筆記修改成功：${title}`);
       } catch (error) {
-        if (error.message.includes('DUPLICATE_TITLE'))
-          return toast.error(`修改失敗，筆記名稱重複: ${title}`);
-        if (error.message.includes('Keyword not exist:')) return toast.error('連結筆記不存在');
+        if (error.message.includes('Keyword not exist:')) {
+          const link = error.message.split(':')[1];
+          return toast.error(`連結筆記不存在： ${link}`);
+        }
+        if (error.message.includes('DUPLICATE_TITLE')) {
+          return toast.error(`筆記名稱重複： ${journalTitle}`)
+        }
         console.error(error);
       }
     };
@@ -163,8 +168,8 @@ function Journal() {
       <Backlink journalId={journalId} />
       <div className="card flex justify-content-center">
         <span className="p-buttonset">
-          <Button label="儲存" icon="pi pi-check" onClick={update} key={journalId} />
-          <Button label="刪除" severity="danger" icon="pi pi-times" onClick={confirm} />
+          <Button label="儲存變更" icon="pi pi-check" onClick={update} key={journalId} />
+          <Button label="刪除筆記" severity="danger" icon="pi pi-times" onClick={confirm} />
         </span>
       </div>
     </>

@@ -108,7 +108,6 @@ function Emotion({
   }, [journalId]);
 
   useEffect(() => {
-    console.log(selectedFeelingNodes);
     setMoodFeelings(nodesToArray(selectedFeelingNodes, feelingNodes));
   }, [selectedFeelingNodes]);
 
