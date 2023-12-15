@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { PrimeReactProvider } from 'primereact/api';
 import { Image } from 'primereact/image';
 import 'primereact/resources/primereact.min.css';
@@ -25,13 +25,15 @@ import logo from './assets/logo.png';
 
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   return (
     <>
       <PrimeReactProvider>
         <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} newestOnTo />
         <Authentication path={location.pathname} />
-        {/* <h1>Mood Journal</h1> */}
-        <Image src={logo} alt="Image" width="300" />
+        <div onClick={() => navigate('/home')}>
+          <Image src={logo} alt="Image" width="300"/>
+        </div>
         <Header />
         <Routes>
           <Route path="/" element={<Welcome />}></Route>
