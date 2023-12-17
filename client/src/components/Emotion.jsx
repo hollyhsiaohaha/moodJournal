@@ -6,6 +6,7 @@ import { useLazyQuery } from '@apollo/client';
 import { GET_FEELINGS, GET_FACTORS, SENTIMENT_ANALYSIS } from '../queries/emotion';
 import { Button } from 'primereact/button';
 import { toast } from 'react-toastify';
+import { MAX_JOURNAL_LENGTH } from '../utils/conf';
 
 function Emotion({
   moodScore,
@@ -120,6 +121,10 @@ function Emotion({
     if (!content.trim()) {
       setLoading(false);
       return toast.warn('請先輸入內容');
+    }
+    if (content.length > MAX_JOURNAL_LENGTH) {
+      setLoading(false);
+      return toast.warn(`情緒分析字元上限為 ${MAX_JOURNAL_LENGTH}`);
     }
     const regexBrackets = /\[\[(.*?)\]\]/g;
     const regexAudioTag = /\<audio.*?\<\/audio\>/gs;

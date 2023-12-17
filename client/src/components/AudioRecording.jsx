@@ -3,6 +3,7 @@ import { Button } from 'primereact/button';
 import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import { MAX_AUDIO_LENGTH } from '../utils/conf';
 
 function AudioRecorder ({ setAudioNameS3 }) {
   const [stateIndex, setStateIndex] = useState(0);
@@ -33,9 +34,17 @@ function AudioRecorder ({ setAudioNameS3 }) {
           setMediaRecorder(recorder);
           setStateIndex(1);
           recorder.start();
+
+          setTimeout(() => {
+            if (recorder.state === 'recording') {
+              recorder.stop();
+              setStateIndex(2);
+            }
+          }, MAX_AUDIO_LENGTH);
+
         })
         .catch((error) => {
-          console.log('Following error has occurred: ', error);
+          console.error(error);
           setStateIndex('');
         });
     } else {
