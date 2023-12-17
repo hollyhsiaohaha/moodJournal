@@ -14,6 +14,7 @@ import { UPDATE_JOURNAL, DELETE_JOURNAL } from '../mutations/journals';
 import { useMutation, useLazyQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { MAX_JOURNAL_LENGTH } from '../utils/conf';
 
 function Journal() {
   const { journalId } = useParams();
@@ -63,6 +64,8 @@ function Journal() {
       const journalTitle = type === 'diary' ? dateParser(date) : title;
       if (!journalTitle) return toast.warn('筆記名稱不能為空白');
       if (!content) return toast.warn('筆記內容不能為空白');
+      if (content.length > MAX_JOURNAL_LENGTH)
+        return toast.warn(`筆記內容字元上限為 ${MAX_JOURNAL_LENGTH}`);
       if (type === 'note') {
         journalInput = {
           title: journalTitle,
@@ -91,7 +94,7 @@ function Journal() {
           return toast.error(`連結筆記不存在： ${link}`);
         }
         if (error.message.includes('DUPLICATE_TITLE')) {
-          return toast.error(`筆記名稱重複： ${journalTitle}`)
+          return toast.error(`筆記名稱重複： ${journalTitle}`);
         }
         console.error(error);
       }
