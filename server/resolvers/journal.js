@@ -227,11 +227,16 @@ const journalCacheResolver = {
     async autoCompleteJournals(_, { keyword }, context) {
       const userId = context.user._id;
       if (Number(ELASTIC_SEARCH_ENABLED)) {
-        const isIndexExist = await checkIndexExist(userId);
-        if (isIndexExist) {
+        try {
           const elasticRes = await autoCompleteElasticSearch(userId, keyword);
           console.log('autocomplete from elastic search');
           return elasticRes;
+        } catch (error) {
+          if (error.message.includes('index_not_found_exception')) {
+            const res = await autoCompleteMongoAtlas(userId, keyword);
+            console.log('autocomplete from DB due to index not exist');
+            return res;
+          } else logger.error(error);
         }
       }
       const res = await autoCompleteMongoAtlas(userId, keyword);
