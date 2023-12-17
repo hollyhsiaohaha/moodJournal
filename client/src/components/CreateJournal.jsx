@@ -11,6 +11,7 @@ import { useMutation } from '@apollo/client';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Tooltip } from 'primereact/tooltip';
+import { MAX_JOURNAL_LENGTH } from '../utils/conf';
 
 function CreateJournal() {
   const { newJournalDate } = useParams();
@@ -38,6 +39,8 @@ function CreateJournal() {
       const journalTitle = type === 'diary' ? dateParser(date) : title;
       if (!journalTitle) return toast.warn('筆記名稱不能為空白');
       if (!content) return toast.warn('筆記內容不能為空白');
+      if (content.length > MAX_JOURNAL_LENGTH)
+        return toast.warn(`筆記內容字元上限為 ${MAX_JOURNAL_LENGTH}`);
       if (type === 'note') {
         journalInput = {
           type,
