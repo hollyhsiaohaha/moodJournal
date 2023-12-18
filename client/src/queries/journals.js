@@ -124,6 +124,22 @@ query GetJournalsbyUserId {
     type
     linkedNotes {
       _id
+      title
+      type
+    }
+  }
+}
+`;
+
+export const GET_JOURNAL_BY_ID_LINKED_TYPE = gql`
+query GetJournalbyId($id: ID!) {
+  getJournalbyId(ID: $id) {
+    _id
+    title
+    type
+    linkedNotes {
+      _id
+      title
       type
     }
   }

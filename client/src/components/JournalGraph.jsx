@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLazyQuery } from '@apollo/client';
-import { GET_JOURNALS_LINKED_TYPE } from '../queries/journals.js';
+import { GET_JOURNAL_BY_ID_LINKED_TYPE, GET_BACKLINK } from '../queries/journals.js';
 import { JournalTypeColorMapping } from '../utils/colorMapping.js';
 import { useNavigate } from 'react-router-dom';
 import { ListBox } from 'primereact/listbox';
@@ -8,7 +8,8 @@ import { io } from 'socket.io-client';
 import * as d3 from 'd3';
 import PropTypes from 'prop-types';
 
-function Graph({ showFilter }) {
+// TODO: refactor: 跟 Graph 合併
+function JournalGraph({ showFilter, journalId }) {
   const ref = useRef();
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const typesOptions = [{ name: 'note' }, { name: 'diary' }];
@@ -16,7 +17,8 @@ function Graph({ showFilter }) {
   const width = 464;
   const height = 340;
   const fetchPolicy = 'network-only';
-  const [GetJournalsLinkedType] = useLazyQuery(GET_JOURNALS_LINKED_TYPE, { fetchPolicy });
+  const [GetJournalsByIdLinkedType] = useLazyQuery(GET_JOURNAL_BY_ID_LINKED_TYPE, { fetchPolicy });
+  const [GetBackLink] = useLazyQuery(GET_BACKLINK, { fetchPolicy });
   const navigate = useNavigate();
   const documentStyle = getComputedStyle(document.documentElement);
 
@@ -51,12 +53,38 @@ function Graph({ showFilter }) {
     return data;
   };
 
-  const refreshForceGraph = async (types) => {
-    const emptyData = { nodes: [], links: [] };
-    if (!types) return setGraphData(emptyData);
-    const res = await GetJournalsLinkedType();
-    const graphJournals = res.data.getJournalsbyUserId;
-    const graphData = parseGraphData(graphJournals, types);
+  const refreshForceGraph = async (id) => {
+    const journals = [];
+    const journalRes = await GetJournalsByIdLinkedType({ variables: { id } });
+    const backLinkRes = await GetBackLink({ variables: { id } });
+    const targetJournal = journalRes.data.getJournalbyId;
+    const graphBackLinkJournals = backLinkRes.data.getBackLinkedJournals;
+    // Add target journal
+    journals.push({
+      _id: targetJournal._id,
+      type: targetJournal.type,
+      title: targetJournal.title,
+      linkedNotes: targetJournal.linkedNotes,
+    });
+    // Add link journal
+    targetJournal.linkedNotes.forEach((journal) => {
+      journals.push({
+        _id: journal._id,
+        type: journal.type,
+        title: journal.title,
+        linkedNotes: [],
+      });
+    });
+    // Add back link journal
+    graphBackLinkJournals.forEach((journal) => {
+      journals.push({
+        _id: journal._id,
+        type: journal.type,
+        title: journal.title,
+        linkedNotes: [targetJournal],
+      });
+    });
+    const graphData = parseGraphData(journals, ['diary', 'note']);
     setGraphData(graphData);
   };
 
@@ -71,7 +99,7 @@ function Graph({ showFilter }) {
     socket.on('message', (msg) => {
       if (msg === 'journal update') {
         console.log('refresh due to journal update');
-        refreshForceGraph(selectedTypes.map((typeOption) => typeOption.name));
+        refreshForceGraph();
       }
     });
     socket.on('disconnect', () => {
@@ -81,8 +109,12 @@ function Graph({ showFilter }) {
   }, []);
 
   useEffect(() => {
-    refreshForceGraph(selectedTypes.map((typeOption) => typeOption.name));
+    refreshForceGraph(journalId);
   }, [selectedTypes]);
+
+  useEffect(() => {
+    refreshForceGraph(journalId);
+  }, [journalId]);
 
   useEffect(() => {
     d3.select(ref.current).selectAll('*').remove();
@@ -214,9 +246,9 @@ function Graph({ showFilter }) {
   );
 }
 
-Graph.propTypes = {
+JournalGraph.propTypes = {
   showFilter: PropTypes.bool,
+  journalId: PropTypes.string,
 };
 
-
-export default Graph;
+export default JournalGraph;
