@@ -20,6 +20,8 @@ function Journal() {
   const { journalId } = useParams();
   const [audioNameS3, setAudioNameS3] = useState('');
   const journalTypeOption = ['diary', 'note'];
+  const [modified, setModified] = useState(false);
+  const [originalJournal, setOriginalJournal] = useState(null);
   const [type, setType] = useState(journalTypeOption[0]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState(' ');
@@ -53,11 +55,28 @@ function Journal() {
     setMoodFactors(journal.moodFactors);
     setTitle(journal.title);
     setDate(new Date(journal.title));
+    setOriginalJournal(journal);
   };
 
   useEffect(() => {
     getJournalInfo(journalId);
+    setModified(false);
   }, [journalId]);
+
+  useEffect(() => {
+    if (!originalJournal) return;
+    if (type === 'diary') {
+      if (
+        dateParser(date) !== originalJournal.title ||
+        moodScore !== originalJournal.moodScore ||
+        JSON.stringify(moodFeelings) !== JSON.stringify(originalJournal.moodFeelings) ||
+        JSON.stringify(moodFactors) !== JSON.stringify(originalJournal.moodFactors)
+      ) return setModified(true);
+    }
+    if (content !== originalJournal.content || title !== originalJournal.title)
+      return setModified(true);
+    return setModified(false);
+  }, [type, content, moodScore, moodFactors, moodFeelings, title, date]);
 
   const update = () => {
     const updateExistingJournal = async () => {
@@ -172,7 +191,13 @@ function Journal() {
       <Backlink journalId={journalId} />
       <div className="card flex justify-content-center">
         <span className="p-buttonset">
-          <Button label="儲存變更" icon="pi pi-check" onClick={update} key={journalId} />
+          <Button
+            visible={modified}
+            label="儲存變更"
+            icon="pi pi-check"
+            onClick={update}
+            key={journalId}
+          />
           <Button label="刪除筆記" severity="danger" icon="pi pi-times" onClick={confirm} />
         </span>
       </div>
