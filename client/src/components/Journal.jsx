@@ -45,13 +45,14 @@ function Journal() {
       navigate('/journalList');
       return toast.error('筆記不存在');
     }
-    setType(data.getJournalbyId.type);
-    setContent(data.getJournalbyId.content);
-    setMoodScore(data.getJournalbyId.moodScore);
-    setMoodFeelings(data.getJournalbyId.moodFeelings);
-    setMoodFactors(data.getJournalbyId.moodFactors);
-    setTitle(data.getJournalbyId.title);
-    setDate(new Date(data.getJournalbyId.title));
+    const journal = data.getJournalbyId;
+    setType(journal.type);
+    setContent(journal.content);
+    setMoodScore(journal.moodScore);
+    setMoodFeelings(journal.moodFeelings);
+    setMoodFactors(journal.moodFactors);
+    setTitle(journal.title);
+    setDate(new Date(journal.title));
   };
 
   useEffect(() => {
