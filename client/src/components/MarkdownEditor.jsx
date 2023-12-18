@@ -12,6 +12,7 @@ import {
   GET_VOICE_TO_TEXT,
   GET_JOURNAL_BY_ID,
 } from '../queries/journals';
+import { toast } from 'react-toastify';
 
 // helper functions
 function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, content, journalId }) {
@@ -118,7 +119,10 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
   useEffect(() => {
     const voiceToText = async (fileName) => {
       const { data, error } = await getVoiceToText({ variables: { fileName } });
-      if (error) return setVoiceToTextResults('錯誤：目前無法進行 voice to text');
+      if (error) {
+        toast.error('錯誤：目前無法進行 voice to text')
+        return setVoiceToTextResults('');
+      }
       if (data.voiceToText) return setVoiceToTextResults(data.voiceToText);
     };
     if (audioNameS3) {
@@ -135,10 +139,13 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
   }, [audioNameS3, setAudioNameS3, getVoiceToText]);
 
   useEffect(() => {
-    const voiceToText = voiceToTextResults;
-    const currentContent = easyMDEInstance.current.value();
-    easyMDEInstance.current.value(`${currentContent}\n${voiceToText}`);
-    setVoiceToTextResults('');
+    if (voiceToTextResults) {
+      const voiceToText = voiceToTextResults;
+      const currentContent = easyMDEInstance.current.value();
+      easyMDEInstance.current.value(`${currentContent}\n${voiceToText}`);
+      setVoiceToTextResults('');
+      toast.success('語音轉譯完成，已加入筆記')
+    }
   }, [voiceToTextResults]);
 
   //  === Autocomplete List ===
