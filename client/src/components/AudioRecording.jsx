@@ -86,11 +86,10 @@ function AudioRecorder({ setAudioNameS3 }) {
   return (
     <div>
       <h3 className='mb-0'>錄音</h3>
-      <div className="display">
-        {stateIndex === 1 && <p>錄音中...</p>}
+      <div className="display m-2">
+        {stateIndex === 1 && <p> 錄音中...</p>}
         {stateIndex === 2 && <audio controls src={audioURL} preload="auto"></audio>}
       </div>
-      <br/>
       <div className="controllers">
         {stateIndex === 0 && <Button onClick={record} className='mr-1' severity="secondary" icon="pi pi-circle-fill" aria-label="開始錄音" />}
         {stateIndex === 1 && <Button onClick={stopRecording} className='mr-1' severity="secondary" icon="pi pi-stop" aria-label="停止錄音" />}

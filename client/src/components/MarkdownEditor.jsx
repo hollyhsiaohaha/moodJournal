@@ -120,7 +120,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
     const voiceToText = async (fileName) => {
       const { data, error } = await getVoiceToText({ variables: { fileName } });
       if (error) {
-        toast.error('錯誤：目前無法進行 voice to text')
+        toast.error('錯誤：目前無法進行 voice to text');
         return setVoiceToTextResults('');
       }
       if (data.voiceToText) return setVoiceToTextResults(data.voiceToText);
@@ -144,7 +144,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
       const currentContent = easyMDEInstance.current.value();
       easyMDEInstance.current.value(`${currentContent}\n${voiceToText}`);
       setVoiceToTextResults('');
-      toast.success('語音轉譯完成，已加入筆記')
+      toast.success('語音轉譯完成，已加入筆記');
     }
   }, [voiceToTextResults]);
 
@@ -199,7 +199,7 @@ function CustomizedMarkdownEditor({ audioNameS3, setAudioNameS3, setContent, con
 
   return (
     <>
-      <div className='m-3'>
+      <div className="m-3">
         <h3 className="m-2" style={{ display: 'inline' }}>
           筆記內容
         </h3>
