@@ -9,7 +9,7 @@ export const PARTICLES_OPTION = {
     color: { value: ["#94E0ED", "#F97316"] },
     shape: { type: 'circle' },
     opacity: { value: 0.5 },
-    size: { value: { min: 1, max: 3 } },
+    size: { value: { min: 1, max: 5 } },
     links: {
       enable: true,
       distance: 100,
