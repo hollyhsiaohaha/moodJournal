@@ -31,9 +31,7 @@ function App() {
       <PrimeReactProvider>
         <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} newestOnTo />
         <Authentication path={location.pathname} />
-        <div onClick={() => navigate('/home')}>
-          <Image src={logo} alt="Image" width="300"/>
-        </div>
+        <Image src={logo} alt="Image" width="300" onClick={() => navigate('/home')} style={{ cursor: 'pointer' }}/>
         <Header />
         <Routes>
           <Route path="/" element={<Welcome />}></Route>

@@ -7,6 +7,7 @@ import './Float.css';
 
 function Float() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showFloat, setShowFloat] = useState(false);
   const [journalID, setjournalID] = useState(null);
   const location = useLocation();
   const { pathname } = location;
@@ -16,24 +17,30 @@ function Float() {
   };
 
   useEffect(() => {
-    if (pathname.includes('/journal/')) setjournalID(pathname.split('/')[2]);
-    else setjournalID(null);
+    const noShowFloatPath = ['/', '/signin', '/signup'];
+    noShowFloatPath.includes(pathname) ? setShowFloat(false) : setShowFloat(true);
+    if (pathname.includes('/journal/')) return setjournalID(pathname.split('/')[2]);
+    setjournalID(null);
   }, [pathname]);
 
   return (
-    <div className="floating-icon">
-      <Button className="floating-icon-btn" icon="pi pi-external-link" onClick={toggleOpen} />
-      {isOpen && !journalID && (
-        <div className="content">
-          <Graph showFilter={false} />
+    <>
+      {showFloat && (
+        <div className="floating-icon">
+          <Button className="floating-icon-btn" icon="pi pi-external-link" onClick={toggleOpen} />
+          {isOpen && !journalID && (
+            <div className="content">
+              <Graph showFilter={false} />
+            </div>
+          )}
+          {isOpen && journalID && (
+            <div className="content">
+              <JournalGraph showFilter={false} journalId={journalID} />
+            </div>
+          )}
         </div>
       )}
-      {isOpen && journalID && (
-        <div className="content">
-          <JournalGraph showFilter={false} journalId={journalID} />
-        </div>
-      )}
-    </div>
+    </>
   );
 }
 

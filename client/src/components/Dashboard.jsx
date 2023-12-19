@@ -127,7 +127,7 @@ function Dashboard() {
     const data = { datasets };
     const options = {
       scales: {
-        x: { title: { display: true, text: '平均分數' }, min: 0, max: 10 },
+        x: { title: { display: true, text: '情緒分數' }, min: 0, max: 10 },
         y: {
           title: { display: true, text: '提及次數' },
           ticks: { stepSize: 1 },
