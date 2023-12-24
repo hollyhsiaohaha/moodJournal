@@ -45,22 +45,22 @@ export const getBackLinkeds = async (journalId) => {
   return res; // [Journal]
 };
 
-const removeDeletedJournal = (linkedNoteIds, deletedId) => {
+export const removeDeletedJournal = (linkedNoteIds, deletedId) => {
   const updatedLinkedNoteIds = linkedNoteIds.filter((id) => id.toString() !== deletedId);
   return updatedLinkedNoteIds;
 };
 
-const reviseContentForDeleted = (content, deletedTitle) => {
+export const reviseContentForDeleted = (content, deletedTitle) => {
   const updatedContent = content.replace(`[[${deletedTitle}]]`, deletedTitle);
   return updatedContent;
 };
 
-const reviseContentForUpdated = (content, originTitle, updatedTitle) => {
+export const reviseContentForUpdated = (content, originTitle, updatedTitle) => {
   const updatedContent = content.replace(`[[${originTitle}]]`, `[[${updatedTitle}]]`);
   return updatedContent;
 };
 
-const deleteSingleJournal = async (journalId, userId) => {
+export const deleteSingleJournal = async (journalId, userId) => {
   const targetJournal = await Journal.findById(journalId);
   if (!targetJournal || targetJournal.userId.toString() !== userId) return false;
   // throwCustomError('Target journal not exist', ErrorTypes.BAD_USER_INPUT);
