@@ -114,4 +114,3 @@ export const deleteIndex = async (userId) => {
 // insertElasticSearch('aaa', journals);
 // deleteIndex('aaa');
 // const res = await autoCompleteElasticSearch('aaa', '測');
-// console.log(res);

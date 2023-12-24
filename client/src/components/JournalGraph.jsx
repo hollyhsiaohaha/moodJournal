@@ -8,7 +8,6 @@ import { io } from 'socket.io-client';
 import * as d3 from 'd3';
 import PropTypes from 'prop-types';
 
-// TODO: refactor: 跟 Graph 合併
 function JournalGraph({ showFilter, journalId }) {
   const ref = useRef();
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });

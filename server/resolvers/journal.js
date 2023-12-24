@@ -2,7 +2,6 @@ import { logger } from '../utils/logger.js';
 import { Journal } from '../models/Journal.js';
 import { throwCustomError, ErrorTypes } from '../utils/errorHandler.js';
 import {
-  checkIndexExist,
   insertElasticSearch,
   deleteIndex,
   autoCompleteElasticSearch,
@@ -63,7 +62,6 @@ export const reviseContentForUpdated = (content, originTitle, updatedTitle) => {
 export const deleteSingleJournal = async (journalId, userId) => {
   const targetJournal = await Journal.findById(journalId);
   if (!targetJournal || targetJournal.userId.toString() !== userId) return false;
-  // throwCustomError('Target journal not exist', ErrorTypes.BAD_USER_INPUT);
   const backLinkedJornals = await getBackLinkeds(journalId);
 
   const session = await Journal.startSession();
@@ -90,7 +88,6 @@ export const deleteSingleJournal = async (journalId, userId) => {
     await session.endSession();
     logger.error(error.stack);
     return false;
-    // throwCustomError('Error occur when journal deleting', ErrorTypes.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -119,7 +116,6 @@ const elasticSearchReload = async (userId) => {
     await deleteIndex(userId);
     const journals = await Journal.find({ userId });
     await insertElasticSearch(userId, journals);
-    console.log('autocomplete input elastic search');
   }
 };
 
@@ -153,15 +149,13 @@ const journalCacheResolver = {
       if (!res) throwCustomError('Title not exist', ErrorTypes.BAD_USER_INPUT);
       return res;
     },
-    async getJournalsbyUserId(_, args, context, info) {
+    async getJournalsbyUserId(_, args, context) {
       const userId = context.user._id;
       const { redisClient } = context;
-      // info.cacheControl.setCacheHint({ maxAge: 30 });
       let res;
       if (Number(REDIS_ENABLED) && redisClient?.status === 'ready') {
         const cacheRes = await redisClient.get(userId);
         if (cacheRes) {
-          console.log('data from cache');
           res = JSON.parse(cacheRes).map((journal) => {
             return {
               _id: journal._id,
@@ -180,7 +174,6 @@ const journalCacheResolver = {
         }
         res = await Journal.find({ userId });
         await redisClient.set(userId, JSON.stringify(res), 'EX', REDIS_EXPIRED);
-        console.log('data from db');
         return res;
       }
       res = await Journal.find({ userId });
@@ -229,18 +222,15 @@ const journalCacheResolver = {
       if (Number(ELASTIC_SEARCH_ENABLED)) {
         try {
           const elasticRes = await autoCompleteElasticSearch(userId, keyword);
-          console.log('autocomplete from elastic search');
           return elasticRes;
         } catch (error) {
           if (error.message.includes('index_not_found_exception')) {
             const res = await autoCompleteMongoAtlas(userId, keyword);
-            console.log('autocomplete from DB due to index not exist');
             return res;
           } else logger.error(error);
         }
       }
       const res = await autoCompleteMongoAtlas(userId, keyword);
-      console.log('autocomplete from DB');
       return res;
     },
     async getBackLinkedJournals(_, { ID }, context) {

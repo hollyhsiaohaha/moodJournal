@@ -80,8 +80,6 @@ export default () => {
   const urlRes = http.post(url, JSON.stringify(payload), { headers });
   let responseBody = JSON.parse(urlRes.body);
   console.log('Response body:', responseBody);
-  // console.log('Data:', responseBody.data);
-  // console.log('Errors:', responseBody.errors);
   check(urlRes, {
     'status was 200 and without errors': (r) => r.status == 200 && !JSON.parse(r.body).errors,
   });
