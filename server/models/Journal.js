@@ -36,6 +36,11 @@ export const reviseContentForDeleted = (content, deletedTitle) => {
   return updatedContent;
 };
 
+export const reviseContentForUpdated = (content, originTitle, updatedTitle) => {
+  const updatedContent = content.replace(`[[${originTitle}]]`, `[[${updatedTitle}]]`);
+  return updatedContent;
+};
+
 export const getLinkedNoteIds = async (content, userId) => {
   const keywordRegex = /\[\[(.*?)\]\]/g;
   const matchedKeywords = content.match(keywordRegex); // ['[[AppWorks School]]', '[[Apple]]']
@@ -87,6 +92,47 @@ export const autoCompleteMongoAtlas = async (userId, keyword) => {
   return res;
 };
 
+export const fullTextSearchJournals = async (keyword, userId) => {
+  const res = await Journal.aggregate([
+    {
+      $search: {
+        index: 'default',
+        text: {
+          query: keyword,
+          path: { wildcard: '*' },
+        },
+      },
+    },
+    {
+      $match: {
+        userId: new mongoose.Types.ObjectId(userId),
+      },
+    },
+  ]);
+  return res;
+};
+
+export const createSingleJournal = async (journalInput, userId) => {
+  const linkedNoteIds = await getLinkedNoteIds(journalInput.content, userId);
+  const journal = new Journal({
+    ...journalInput,
+    userId,
+    linkedNoteIds,
+  });
+  try {
+    const res = await journal.save();
+    logger.info('Journal created:');
+    logger.info(res);
+    return { ...res._doc };
+  } catch (error) {
+    if (error.message.includes('duplicate key error')) {
+      throwCustomError(`DUPLICATE_KEY: ${journalInput.title}`, ErrorTypes.DUPLICATE_KEY);
+    }
+    logger.error(error);
+    throw error;
+  }
+};
+
 export const deleteSingleJournal = async (journalId, userId) => {
   const targetJournal = await Journal.findById(journalId);
   if (!targetJournal || targetJournal.userId.toString() !== userId) return false;
@@ -118,22 +164,44 @@ export const deleteSingleJournal = async (journalId, userId) => {
   }
 };
 
-export const fullTextSearchJournals = async (keyword, userId) => {
-  const res = await Journal.aggregate([
-    {
-      $search: {
-        index: 'default',
-        text: {
-          query: keyword,
-          path: { wildcard: '*' },
-        },
-      },
-    },
-    {
-      $match: {
-        userId: new mongoose.Types.ObjectId(userId),
-      },
-    },
-  ]);
-  return res;
+export const updateSingleJournal = async (journalId, journalInput, userId) => {
+  const targetJournal = await Journal.findById(journalId);
+  if (!targetJournal || targetJournal.userId.toString() !== userId)
+    throwCustomError('Target journal not exist', ErrorTypes.BAD_USER_INPUT);
+  journalInput.linkedNoteIds = await getLinkedNoteIds(journalInput.content, userId);
+  const session = await Journal.startSession();
+  session.startTransaction();
+  try {
+    const updatedJournal = await Journal.findByIdAndUpdate(
+      { _id: journalId },
+      { ...journalInput, updatedAt: new Date().toISOString() },
+      { new: true, session },
+    );
+    if (journalInput.title) {
+      const backLinkedJornals = await getBackLinkeds(journalId);
+      for (const journal of backLinkedJornals) {
+        await Journal.findByIdAndUpdate(
+          { _id: journal._id },
+          {
+            content: reviseContentForUpdated(
+              journal.content,
+              targetJournal.title,
+              journalInput.title,
+            ),
+          },
+          { session },
+        );
+      }
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return updatedJournal;
+  } catch (error) {
+    await session.abortTransaction();
+    await session.endSession();
+    logger.error(error.stack);
+    if (error.message.includes('title_1_userId_1 dup key'))
+      return throwCustomError('DUPLICATE_TITLE', ErrorTypes.BAD_USER_INPUT);
+    throwCustomError('Error occur when journal updating', ErrorTypes.INTERNAL_SERVER_ERROR);
+  }
 };

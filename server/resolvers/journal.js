@@ -7,11 +7,12 @@ import {
 } from '../utils/elasticSearch.js';
 import {
   Journal,
-  getLinkedNoteIds,
   getBackLinkeds,
   autoCompleteMongoAtlas,
+  createSingleJournal,
   deleteSingleJournal,
   fullTextSearchJournals,
+  updateSingleJournal,
 } from '../models/Journal.js';
 
 const REDIS_ENABLED = Number(process.env.REDIS_ENABLED);
@@ -19,10 +20,6 @@ const REDIS_EXPIRED = Number(process.env.REDIS_EXPIRED);
 const ELASTIC_SEARCH_ENABLED = Number(process.env.ELASTIC_SEARCH_ENABLED);
 
 // === helper functions ===
-export const reviseContentForUpdated = (content, originTitle, updatedTitle) => {
-  const updatedContent = content.replace(`[[${originTitle}]]`, `[[${updatedTitle}]]`);
-  return updatedContent;
-};
 
 const cacheInvalid = async (key, client) => {
   REDIS_ENABLED && client?.status === 'ready' ? await client.del(key) : null;
@@ -34,6 +31,12 @@ const elasticSearchReload = async (userId) => {
     const journals = await Journal.find({ userId });
     await insertElasticSearch(userId, journals);
   }
+};
+
+const journalMutation = async (userId, redisClient, io) => {
+  await cacheInvalid(userId, redisClient);
+  await elasticSearchReload(userId);
+  io.emit('message', 'journal update');
 };
 
 // === resolvers ===
@@ -134,53 +137,21 @@ const journalCacheResolver = {
       return res;
     },
   },
-  // TODO: ++ try catch
   Mutation: {
-    async createJournal(
-      _,
-      { journalInput: { title, type, content, diaryDate, moodScore, moodFeelings, moodFactors } },
-      context,
-    ) {
+    async createJournal(_, { journalInput }, context) {
       const userId = context.user._id;
       const { io, redisClient } = context;
-      const linkedNoteIds = await getLinkedNoteIds(content, userId);
-      const journal = new Journal({
-        title,
-        type,
-        content,
-        userId,
-        diaryDate,
-        moodScore,
-        moodFeelings,
-        moodFactors,
-        linkedNoteIds,
-      });
-      try {
-        const res = await journal.save();
-        logger.info('Journal created:');
-        logger.info(res);
-        await cacheInvalid(userId, redisClient);
-        await elasticSearchReload(userId);
-        io.emit('message', 'journal update');
-        return { ...res._doc };
-      } catch (error) {
-        if (error.message.includes('duplicate key error')) {
-          throwCustomError(`DUPLICATE_KEY: ${title}`, ErrorTypes.DUPLICATE_KEY);
-        }
-        logger.error(error);
-        throw error;
-      }
+      const res = await createSingleJournal(journalInput, userId);
+      journalMutation(userId, redisClient, io);
+      return res;
     },
     async deleteJournal(_, { ID }, context) {
       const userId = context.user._id;
       const { io, redisClient } = context;
       const res = await deleteSingleJournal(ID, userId);
-      await cacheInvalid(userId, redisClient);
-      await elasticSearchReload(userId);
-      io.emit('message', 'journal update');
+      journalMutation(userId, redisClient, io);
       return res;
     },
-    // TODO: add error handleing
     async deleteJournals(_, { Ids }, context) {
       const userId = context.user._id;
       const { io, redisClient } = context;
@@ -189,61 +160,15 @@ const journalCacheResolver = {
         const res = await deleteSingleJournal(journalId, userId);
         resArray.push(res);
       }
-      await cacheInvalid(userId, redisClient);
-      await elasticSearchReload(userId);
-      io.emit('message', 'journal update');
-      return resArray;
+      journalMutation(userId, redisClient, io);
+      return resArray; // [true, true, false]
     },
     async updateJournal(_, { ID, journalInput }, context) {
       const userId = context.user._id;
       const { io, redisClient } = context;
-      const targetJournal = await Journal.findById(ID);
-      if (!targetJournal || targetJournal.userId.toString() !== userId)
-        throwCustomError('Target journal not exist', ErrorTypes.BAD_USER_INPUT);
-      // update target journal and linkedNoteIds if needed
-      if (journalInput.content || '' !== targetJournal.content) {
-        const updatedLinkedNoteIds = await getLinkedNoteIds(journalInput.content, userId);
-        journalInput.linkedNoteIds = updatedLinkedNoteIds;
-      }
-      const session = await Journal.startSession();
-      session.startTransaction();
-      try {
-        const updatedJournal = await Journal.findByIdAndUpdate(
-          { _id: ID },
-          { ...journalInput, updatedAt: new Date().toISOString() },
-          { new: true, session },
-        );
-        // update back linked journals
-        if (journalInput.title) {
-          const backLinkedJornals = await getBackLinkeds(ID);
-          for (const journal of backLinkedJornals) {
-            await Journal.findByIdAndUpdate(
-              { _id: journal._id },
-              {
-                content: reviseContentForUpdated(
-                  journal.content,
-                  targetJournal.title,
-                  journalInput.title,
-                ),
-              },
-              { session },
-            );
-          }
-        }
-        await session.commitTransaction();
-        await session.endSession();
-        await cacheInvalid(userId, redisClient);
-        await elasticSearchReload(userId);
-        io.emit('message', 'journal update');
-        return updatedJournal;
-      } catch (error) {
-        await session.abortTransaction();
-        await session.endSession();
-        logger.error(error.stack);
-        if (error.message.includes('title_1_userId_1 dup key'))
-          return throwCustomError('DUPLICATE_TITLE', ErrorTypes.BAD_USER_INPUT);
-        throwCustomError('Error occur when journal updating', ErrorTypes.INTERNAL_SERVER_ERROR);
-      }
+      const res = await updateSingleJournal(ID, journalInput, userId);
+      journalMutation(userId, redisClient, io);
+      return res;
     },
   },
 };
