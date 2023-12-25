@@ -1,9 +1,10 @@
+import { expect, test, describe, jest } from '@jest/globals';
 import {
   removeDeletedJournal,
   reviseContentForDeleted,
   reviseContentForUpdated,
 } from '../resolvers/journal';
-import { expect, test, describe } from '@jest/globals';
+
 describe('Remove deleted journal from linked id array', () => {
   const deletedId = '2';
   test('Array include deleted id', () => {
@@ -40,8 +41,8 @@ describe('Revise linked journal content for updated journal', () => {
   });
   test('Content without keyword', () => {
     expect(
-      reviseContentForUpdated('This is content with NOTkeyword!', 'keyword', 'new keyword'),
-    ).toBe('This is content with NOTkeyword!');
+      reviseContentForUpdated('This is content with [[NOTkeyword]]!', 'keyword', 'new keyword'),
+    ).toBe('This is content with [[NOTkeyword]]!');
   });
   test('Empty content', () => {
     expect(reviseContentForUpdated('', 'keyword', 'new keyword')).toBe('');

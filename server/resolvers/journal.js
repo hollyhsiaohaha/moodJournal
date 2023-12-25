@@ -10,6 +10,7 @@ import mongoose from 'mongoose';
 
 // === helper functions ===
 const { REDIS_ENABLED, REDIS_EXPIRED, ELASTIC_SEARCH_ENABLED } = process.env;
+
 const getLinkedNoteIds = async (content, userId) => {
   const linkedNoteIds = [];
   const uniqLinkedNoteIds = {}; // to make sure linkedNoteIds with unique values
