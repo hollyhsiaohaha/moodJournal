@@ -1,119 +1,35 @@
 import { logger } from '../utils/logger.js';
-import { Journal } from '../models/Journal.js';
 import { throwCustomError, ErrorTypes } from '../utils/errorHandler.js';
 import {
   insertElasticSearch,
   deleteIndex,
   autoCompleteElasticSearch,
 } from '../utils/elasticSearch.js';
-import mongoose from 'mongoose';
+import {
+  Journal,
+  getLinkedNoteIds,
+  getBackLinkeds,
+  autoCompleteMongoAtlas,
+  deleteSingleJournal,
+  fullTextSearchJournals,
+} from '../models/Journal.js';
+
+const REDIS_ENABLED = Number(process.env.REDIS_ENABLED);
+const REDIS_EXPIRED = Number(process.env.REDIS_EXPIRED);
+const ELASTIC_SEARCH_ENABLED = Number(process.env.ELASTIC_SEARCH_ENABLED);
 
 // === helper functions ===
-const { REDIS_ENABLED, REDIS_EXPIRED, ELASTIC_SEARCH_ENABLED } = process.env;
-
-const getLinkedNoteIds = async (content, userId) => {
-  const linkedNoteIds = [];
-  const uniqLinkedNoteIds = {}; // to make sure linkedNoteIds with unique values
-  const keywordRegex = /\[\[(.*?)\]\]/g;
-  const matches = content.match(keywordRegex);
-  if (!matches) return linkedNoteIds;
-  const extracted = matches.map((match) => match.slice(2, -2));
-  const linkedNoteSearch = extracted.map((keyword) => {
-    return Journal.findOne({ userId, title: keyword }).select({ _id: 1 }).exec();
-  });
-  const linkedNotes = await Promise.all(linkedNoteSearch);
-  for (let i = 0; i < linkedNotes.length; i++) {
-    if (!linkedNotes[i])
-      throwCustomError(`Keyword not exist: ${extracted[i]}`, ErrorTypes.BAD_USER_INPUT);
-    const journalId = linkedNotes[i]._id;
-    if (!uniqLinkedNoteIds[journalId]) {
-      linkedNoteIds.push(journalId);
-      uniqLinkedNoteIds[journalId] = 1;
-    }
-  }
-  return linkedNoteIds;
-};
-
-export const getBackLinkeds = async (journalId) => {
-  const res = await Journal.aggregate([
-    {
-      $match: {
-        linkedNoteIds: { $in: [new mongoose.Types.ObjectId(journalId)] },
-      },
-    },
-  ]);
-  return res; // [Journal]
-};
-
-export const removeDeletedJournal = (linkedNoteIds, deletedId) => {
-  const updatedLinkedNoteIds = linkedNoteIds.filter((id) => id.toString() !== deletedId);
-  return updatedLinkedNoteIds;
-};
-
-export const reviseContentForDeleted = (content, deletedTitle) => {
-  const updatedContent = content.replace(`[[${deletedTitle}]]`, deletedTitle);
-  return updatedContent;
-};
-
 export const reviseContentForUpdated = (content, originTitle, updatedTitle) => {
   const updatedContent = content.replace(`[[${originTitle}]]`, `[[${updatedTitle}]]`);
   return updatedContent;
 };
 
-export const deleteSingleJournal = async (journalId, userId) => {
-  const targetJournal = await Journal.findById(journalId);
-  if (!targetJournal || targetJournal.userId.toString() !== userId) return false;
-  const backLinkedJornals = await getBackLinkeds(journalId);
-
-  const session = await Journal.startSession();
-  session.startTransaction();
-  try {
-    // delete target journal
-    await Journal.findByIdAndDelete({ _id: journalId }, { session });
-    // update back linked journals
-    for (const journal of backLinkedJornals) {
-      await Journal.findByIdAndUpdate(
-        { _id: journal._id },
-        {
-          linkedNoteIds: removeDeletedJournal(journal.linkedNoteIds, journalId),
-          content: reviseContentForDeleted(journal.content, targetJournal.title),
-        },
-        { session },
-      );
-    }
-    await session.commitTransaction();
-    await session.endSession();
-    return true;
-  } catch (error) {
-    await session.abortTransaction();
-    await session.endSession();
-    logger.error(error.stack);
-    return false;
-  }
-};
-
-const autoCompleteMongoAtlas = async (userId, keyword) => {
-  const res = await Journal.aggregate([
-    {
-      $search: {
-        index: 'title_autocomplete',
-        autocomplete: {
-          path: 'title',
-          query: keyword,
-        },
-      },
-    },
-    { $match: { userId: new mongoose.Types.ObjectId(userId) } },
-  ]);
-  return res;
-};
-
 const cacheInvalid = async (key, client) => {
-  Number(REDIS_ENABLED) && client?.status === 'ready' ? await client.del(key) : null;
+  REDIS_ENABLED && client?.status === 'ready' ? await client.del(key) : null;
 };
 
 const elasticSearchReload = async (userId) => {
-  if (Number(ELASTIC_SEARCH_ENABLED)) {
+  if (ELASTIC_SEARCH_ENABLED) {
     await deleteIndex(userId);
     const journals = await Journal.find({ userId });
     await insertElasticSearch(userId, journals);
@@ -123,13 +39,13 @@ const elasticSearchReload = async (userId) => {
 // === resolvers ===
 const journalCacheResolver = {
   Journal: {
-    user: async (parent, args, context) => {
+    user: async (parent, _args, context) => {
       const { loaders } = context;
       const { journalUserLoader } = loaders;
       const user = await journalUserLoader.load(parent.userId);
       return user;
     },
-    linkedNotes: async (parent, args, context) => {
+    linkedNotes: async (parent, _args, context) => {
       const { loaders } = context;
       const { journalLinkLoader } = loaders;
       const journalPromises = parent.linkedNoteIds.map((id) => journalLinkLoader.load(id));
@@ -150,34 +66,29 @@ const journalCacheResolver = {
       if (!res) throwCustomError('Title not exist', ErrorTypes.BAD_USER_INPUT);
       return res;
     },
-    async getJournalsbyUserId(_, args, context) {
+    async getJournalsbyUserId(_, _args, context) {
       const userId = context.user._id;
       const { redisClient } = context;
-      let res;
-      if (Number(REDIS_ENABLED) && redisClient?.status === 'ready') {
-        const cacheRes = await redisClient.get(userId);
-        if (cacheRes) {
-          res = JSON.parse(cacheRes).map((journal) => {
-            return {
-              _id: journal._id,
-              title: journal.title,
-              type: journal.type,
-              content: journal.content,
-              userId: journal.userId,
-              linkedNoteIds: journal.linkedNoteIds,
-              moodFeelings: journal.moodFeelings,
-              moodFactors: journal.moodFactors,
-              createdAt: new Date(journal.createdAt),
-              updatedAt: new Date(journal.updatedAt),
-            };
-          });
-          return res;
-        }
-        res = await Journal.find({ userId });
-        await redisClient.set(userId, JSON.stringify(res), 'EX', REDIS_EXPIRED);
-        return res;
+      if (!REDIS_ENABLED || redisClient?.status !== 'ready') return await Journal.find({ userId });
+      const cacheRes = await redisClient.get(userId);
+      if (cacheRes) {
+        return JSON.parse(cacheRes).map((journal) => {
+          return {
+            _id: journal._id,
+            title: journal.title,
+            type: journal.type,
+            content: journal.content,
+            userId: journal.userId,
+            linkedNoteIds: journal.linkedNoteIds,
+            moodFeelings: journal.moodFeelings,
+            moodFactors: journal.moodFactors,
+            createdAt: new Date(journal.createdAt),
+            updatedAt: new Date(journal.updatedAt),
+          };
+        });
       }
-      res = await Journal.find({ userId });
+      const res = await Journal.find({ userId });
+      await redisClient.set(userId, JSON.stringify(res), 'EX', REDIS_EXPIRED);
       return res;
     },
     async getUserLatestJournals(_, { amount, type }, context) {
@@ -200,39 +111,19 @@ const journalCacheResolver = {
     },
     async searchJournals(_, { keyword }, context) {
       const userId = context.user._id;
-      const res = await Journal.aggregate([
-        {
-          $search: {
-            index: 'default',
-            text: {
-              query: keyword,
-              path: { wildcard: '*' },
-            },
-          },
-        },
-        {
-          $match: {
-            userId: new mongoose.Types.ObjectId(userId),
-          },
-        },
-      ]);
+      const res = await fullTextSearchJournals(keyword, userId);
       return res;
     },
     async autoCompleteJournals(_, { keyword }, context) {
       const userId = context.user._id;
-      if (Number(ELASTIC_SEARCH_ENABLED)) {
-        try {
-          const elasticRes = await autoCompleteElasticSearch(userId, keyword);
-          return elasticRes;
-        } catch (error) {
-          if (error.message.includes('index_not_found_exception')) {
-            const res = await autoCompleteMongoAtlas(userId, keyword);
-            return res;
-          } else logger.error(error);
-        }
+      if (!ELASTIC_SEARCH_ENABLED) return await autoCompleteMongoAtlas(userId, keyword);
+      try {
+        return await autoCompleteElasticSearch(userId, keyword);
+      } catch (error) {
+        if (error.message.includes('index_not_found_exception')) {
+          return await autoCompleteMongoAtlas(userId, keyword);
+        } else logger.error(error);
       }
-      const res = await autoCompleteMongoAtlas(userId, keyword);
-      return res;
     },
     async getBackLinkedJournals(_, { ID }, context) {
       const userId = context.user._id;
@@ -243,6 +134,7 @@ const journalCacheResolver = {
       return res;
     },
   },
+  // TODO: ++ try catch
   Mutation: {
     async createJournal(
       _,
@@ -288,6 +180,7 @@ const journalCacheResolver = {
       io.emit('message', 'journal update');
       return res;
     },
+    // TODO: add error handleing
     async deleteJournals(_, { Ids }, context) {
       const userId = context.user._id;
       const { io, redisClient } = context;
@@ -308,7 +201,7 @@ const journalCacheResolver = {
       if (!targetJournal || targetJournal.userId.toString() !== userId)
         throwCustomError('Target journal not exist', ErrorTypes.BAD_USER_INPUT);
       // update target journal and linkedNoteIds if needed
-      if (journalInput.content || '' != targetJournal.content) {
+      if (journalInput.content || '' !== targetJournal.content) {
         const updatedLinkedNoteIds = await getLinkedNoteIds(journalInput.content, userId);
         journalInput.linkedNoteIds = updatedLinkedNoteIds;
       }
