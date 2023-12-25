@@ -6,7 +6,11 @@ import {
   autoCompleteElasticSearch,
 } from '../utils/elasticSearch.js';
 import {
-  Journal,
+  journalFindById,
+  journalFindByTitle,
+  journalFindByUserId,
+  journalFindByUserIdLatest,
+  journalFindByUserIdPeriod,
   getBackLinkeds,
   autoCompleteMongoAtlas,
   createSingleJournal,
@@ -28,7 +32,7 @@ const cacheInvalid = async (key, client) => {
 const elasticSearchReload = async (userId) => {
   if (ELASTIC_SEARCH_ENABLED) {
     await deleteIndex(userId);
-    const journals = await Journal.find({ userId });
+    const journals = journalFindByUserId(userId);
     await insertElasticSearch(userId, journals);
   }
 };
@@ -40,7 +44,7 @@ const journalMutation = async (userId, redisClient, io) => {
 };
 
 // === resolvers ===
-const journalCacheResolver = {
+export const journalCacheResolver = {
   Journal: {
     user: async (parent, _args, context) => {
       const { loaders } = context;
@@ -58,21 +62,22 @@ const journalCacheResolver = {
   Query: {
     async getJournalbyId(_, { ID }, context) {
       const userId = context.user._id;
-      const res = await Journal.findById(ID);
+      const res = await journalFindById(ID);
       if (!res || res.userId.toString() !== userId)
         throwCustomError('Journal not exist', ErrorTypes.BAD_USER_INPUT);
       return res;
     },
     async getJournalbyTitle(_, { title }, context) {
       const userId = context.user._id;
-      const res = await Journal.findOne({ userId, title }).exec();
+      const res = await journalFindByTitle(userId, title);
       if (!res) throwCustomError('Title not exist', ErrorTypes.BAD_USER_INPUT);
       return res;
     },
     async getJournalsbyUserId(_, _args, context) {
       const userId = context.user._id;
       const { redisClient } = context;
-      if (!REDIS_ENABLED || redisClient?.status !== 'ready') return await Journal.find({ userId });
+      if (!REDIS_ENABLED || redisClient?.status !== 'ready')
+        return await journalFindByUserId(userId);
       const cacheRes = await redisClient.get(userId);
       if (cacheRes) {
         return JSON.parse(cacheRes).map((journal) => {
@@ -90,13 +95,13 @@ const journalCacheResolver = {
           };
         });
       }
-      const res = await Journal.find({ userId });
+      const res = await journalFindByUserId(userId);
       await redisClient.set(userId, JSON.stringify(res), 'EX', REDIS_EXPIRED);
       return res;
     },
     async getUserLatestJournals(_, { amount, type }, context) {
       const userId = context.user._id;
-      const res = await Journal.find({ userId, type }).sort({ updatedAt: -1 }).limit(amount);
+      const res = await journalFindByUserIdLatest(userId, type, amount);
       return res;
     },
     async getDiariesbyMonth(_, { month }, context) {
@@ -106,10 +111,7 @@ const journalCacheResolver = {
       const m = date.getMonth();
       const firstDay = new Date(y, m, 1);
       const lastDay = new Date(y, m + 1, 2);
-      const res = await Journal.find({
-        userId,
-        diaryDate: { $gte: firstDay, $lte: lastDay },
-      });
+      const res = await journalFindByUserIdPeriod(userId, firstDay, lastDay);
       return res;
     },
     async searchJournals(_, { keyword }, context) {
@@ -130,7 +132,7 @@ const journalCacheResolver = {
     },
     async getBackLinkedJournals(_, { ID }, context) {
       const userId = context.user._id;
-      const journal = await Journal.findById(ID);
+      const journal = await journalFindById(ID);
       if (!journal || journal.userId.toString() !== userId)
         throwCustomError('Journal not exist', ErrorTypes.BAD_USER_INPUT);
       const res = await getBackLinkeds(ID);

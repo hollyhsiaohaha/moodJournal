@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": " node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test": "npx vitest",
+    "coverage": "vitest run --coverage",
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
@@ -53,6 +54,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.23.6",
+    "@vitest/coverage-v8": "^1.1.0",
     "babel-jest": "^29.7.0",
     "eslint": "^8.53.0",
     "eslint-plugin-prettier": "^5.0.1",
@@ -60,7 +62,9 @@
     "jest-environment-jsdom": "^29.7.0",
     "jest-environment-node": "^29.7.0",
     "k6": "^0.0.0",
+    "mockingoose": "^2.16.2",
     "prettier": "^3.1.0",
-    "prettier-eslint": "^16.1.2"
+    "prettier-eslint": "^16.1.2",
+    "vitest": "^1.1.0"
   }
 }

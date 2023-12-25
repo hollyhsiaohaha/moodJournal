@@ -26,6 +26,29 @@ JournalSchema.index({ title: 1, userId: 1 }, { unique: true });
 
 export const Journal = mongoose.model('Journal', JournalSchema);
 
+export const journalFindById = async (journalId) => {
+  return await Journal.findById({ _id: journalId });
+};
+
+export const journalFindByTitle = async (userId, title) => {
+  return await Journal.findOne({ userId, title }).exec();
+};
+
+export const journalFindByUserId = async (userId) => {
+  return await Journal.find({ userId });
+};
+
+export const journalFindByUserIdLatest = async (userId, type, amount) => {
+  return await Journal.find({ userId, type }).sort({ updatedAt: -1 }).limit(amount);
+};
+
+export const journalFindByUserIdPeriod = async (userId, firstDay, lastDay) => {
+  return await Journal.find({
+    userId,
+    diaryDate: { $gte: firstDay, $lte: lastDay },
+  });
+};
+
 export const removeDeletedJournal = (linkedNoteIds, deletedId) => {
   const updatedLinkedNoteIds = linkedNoteIds.filter((id) => id.toString() !== deletedId);
   return updatedLinkedNoteIds;
@@ -51,9 +74,9 @@ export const getLinkedNoteIds = async (content, userId) => {
     uniqueKeywordsMapping[keyword] ? null : (uniqueKeywordsMapping[keyword] = 1),
   );
   const uniqueKeywords = Object.keys(uniqueKeywordsMapping);
-  const linkedJornals = await Journal.find({ userId, title: uniqueKeywords })
-    .select({ _id: 1, title: 1 })
-    .exec();
+  const linkedJornals =
+    (await Journal.find({ userId, title: uniqueKeywords }).select({ _id: 1, title: 1 }).exec()) ||
+    [];
   const journalTitleIdMapping = linkedJornals.reduce(
     (obj, item) => Object.assign(obj, { [item.title]: item._id }),
     {},
