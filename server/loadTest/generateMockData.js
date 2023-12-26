@@ -51,11 +51,7 @@ const generateJournalsAi = async (type, amount) => {
 };
 
 const storeDataToJson = async () => {
-  // const jsonDiaryData = await generateJournalsAi('diary', 10);
   const jsonNoteData = await generateJournalsAi('note', 50);
-  // fs.writeFile('./test/diary.json', JSON.stringify(jsonDiaryData), function (err) {
-  //   if (err) console.log(err);
-  // });
   fs.writeFile('./test/note.json', JSON.stringify(jsonNoteData), function (err) {
     if (err) console.log(err);
   });

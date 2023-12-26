@@ -37,7 +37,6 @@ const userResolver = {
     async signUp(_, { signUpInput: { name, email, password } }) {
       try {
         const existUser = await User.findOne({ email }).exec();
-        console.log(existUser);
         if (!validateEmail(email))
           throwCustomError('incorrect email format', ErrorTypes.BAD_USER_INPUT);
         if (existUser) throwCustomError('email exist', ErrorTypes.DUPLICATE_KEY);
