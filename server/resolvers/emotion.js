@@ -4,9 +4,10 @@ import { logger } from '../utils/logger.js';
 import { throwCustomError, ErrorTypes } from '../utils/errorHandler.js';
 import { Feelings, Factors, prompt } from '../models/Emotion.js';
 
+const { OPENAI_API_KEY, OPENAI_API_MODEL } = process.env;
 const awsComprehendClient = new ComprehendClient({ region: 'ap-northeast-2' });
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY,
 });
 
 const emotionResolver = {
@@ -25,8 +26,7 @@ const emotionResolver = {
             { role: 'user', content: prompt },
             { role: 'user', content: journalContent },
           ],
-          // model: 'gpt-4-1106-preview', //TODO: use .env
-          model: 'gpt-3.5-turbo-1106',
+          model: OPENAI_API_MODEL,
           temperature: 0,
           seed: 12,
         });
