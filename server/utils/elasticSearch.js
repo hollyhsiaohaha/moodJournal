@@ -105,13 +105,3 @@ export const deleteIndex = async (userId) => {
     return 1;
   } else return 0;
 };
-
-// const journals = [
-//   { _id: 'bbb', title: '測試' },
-//   { _id: 'ccc', title: '測試2' },
-// ];
-
-// insertElasticSearch('aaa', journals);
-// deleteIndex('aaa');
-// const res = await autoCompleteElasticSearch('aaa', '測');
-// console.log(res);

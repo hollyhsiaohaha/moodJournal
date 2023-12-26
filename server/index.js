@@ -16,10 +16,6 @@ import resolvers from './resolvers/resolvers.js';
 import context from './context/context.js';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { Server } from 'socket.io';
-// import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
-// import Keyv from 'keyv';
-// import { KeyvAdapter } from '@apollo/utils.keyvadapter';
-// import responseCachePlugin from '@apollo/server-plugin-response-cache';
 
 dotenv.config();
 const filename = fileURLToPath(import.meta.url);
@@ -43,7 +39,6 @@ const log = fs.createWriteStream(path.join(workingDir, 'logs', 'request.log'), {
   flags: 'a',
 });
 
-// CORS setting for React and Apollo sandbox
 app.use(
   cors({
     origin: ['http://localhost:5173', 'https://studio.apollographql.com'],
@@ -61,7 +56,6 @@ morganBody(app, {
   stream: log,
 });
 
-// define statics path
 app.use('/assets', s3Proxy);
 app.use('/static', express.static(path.join(workingDir, 'public')));
 app.set('views', path.join(workingDir, 'views'));
@@ -80,8 +74,6 @@ const apolloServer = new ApolloServer({
   playground: true,
   debug: true,
   context,
-  // cache: new InMemoryLRUCache(),
-  // plugins: [responseCachePlugin()],
 });
 
 await apolloServer.start();
@@ -111,7 +103,7 @@ const server = app.listen(port, () => {
 
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173', // The client URL
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST'],
   },
 });
