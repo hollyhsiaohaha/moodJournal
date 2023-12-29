@@ -10,8 +10,8 @@ import { useUserState } from '../state/state.js';
 import { toast } from 'react-toastify';
 
 function Signin() {
-  const [userEmail, setUserEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [userEmail, setUserEmail] = useState('test@test.com');
+  const [password, setPassword] = useState('test');
   const [loading, setLoading] = useState(false);
   const [signIn] = useMutation(SIGN_IN);
   const navigate = useNavigate();
